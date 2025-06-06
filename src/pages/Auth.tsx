@@ -1,0 +1,174 @@
+
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Sparkles, Heart } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+
+const Auth = () => {
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { signUp, signIn } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      let result;
+      if (isSignUp) {
+        result = await signUp(email, password, fullName);
+      } else {
+        result = await signIn(email, password);
+      }
+
+      if (result.error) {
+        console.error('Auth error:', result.error);
+        toast({
+          title: "Oops, something went wrong",
+          description: result.error.message || "Please try again in a moment.",
+          variant: "destructive"
+        });
+      } else {
+        if (isSignUp) {
+          toast({
+            title: "Welcome to Flowlight! ✨",
+            description: "Check your email to confirm your account, then come back to start flowing."
+          });
+        } else {
+          navigate('/');
+        }
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast({
+        title: "Something unexpected happened",
+        description: "Please try again. We're here when you're ready.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flow-gradient flex items-center justify-center p-4">
+      <Card className="max-w-md mx-auto p-8 soft-shadow border-2 border-white/20 bg-white/90 backdrop-blur-sm">
+        <div className="text-center space-y-6">
+          <div className="space-y-2">
+            <div className="animate-gentle-float">
+              <Sparkles className="h-10 w-10 text-primary mx-auto" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">
+              {isSignUp ? 'Join Flowlight' : 'Welcome back'}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              {isSignUp 
+                ? 'Create your safe space for gentle progress'
+                : 'Ready to check in with yourself?'
+              }
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {isSignUp && (
+              <div className="space-y-2 text-left">
+                <Label htmlFor="fullName" className="text-sm font-medium">
+                  Your name (optional)
+                </Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="What should we call you?"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="gentle-hover"
+                />
+              </div>
+            )}
+            
+            <div className="space-y-2 text-left">
+              <Label htmlFor="email" className="text-sm font-medium">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="gentle-hover"
+              />
+            </div>
+
+            <div className="space-y-2 text-left">
+              <Label htmlFor="password" className="text-sm font-medium">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder={isSignUp ? "Choose a secure password" : "Enter your password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="gentle-hover"
+              />
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gentle-hover"
+              disabled={loading}
+              size="lg"
+            >
+              {loading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>{isSignUp ? 'Creating your space...' : 'Signing you in...'}</span>
+                </div>
+              ) : (
+                <>
+                  {isSignUp ? 'Create my account' : 'Sign in'} 
+                  <Heart className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </form>
+
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-sm text-primary hover:text-primary/80 transition-colors"
+            >
+              {isSignUp 
+                ? 'Already have an account? Sign in' 
+                : "New here? Let's get you started"
+              }
+            </button>
+          </div>
+
+          {isSignUp && (
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Your data is private and secure. We're here to support your journey, 
+              not to judge it. 💙
+            </p>
+          )}
+        </div>
+      </Card>
+    </div>
+  );
+};
+
+export default Auth;
