@@ -23,11 +23,10 @@ const ActionSuggestion = ({ mood, onReset }: ActionSuggestionProps) => {
   const [currentActionIndex, setCurrentActionIndex] = useState(0);
   const [showEncouragement, setShowEncouragement] = useState(false);
   const [triedActions, setTriedActions] = useState<Set<number>>(new Set());
-  const [isLogging, setIsLogging] = useState(false);
+  const [loggingActions, setLoggingActions] = useState<Set<number>>(new Set());
   const { toast } = useToast();
   
   const actions = moodActionsData[mood.label as keyof typeof moodActionsData] || moodActionsData["Actually okay"];
-  const currentAction = actions[currentActionIndex];
 
   const handleNowWhat = () => {
     setShowEncouragement(true);
@@ -38,11 +37,11 @@ const ActionSuggestion = ({ mood, onReset }: ActionSuggestionProps) => {
     setCurrentActionIndex((prev) => (prev + 1) % actions.length);
   };
 
-  const handleTriedThis = async () => {
-    setIsLogging(true);
+  const handleTriedThis = async (actionIndex: number) => {
+    setLoggingActions(prev => new Set([...prev, actionIndex]));
     try {
-      await logMoodAction(mood.label, currentAction);
-      setTriedActions(prev => new Set([...prev, currentActionIndex]));
+      await logMoodAction(mood.label, actions[actionIndex]);
+      setTriedActions(prev => new Set([...prev, actionIndex]));
       
       toast({
         title: "Nice work! 🌟",
@@ -56,11 +55,13 @@ const ActionSuggestion = ({ mood, onReset }: ActionSuggestionProps) => {
         variant: "destructive"
       });
     } finally {
-      setIsLogging(false);
+      setLoggingActions(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(actionIndex);
+        return newSet;
+      });
     }
   };
-
-  const currentActionTried = triedActions.has(currentActionIndex);
 
   return (
     <div className="space-y-6 animate-fade-in-up max-w-lg mx-auto">
@@ -91,33 +92,24 @@ const ActionSuggestion = ({ mood, onReset }: ActionSuggestionProps) => {
                 </p>
               </div>
               
-              {index === currentActionIndex && (
-                <div className="flex gap-2 flex-shrink-0">
-                  {!currentActionTried ? (
-                    <Button 
-                      size="sm"
-                      variant="outline"
-                      onClick={handleTriedThis}
-                      disabled={isLogging}
-                      className="text-xs bg-white hover:bg-primary/10 border-primary/30"
-                    >
-                      {isLogging ? '...' : 'Tried this'}
-                    </Button>
-                  ) : (
-                    <div className="flex items-center gap-1 text-green-600 text-xs">
-                      <Check className="h-3 w-3" />
-                      Done
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {triedActions.has(index) && index !== currentActionIndex && (
-                <div className="flex items-center gap-1 text-green-600 text-xs">
-                  <Check className="h-3 w-3" />
-                  Done
-                </div>
-              )}
+              <div className="flex gap-2 flex-shrink-0">
+                {!triedActions.has(index) ? (
+                  <Button 
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleTriedThis(index)}
+                    disabled={loggingActions.has(index)}
+                    className="text-xs bg-white hover:bg-primary/10 border-primary/30"
+                  >
+                    {loggingActions.has(index) ? '...' : 'Tried this'}
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-1 text-green-600 text-xs">
+                    <Check className="h-3 w-3" />
+                    Done
+                  </div>
+                )}
+              </div>
             </div>
           </Card>
         ))}
