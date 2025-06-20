@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -6,6 +5,7 @@ import { ArrowRight, RefreshCw, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { logMoodAction } from '@/utils/moodActionLogger';
 import { moodActionsData } from '@/data/moodActions';
+import { encouragementMessages } from '@/data/encouragementMessages';
 
 type Mood = {
   id: string;
@@ -22,15 +22,43 @@ type ActionSuggestionProps = {
 const ActionSuggestion = ({ mood, onReset }: ActionSuggestionProps) => {
   const [currentActionIndex, setCurrentActionIndex] = useState(0);
   const [showEncouragement, setShowEncouragement] = useState(false);
+  const [currentEncouragementMessage, setCurrentEncouragementMessage] = useState('');
+  const [usedMessages, setUsedMessages] = useState<Set<string>>(new Set());
   const [triedActions, setTriedActions] = useState<Set<number>>(new Set());
   const [loggingActions, setLoggingActions] = useState<Set<number>>(new Set());
   const { toast } = useToast();
   
   const actions = moodActionsData[mood.label as keyof typeof moodActionsData] || moodActionsData["Actually okay"];
 
+  const getRandomEncouragementMessage = () => {
+    // Get mood-specific messages, fallback to general messages
+    const moodMessages = encouragementMessages[mood.label as keyof typeof encouragementMessages] || [];
+    const generalMessages = encouragementMessages.General;
+    const allMessages = [...moodMessages, ...generalMessages];
+    
+    // Filter out already used messages
+    const availableMessages = allMessages.filter(msg => !usedMessages.has(msg));
+    
+    // If all messages have been used, reset the used messages set
+    if (availableMessages.length === 0) {
+      setUsedMessages(new Set());
+      return allMessages[Math.floor(Math.random() * allMessages.length)];
+    }
+    
+    // Select a random message from available ones
+    const selectedMessage = availableMessages[Math.floor(Math.random() * availableMessages.length)];
+    
+    // Add the selected message to used messages
+    setUsedMessages(prev => new Set([...prev, selectedMessage]));
+    
+    return selectedMessage;
+  };
+
   const handleNowWhat = () => {
+    const message = getRandomEncouragementMessage();
+    setCurrentEncouragementMessage(message);
     setShowEncouragement(true);
-    setTimeout(() => setShowEncouragement(false), 3000);
+    setTimeout(() => setShowEncouragement(false), 4000);
   };
 
   const handleTryAnother = () => {
@@ -118,7 +146,7 @@ const ActionSuggestion = ({ mood, onReset }: ActionSuggestionProps) => {
       {showEncouragement && (
         <div className="p-4 bg-flow-gentle/20 rounded-lg border border-flow-gentle/30 animate-fade-in-up">
           <p className="text-sm text-foreground font-medium text-center">
-            You're taking care of yourself, and that's beautiful 💙
+            {currentEncouragementMessage}
           </p>
         </div>
       )}
