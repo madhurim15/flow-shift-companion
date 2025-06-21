@@ -6,6 +6,8 @@ import MoodSelector from '@/components/MoodSelector';
 import ActionSuggestion from '@/components/ActionSuggestion';
 import UserMenu from '@/components/UserMenu';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Timer } from 'lucide-react';
 
 type Mood = {
   id: string;
@@ -85,6 +87,15 @@ const Index = () => {
                 Feeling {selectedMood.label.toLowerCase()} {selectedMood.emoji}
               </div>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/focus')}
+              className="flex items-center gap-2"
+            >
+              <Timer className="h-4 w-4" />
+              Focus
+            </Button>
             <UserMenu />
           </div>
         </div>

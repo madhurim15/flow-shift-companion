@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      check_in_reminders: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          mood_response: string | null
+          reminder_type: string
+          scheduled_time: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          mood_response?: string | null
+          reminder_type: string
+          scheduled_time: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          mood_response?: string | null
+          reminder_type?: string
+          scheduled_time?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       mood_logs: {
         Row: {
           action_taken: string | null
@@ -29,6 +59,45 @@ export type Database = {
           created_at?: string
           id?: string
           mood?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pomodoro_sessions: {
+        Row: {
+          actual_duration: number | null
+          completed: boolean | null
+          completed_at: string | null
+          id: string
+          interrupted: boolean | null
+          interruption_reason: string | null
+          planned_duration: number
+          session_type: string | null
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_duration?: number | null
+          completed?: boolean | null
+          completed_at?: string | null
+          id?: string
+          interrupted?: boolean | null
+          interruption_reason?: string | null
+          planned_duration?: number
+          session_type?: string | null
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_duration?: number | null
+          completed?: boolean | null
+          completed_at?: string | null
+          id?: string
+          interrupted?: boolean | null
+          interruption_reason?: string | null
+          planned_duration?: number
+          session_type?: string | null
+          started_at?: string
           user_id?: string
         }
         Relationships: []
@@ -60,6 +129,45 @@ export type Database = {
           preferred_name?: string | null
           timezone?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      reminder_settings: {
+        Row: {
+          afternoon_time: string | null
+          created_at: string
+          evening_time: string | null
+          id: string
+          morning_time: string | null
+          night_time: string | null
+          notifications_enabled: boolean | null
+          timezone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          afternoon_time?: string | null
+          created_at?: string
+          evening_time?: string | null
+          id?: string
+          morning_time?: string | null
+          night_time?: string | null
+          notifications_enabled?: boolean | null
+          timezone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          afternoon_time?: string | null
+          created_at?: string
+          evening_time?: string | null
+          id?: string
+          morning_time?: string | null
+          night_time?: string | null
+          notifications_enabled?: boolean | null
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
