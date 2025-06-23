@@ -109,12 +109,31 @@ export const markReminderCompleted = async (reminderId: string, moodResponse?: s
   return data;
 };
 
+export const checkNotificationPermission = (): NotificationPermission => {
+  if (!('Notification' in window)) {
+    console.log('This browser does not support notifications');
+    return 'denied';
+  }
+  return Notification.permission;
+};
+
 export const requestNotificationPermission = async (): Promise<boolean> => {
   if (!('Notification' in window)) {
     console.log('This browser does not support notifications');
     return false;
   }
 
+  // If already granted, return true
+  if (Notification.permission === 'granted') {
+    return true;
+  }
+
+  // If denied, don't request again
+  if (Notification.permission === 'denied') {
+    return false;
+  }
+
+  // Request permission for 'default' state
   const permission = await Notification.requestPermission();
   return permission === 'granted';
 };

@@ -8,6 +8,7 @@ import {
   getUserReminderSettings, 
   createOrUpdateReminderSettings,
   requestNotificationPermission,
+  checkNotificationPermission,
   showNotification,
   reminderMessages,
   type ReminderType
@@ -28,7 +29,19 @@ const ReminderSystem = () => {
     try {
       const settings = await getUserReminderSettings();
       setReminderSettings(settings);
-      setNotificationsEnabled(settings?.notifications_enabled || false);
+      
+      // Check both database setting and browser permission
+      const browserPermission = checkNotificationPermission();
+      const dbEnabled = settings?.notifications_enabled || false;
+      
+      // Only enable if both database says yes AND browser permission is granted
+      setNotificationsEnabled(dbEnabled && browserPermission === 'granted');
+      
+      console.log('Loaded settings:', { 
+        dbEnabled, 
+        browserPermission, 
+        finalEnabled: dbEnabled && browserPermission === 'granted' 
+      });
     } catch (error) {
       console.error('Error loading reminder settings:', error);
     } finally {
@@ -68,12 +81,31 @@ const ReminderSystem = () => {
   };
 
   const toggleNotifications = async () => {
+    const currentBrowserPermission = checkNotificationPermission();
+    console.log('Current browser permission:', currentBrowserPermission);
+    
     if (!notificationsEnabled) {
-      const granted = await requestNotificationPermission();
-      if (!granted) {
+      // Trying to enable notifications
+      let permissionGranted = false;
+      
+      if (currentBrowserPermission === 'granted') {
+        permissionGranted = true;
+      } else if (currentBrowserPermission === 'default') {
+        permissionGranted = await requestNotificationPermission();
+      } else {
+        // Permission is 'denied'
+        permissionGranted = false;
+      }
+      
+      if (!permissionGranted) {
+        let errorMessage = "Please enable notifications in your browser settings for gentle check-ins.";
+        if (currentBrowserPermission === 'denied') {
+          errorMessage = "Notifications are blocked. Please enable them in your browser settings to receive gentle check-ins.";
+        }
+        
         toast({
-          title: "Notifications blocked",
-          description: "Please enable notifications in your browser settings for gentle check-ins.",
+          title: "Notifications not available",
+          description: errorMessage,
           variant: "destructive"
         });
         return;
@@ -81,12 +113,13 @@ const ReminderSystem = () => {
     }
 
     const newEnabled = !notificationsEnabled;
-    setNotificationsEnabled(newEnabled);
     
     try {
       await createOrUpdateReminderSettings({
         notifications_enabled: newEnabled
       });
+      
+      setNotificationsEnabled(newEnabled);
       
       toast({
         title: newEnabled ? "Gentle reminders enabled ✨" : "Reminders turned off",
@@ -105,11 +138,20 @@ const ReminderSystem = () => {
   };
 
   const testNotification = () => {
-    showNotification('morning');
-    toast({
-      title: "Test notification sent!",
-      description: "Check if you received it (may need to allow notifications first)"
-    });
+    const permission = checkNotificationPermission();
+    if (permission === 'granted') {
+      showNotification('morning');
+      toast({
+        title: "Test notification sent!",
+        description: "Check if you received it"
+      });
+    } else {
+      toast({
+        title: "Cannot send test notification",
+        description: "Please enable notifications first",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {
