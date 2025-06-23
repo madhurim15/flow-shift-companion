@@ -4,14 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 export interface PomodoroSession {
   id?: string;
   user_id: string;
-  session_type: 'focus' | 'break';
+  session_type: string | null; // Changed from 'focus' | 'break' to match database
   planned_duration: number; // in seconds
-  actual_duration?: number;
-  completed: boolean;
-  interrupted: boolean;
-  interruption_reason?: string;
+  actual_duration?: number | null;
+  completed: boolean | null;
+  interrupted: boolean | null;
+  interruption_reason?: string | null;
   started_at: string;
-  completed_at?: string;
+  completed_at?: string | null;
 }
 
 export const FOCUS_DURATION = 25 * 60; // 25 minutes in seconds
