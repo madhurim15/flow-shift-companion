@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -15,9 +14,10 @@ import {
 } from '@/utils/reminderUtils';
 
 const ReminderSystem = () => {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true); // Default to true
   const [reminderSettings, setReminderSettings] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [browserPermissionWarning, setBrowserPermissionWarning] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -27,48 +27,35 @@ const ReminderSystem = () => {
 
   const loadReminderSettings = async () => {
     try {
-      const settings = await getUserReminderSettings();
-      setReminderSettings(settings);
+      let settings = await getUserReminderSettings();
       
-      const browserPermission = checkNotificationPermission();
-      
-      if (settings) {
-        // If database record exists, use the stored preference AND browser permission
-        const dbEnabled = settings.notifications_enabled;
-        setNotificationsEnabled(dbEnabled && browserPermission === 'granted');
-        
-        console.log('Loaded existing settings:', { 
-          dbEnabled, 
-          browserPermission, 
-          finalEnabled: dbEnabled && browserPermission === 'granted' 
+      if (!settings) {
+        // Auto-create default settings with reminders enabled
+        console.log('No settings found, creating default settings');
+        settings = await createOrUpdateReminderSettings({
+          notifications_enabled: true
         });
-      } else {
-        // If no database record exists, use only browser permission
-        const browserEnabled = browserPermission === 'granted';
-        setNotificationsEnabled(browserEnabled);
-        
-        console.log('No database settings found, using browser permission:', { 
-          browserPermission, 
-          finalEnabled: browserEnabled 
-        });
-        
-        // If browser permission is granted, create initial database record
-        if (browserEnabled) {
-          try {
-            await createOrUpdateReminderSettings({
-              notifications_enabled: true
-            });
-            console.log('Created initial reminder settings');
-          } catch (error) {
-            console.error('Error creating initial settings:', error);
-          }
-        }
+        console.log('Created default reminder settings:', settings);
       }
+      
+      setReminderSettings(settings);
+      setNotificationsEnabled(settings.notifications_enabled);
+      
+      // Check browser permission but don't block functionality
+      const browserPermission = checkNotificationPermission();
+      if (settings.notifications_enabled && browserPermission !== 'granted') {
+        setBrowserPermissionWarning(true);
+      }
+      
+      console.log('Loaded settings:', { 
+        dbEnabled: settings.notifications_enabled,
+        browserPermission,
+        warningShown: browserPermission !== 'granted' && settings.notifications_enabled
+      });
     } catch (error) {
       console.error('Error loading reminder settings:', error);
-      // Fallback to browser permission only if database fails
-      const browserPermission = checkNotificationPermission();
-      setNotificationsEnabled(browserPermission === 'granted');
+      // Even if database fails, keep reminders enabled by default
+      setNotificationsEnabled(true);
     } finally {
       setLoading(false);
     }
@@ -99,44 +86,34 @@ const ReminderSystem = () => {
     // Check if current time matches any reminder time
     for (const [type, time] of Object.entries(reminderTimes)) {
       if (currentTime === time) {
-        showNotification(type as ReminderType);
+        await sendReminder(type as ReminderType);
         break;
       }
     }
   };
 
-  const toggleNotifications = async () => {
-    const currentBrowserPermission = checkNotificationPermission();
-    console.log('Current browser permission:', currentBrowserPermission);
+  const sendReminder = async (type: ReminderType) => {
+    const browserPermission = checkNotificationPermission();
     
-    if (!notificationsEnabled) {
-      // Trying to enable notifications
-      let permissionGranted = false;
+    if (browserPermission === 'granted') {
+      // Send browser notification
+      showNotification(type);
+    } else {
+      // Fallback to in-app toast notification
+      toast({
+        title: "Gentle Check-in ✨",
+        description: reminderMessages[type],
+        duration: 10000, // Show for 10 seconds
+      });
       
-      if (currentBrowserPermission === 'granted') {
-        permissionGranted = true;
-      } else if (currentBrowserPermission === 'default') {
-        permissionGranted = await requestNotificationPermission();
-      } else {
-        // Permission is 'denied'
-        permissionGranted = false;
-      }
-      
-      if (!permissionGranted) {
-        let errorMessage = "Please enable notifications in your browser settings for gentle check-ins.";
-        if (currentBrowserPermission === 'denied') {
-          errorMessage = "Notifications are blocked. Please enable them in your browser settings to receive gentle check-ins.";
-        }
-        
-        toast({
-          title: "Notifications not available",
-          description: errorMessage,
-          variant: "destructive"
-        });
-        return;
+      // Show warning about browser notifications if not already shown
+      if (!browserPermissionWarning) {
+        setBrowserPermissionWarning(true);
       }
     }
+  };
 
+  const toggleNotifications = async () => {
     const newEnabled = !notificationsEnabled;
     
     try {
@@ -146,12 +123,24 @@ const ReminderSystem = () => {
       
       setNotificationsEnabled(newEnabled);
       
-      toast({
-        title: newEnabled ? "Gentle reminders enabled ✨" : "Reminders turned off",
-        description: newEnabled 
-          ? "We'll gently check in with you 4 times a day"
-          : "You can always turn them back on when you're ready"
-      });
+      if (newEnabled) {
+        // Check browser permission when enabling
+        const browserPermission = checkNotificationPermission();
+        if (browserPermission !== 'granted') {
+          setBrowserPermissionWarning(true);
+        }
+        
+        toast({
+          title: "Gentle reminders enabled ✨",
+          description: "We'll gently check in with you 4 times a day"
+        });
+      } else {
+        setBrowserPermissionWarning(false);
+        toast({
+          title: "Reminders turned off",
+          description: "You can always turn them back on when you're ready"
+        });
+      }
     } catch (error) {
       console.error('Error updating notification settings:', error);
       toast({
@@ -162,21 +151,29 @@ const ReminderSystem = () => {
     }
   };
 
-  const testNotification = () => {
-    const permission = checkNotificationPermission();
-    if (permission === 'granted') {
-      showNotification('morning');
+  const requestBrowserPermission = async () => {
+    const granted = await requestNotificationPermission();
+    if (granted) {
+      setBrowserPermissionWarning(false);
       toast({
-        title: "Test notification sent!",
-        description: "Check if you received it"
+        title: "Browser notifications enabled! 🎉",
+        description: "You'll now receive gentle reminders"
       });
     } else {
       toast({
-        title: "Cannot send test notification",
-        description: "Please enable notifications first",
+        title: "Browser notifications blocked",
+        description: "You'll still get in-app reminders, but enabling browser notifications gives you the best experience",
         variant: "destructive"
       });
     }
+  };
+
+  const testNotification = async () => {
+    await sendReminder('morning');
+    toast({
+      title: "Test reminder sent!",
+      description: "Check if you received it"
+    });
   };
 
   if (loading) {
@@ -210,6 +207,22 @@ const ReminderSystem = () => {
         </Button>
       </div>
 
+      {browserPermissionWarning && notificationsEnabled && (
+        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="text-sm text-amber-800">
+            <strong>Browser notifications blocked</strong> - You're getting in-app reminders, but browser notifications would give you a better experience.
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={requestBrowserPermission}
+            className="mt-2 text-amber-700 hover:text-amber-900"
+          >
+            Enable browser notifications
+          </Button>
+        </div>
+      )}
+
       {notificationsEnabled && (
         <div className="space-y-3">
           <div className="text-sm text-muted-foreground">
@@ -240,7 +253,7 @@ const ReminderSystem = () => {
             onClick={testNotification}
             className="w-full text-xs"
           >
-            Test notification
+            Test reminder
           </Button>
         </div>
       )}
