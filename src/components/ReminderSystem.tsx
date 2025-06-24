@@ -30,20 +30,45 @@ const ReminderSystem = () => {
       const settings = await getUserReminderSettings();
       setReminderSettings(settings);
       
-      // Check both database setting and browser permission
       const browserPermission = checkNotificationPermission();
-      const dbEnabled = settings?.notifications_enabled || false;
       
-      // Only enable if both database says yes AND browser permission is granted
-      setNotificationsEnabled(dbEnabled && browserPermission === 'granted');
-      
-      console.log('Loaded settings:', { 
-        dbEnabled, 
-        browserPermission, 
-        finalEnabled: dbEnabled && browserPermission === 'granted' 
-      });
+      if (settings) {
+        // If database record exists, use the stored preference AND browser permission
+        const dbEnabled = settings.notifications_enabled;
+        setNotificationsEnabled(dbEnabled && browserPermission === 'granted');
+        
+        console.log('Loaded existing settings:', { 
+          dbEnabled, 
+          browserPermission, 
+          finalEnabled: dbEnabled && browserPermission === 'granted' 
+        });
+      } else {
+        // If no database record exists, use only browser permission
+        const browserEnabled = browserPermission === 'granted';
+        setNotificationsEnabled(browserEnabled);
+        
+        console.log('No database settings found, using browser permission:', { 
+          browserPermission, 
+          finalEnabled: browserEnabled 
+        });
+        
+        // If browser permission is granted, create initial database record
+        if (browserEnabled) {
+          try {
+            await createOrUpdateReminderSettings({
+              notifications_enabled: true
+            });
+            console.log('Created initial reminder settings');
+          } catch (error) {
+            console.error('Error creating initial settings:', error);
+          }
+        }
+      }
     } catch (error) {
       console.error('Error loading reminder settings:', error);
+      // Fallback to browser permission only if database fails
+      const browserPermission = checkNotificationPermission();
+      setNotificationsEnabled(browserPermission === 'granted');
     } finally {
       setLoading(false);
     }
