@@ -1,7 +1,9 @@
 
 import { useState, useEffect, useRef } from 'react';
+import { useBlocker } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Play, Pause, RotateCcw, Coffee, Focus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -27,17 +29,25 @@ const PomodoroTimer = () => {
   const [currentSession, setCurrentSession] = useState<PomodoroSession | null>(null);
   const [currentMessage, setCurrentMessage] = useState('');
   const [startTime, setStartTime] = useState<Date | null>(null);
+  const [showNavigationDialog, setShowNavigationDialog] = useState(false);
+  const [blockedNavigation, setBlockedNavigation] = useState<(() => void) | null>(null);
   
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
+
+  // Block navigation when timer is running
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      timerState === 'running' && currentLocation.pathname !== nextLocation.pathname
+  );
 
   useEffect(() => {
     // Update message when session type changes
     updateMessage();
   }, [sessionType]);
 
+  // Enhanced browser exit prevention
   useEffect(() => {
-    // Set up exit prevention when timer is running
     if (timerState === 'running') {
       const handleBeforeUnload = (e: BeforeUnloadEvent) => {
         e.preventDefault();
@@ -45,10 +55,30 @@ const PomodoroTimer = () => {
         return e.returnValue;
       };
 
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'hidden' && timerState === 'running') {
+          // Optional: Pause timer when tab becomes hidden
+          // This provides a gentler UX while still maintaining focus
+        }
+      };
+
       window.addEventListener('beforeunload', handleBeforeUnload);
-      return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      };
     }
   }, [timerState]);
+
+  // Handle in-app navigation blocking
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      setShowNavigationDialog(true);
+      setBlockedNavigation(() => blocker.proceed);
+    }
+  }, [blocker]);
 
   const updateMessage = () => {
     const messages = sessionType === 'focus' ? focusMessages : breakMessages;
@@ -170,6 +200,20 @@ const PomodoroTimer = () => {
     updateMessage();
   };
 
+  const handleNavigationCancel = () => {
+    setShowNavigationDialog(false);
+    setBlockedNavigation(null);
+    blocker.reset?.();
+  };
+
+  const handleNavigationConfirm = () => {
+    setShowNavigationDialog(false);
+    if (blockedNavigation) {
+      blockedNavigation();
+    }
+    setBlockedNavigation(null);
+  };
+
   const progress = sessionType === 'focus' 
     ? ((FOCUS_DURATION - timeLeft) / FOCUS_DURATION) * 100
     : ((BREAK_DURATION - timeLeft) / BREAK_DURATION) * 100;
@@ -281,6 +325,26 @@ const PomodoroTimer = () => {
           }
         </p>
       </Card>
+
+      {/* Navigation Prevention Dialog */}
+      <AlertDialog open={showNavigationDialog} onOpenChange={setShowNavigationDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Timer is running</AlertDialogTitle>
+            <AlertDialogDescription>
+              Leaving now won't help—you can stop after this tiny win. Your focus session is in progress and you're doing great!
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleNavigationCancel}>
+              Stay focused
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleNavigationConfirm}>
+              Leave anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
