@@ -30,10 +30,10 @@ export const moodActionsData = {
     "Do one tiny thing you can feel proud of right now",
     "Remember: progress isn't linear and rest isn't giving up"
   ],
-  "Restless": [
-    "Move your body for 2 minutes - dance, stretch, shake it out",
-    "Clean or organize one small thing you can see results from",
-    "Step outside for a moment, even if it's just to your doorway"
+  "Lazy": [
+    "Give yourself permission to rest for 15 minutes, guilt-free",
+    "Do one tiny thing that takes less than 2 minutes",
+    "Remember: rest is productive too, you're recharging"
   ],
   "Actually okay": [
     "Check in with future you: what would help you feel proud later?",

@@ -17,7 +17,7 @@ const moods: Mood[] = [
   { id: 'bored', label: 'Bored', emoji: '😐', description: 'Nothing feels interesting' },
   { id: 'stuck', label: 'Stuck', emoji: '🤯', description: "Don't know where to start" },
   { id: 'guilty', label: 'Guilty', emoji: '😔', description: 'Been scrolling too much' },
-  { id: 'restless', label: 'Restless', emoji: '😤', description: 'Want to move but feeling frozen' },
+  { id: 'lazy', label: 'Lazy', emoji: '🛋️', description: 'Just want to do nothing today' },
   { id: 'okay', label: 'Actually okay', emoji: '🙂', description: 'Just checking in' }
 ];
 
