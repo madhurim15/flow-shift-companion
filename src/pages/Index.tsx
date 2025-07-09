@@ -5,7 +5,9 @@ import WelcomeScreen from '@/components/WelcomeScreen';
 import MoodSelector from '@/components/MoodSelector';
 import ActionSuggestion from '@/components/ActionSuggestion';
 import UserMenu from '@/components/UserMenu';
+import DoomScrollingIntervention from '@/components/DoomScrollingIntervention';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDoomScrollingDetection } from '@/hooks/useDoomScrollingDetection';
 import { Button } from '@/components/ui/button';
 import { Timer } from 'lucide-react';
 
@@ -23,6 +25,9 @@ const Index = () => {
   const navigate = useNavigate();
   const [appState, setAppState] = useState<AppState>('welcome');
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
+  
+  // Doom scrolling detection
+  const { shouldShowIntervention, resetPattern } = useDoomScrollingDetection();
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -48,6 +53,10 @@ const Index = () => {
   const handleBackToWelcome = () => {
     setSelectedMood(null);
     setAppState('welcome');
+  };
+
+  const handleStartMoodCheck = () => {
+    setAppState('mood-select');
   };
 
   // Show loading or nothing while checking auth
@@ -111,6 +120,13 @@ const Index = () => {
           <ActionSuggestion mood={selectedMood} onReset={handleReset} />
         )}
       </div>
+
+      {/* Doom Scrolling Intervention */}
+      <DoomScrollingIntervention
+        isOpen={shouldShowIntervention}
+        onClose={resetPattern}
+        onStartMoodCheck={handleStartMoodCheck}
+      />
     </div>
   );
 };

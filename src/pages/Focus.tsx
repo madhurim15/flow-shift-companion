@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import PomodoroTimer from '@/components/PomodoroTimer';
 import ReminderSystem from '@/components/ReminderSystem';
 import UserMenu from '@/components/UserMenu';
+import DoomScrollingIntervention from '@/components/DoomScrollingIntervention';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDoomScrollingDetection } from '@/hooks/useDoomScrollingDetection';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Timer, Bell } from 'lucide-react';
 
@@ -14,6 +16,9 @@ const Focus = () => {
   const [currentView, setCurrentView] = useState<FocusView>('pomodoro');
   const { user } = useAuth();
   const navigate = useNavigate();
+  
+  // Doom scrolling detection
+  const { shouldShowIntervention, resetPattern } = useDoomScrollingDetection();
 
   useEffect(() => {
     if (!user) {
@@ -75,6 +80,13 @@ const Focus = () => {
         {currentView === 'pomodoro' && <PomodoroTimer />}
         {currentView === 'reminders' && <ReminderSystem />}
       </div>
+
+      {/* Doom Scrolling Intervention */}
+      <DoomScrollingIntervention
+        isOpen={shouldShowIntervention}
+        onClose={resetPattern}
+        onStartMoodCheck={() => navigate('/')}
+      />
     </div>
   );
 };
