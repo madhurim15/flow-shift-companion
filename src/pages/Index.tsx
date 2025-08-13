@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import WelcomeScreen from '@/components/WelcomeScreen';
 import MoodSelector from '@/components/MoodSelector';
 import ActionSuggestion from '@/components/ActionSuggestion';
+import DiceRoll from '@/components/DiceRoll';
 import UserMenu from '@/components/UserMenu';
 import DoomScrollingIntervention from '@/components/DoomScrollingIntervention';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,7 +19,7 @@ type Mood = {
   description: string;
 };
 
-type AppState = 'welcome' | 'mood-select' | 'action-suggest';
+type AppState = 'welcome' | 'mood-select' | 'dice-roll' | 'action-suggest';
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -40,9 +41,9 @@ const Index = () => {
     setAppState('mood-select');
   };
 
-  const handleMoodSelect = (mood: Mood) => {
+const handleMoodSelect = (mood: Mood) => {
     setSelectedMood(mood);
-    setAppState('action-suggest');
+    setAppState('dice-roll');
   };
 
   const handleReset = () => {
@@ -114,6 +115,13 @@ const Index = () => {
       <div className="max-w-2xl mx-auto p-6">
         {appState === 'mood-select' && (
           <MoodSelector onMoodSelect={handleMoodSelect} />
+        )}
+        
+        {appState === 'dice-roll' && selectedMood && (
+          <DiceRoll
+            mood={selectedMood}
+            onConfirm={() => setAppState('action-suggest')}
+          />
         )}
         
         {appState === 'action-suggest' && selectedMood && (
