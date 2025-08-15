@@ -1,66 +1,155 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import WelcomeScreen from "@/components/WelcomeScreen";
+import MoodSelector from "@/components/MoodSelector";
+import Dice3D from "@/components/Dice3D";
+import ActionTimer from "@/components/ActionTimer";
+import CompletionCelebration from "@/components/CompletionCelebration";
+import DiceSystemStatus from "@/components/DiceSystemStatus";
+import UserMenu from "@/components/UserMenu";
+import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
+import { Button } from "@/components/ui/button";
+import { Timer, RotateCcw, Home } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useDoomScrollingDetection } from "@/hooks/useDoomScrollingDetection";
+import { useDiceSystem, CompletionResult } from "@/hooks/useDiceSystem";
+import { toast } from "@/hooks/use-toast";
 
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import WelcomeScreen from '@/components/WelcomeScreen';
-import MoodSelector from '@/components/MoodSelector';
-import ActionSuggestion from '@/components/ActionSuggestion';
-import DiceRoll from '@/components/DiceRoll';
-import UserMenu from '@/components/UserMenu';
-import DoomScrollingIntervention from '@/components/DoomScrollingIntervention';
-import { useAuth } from '@/contexts/AuthContext';
-import { useDoomScrollingDetection } from '@/hooks/useDoomScrollingDetection';
-import { Button } from '@/components/ui/button';
-import { Timer } from 'lucide-react';
-
-type Mood = {
+export type Mood = {
   id: string;
   label: string;
   emoji: string;
   description: string;
 };
 
-type AppState = 'welcome' | 'mood-select' | 'dice-roll' | 'action-suggest';
+type AppState = "welcome" | "mood-selection" | "dice-roll" | "action-timer" | "completion-celebration";
 
 const Index = () => {
-  const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const [appState, setAppState] = useState<AppState>('welcome');
+  const { user, loading } = useAuth();
+  const [appState, setAppState] = useState<AppState>("welcome");
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
-  
-  // Doom scrolling detection
+  const [currentAction, setCurrentAction] = useState<string>("");
+  const [diceRollId, setDiceRollId] = useState<string>("");
+  const [completionResult, setCompletionResult] = useState<CompletionResult | null>(null);
+  const [plannedDuration, setPlannedDuration] = useState<number>(0);
+  const [actualDuration, setActualDuration] = useState<number>(0);
   const { shouldShowIntervention, resetPattern } = useDoomScrollingDetection();
+  const { requestDiceRoll, completeAction, soundEnabled, setSoundEnabled } = useDiceSystem();
 
-  // Redirect to auth if not logged in
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/auth');
+      navigate("/auth");
     }
   }, [user, loading, navigate]);
 
   const handleStart = () => {
-    setAppState('mood-select');
+    setAppState("mood-selection");
   };
 
-const handleMoodSelect = (mood: Mood) => {
+  const handleMoodSelect = async (mood: Mood) => {
     setSelectedMood(mood);
-    setAppState('dice-roll');
+    
+    // Request dice roll from backend
+    const { result, action } = await requestDiceRoll(mood.label);
+    
+    if (result.success && result.dice_roll_id) {
+      setCurrentAction(action);
+      setDiceRollId(result.dice_roll_id);
+      setAppState("dice-roll");
+    } else {
+      // Handle error - stay on mood selection
+      // Toast already shown by useDiceSystem
+    }
+  };
+
+  const handleStartAction = (diceRollId: string, action: string) => {
+    // Determine planned duration based on action type
+    const duration = getDurationFromAction(action);
+    setPlannedDuration(duration);
+    setAppState("action-timer");
+  };
+
+  const handleActionComplete = async (diceRollId: string, plannedDuration: number, actualDuration: number) => {
+    try {
+      const result = await completeAction(diceRollId, plannedDuration, actualDuration);
+      setCompletionResult(result);
+      setActualDuration(actualDuration);
+      setAppState("completion-celebration");
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to record completion, but you still did great!",
+        variant: "destructive"
+      });
+      // Still show celebration even if recording failed
+      setCompletionResult({
+        success: true,
+        completion_type: plannedDuration <= 300 ? 'small' : plannedDuration <= 1200 ? 'medium' : 'big',
+        current_streak: 1,
+        best_streak: 1,
+        is_new_best: false
+      });
+      setActualDuration(actualDuration);
+      setAppState("completion-celebration");
+    }
+  };
+
+  const handleCompletionContinue = () => {
+    setAppState("welcome");
+    setSelectedMood(null);
+    setCurrentAction("");
+    setDiceRollId("");
+    setCompletionResult(null);
+    setPlannedDuration(0);
+    setActualDuration(0);
   };
 
   const handleReset = () => {
     setSelectedMood(null);
-    setAppState('mood-select');
+    setCurrentAction("");
+    setDiceRollId("");
+    setCompletionResult(null);
+    setPlannedDuration(0);
+    setActualDuration(0);
+    setAppState("welcome");
   };
 
   const handleBackToWelcome = () => {
-    setSelectedMood(null);
-    setAppState('welcome');
+    setAppState("welcome");
   };
 
   const handleStartMoodCheck = () => {
-    setAppState('mood-select');
+    setAppState("mood-selection");
   };
 
-  // Show loading or nothing while checking auth
+  // Helper function to determine duration from action text
+  const getDurationFromAction = (action: string): number => {
+    const lowerAction = action.toLowerCase();
+    
+    // Look for time indicators in the action text
+    if (lowerAction.includes('2-min') || lowerAction.includes('2 min')) return 120;
+    if (lowerAction.includes('5-min') || lowerAction.includes('5 min')) return 300;
+    if (lowerAction.includes('10-min') || lowerAction.includes('10 min')) return 600;
+    if (lowerAction.includes('15-min') || lowerAction.includes('15 min')) return 900;
+    if (lowerAction.includes('20-min') || lowerAction.includes('20 min')) return 1200;
+    if (lowerAction.includes('30-min') || lowerAction.includes('30 min')) return 1800;
+    
+    // Default durations based on action complexity
+    if (lowerAction.includes('timer') || lowerAction.includes('focused') || lowerAction.includes('work')) {
+      return 600; // 10 minutes for work sessions
+    }
+    if (lowerAction.includes('breath') || lowerAction.includes('sit') || lowerAction.includes('quietly')) {
+      return 120; // 2 minutes for mindfulness
+    }
+    if (lowerAction.includes('write') || lowerAction.includes('list') || lowerAction.includes('draw')) {
+      return 300; // 5 minutes for planning/creative tasks
+    }
+    
+    // Default to 5 minutes for most actions
+    return 300;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -69,72 +158,121 @@ const handleMoodSelect = (mood: Mood) => {
     );
   }
 
-  // Don't render anything if not authenticated (will redirect)
   if (!user) {
     return null;
   }
 
-  if (appState === 'welcome') {
-    return <WelcomeScreen onStart={handleStart} />;
-  }
-
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-white border-b border-border">
-        <div className="max-w-2xl mx-auto p-4 flex items-center justify-between">
-          <button 
-            onClick={handleBackToWelcome}
-            className="flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors"
-          >
-            <span className="text-xl">✨</span>
-            <span className="font-medium">Flowlight</span>
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+      {shouldShowIntervention && (
+        <DoomScrollingIntervention 
+          isOpen={shouldShowIntervention}
+          onClose={resetPattern}
+          onStartMoodCheck={handleStartMoodCheck}
+        />
+      )}
+      
+      {appState === "welcome" && <WelcomeScreen onStart={handleStart} />}
+      
+      {appState !== "welcome" && (
+        <>
+          <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="container flex h-16 items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleBackToWelcome}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <Home size={18} className="mr-2" />
+                  FlowFocus
+                </Button>
+                
+                {selectedMood && (
+                  <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>Currently:</span>
+                    <span className="font-medium text-foreground">
+                      {selectedMood.emoji} {selectedMood.label}
+                    </span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate("/focus")}
+                  className="hidden sm:flex"
+                >
+                  <Timer size={16} className="mr-2" />
+                  Focus Timer
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleReset}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <RotateCcw size={16} />
+                  <span className="sr-only sm:not-sr-only sm:ml-2">Reset</span>
+                </Button>
+                
+                <UserMenu />
+              </div>
+            </div>
+          </header>
           
-          <div className="flex items-center space-x-4">
-            {selectedMood && (
-              <div className="text-sm text-muted-foreground">
-                Feeling {selectedMood.label.toLowerCase()} {selectedMood.emoji}
+          <main className="container py-8">
+            {appState === "mood-selection" && (
+              <div className="space-y-6">
+                <DiceSystemStatus />
+                <MoodSelector onMoodSelect={handleMoodSelect} />
               </div>
             )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/focus')}
-              className="flex items-center gap-2"
-            >
-              <Timer className="h-4 w-4" />
-              Focus
-            </Button>
-            <UserMenu />
-          </div>
-        </div>
-      </div>
+          </main>
+        </>
+      )}
 
-      {/* Main Content */}
-      <div className="max-w-2xl mx-auto p-6">
-        {appState === 'mood-select' && (
-          <MoodSelector onMoodSelect={handleMoodSelect} />
-        )}
-        
-        {appState === 'dice-roll' && selectedMood && (
-          <DiceRoll
-            mood={selectedMood}
-            onConfirm={() => setAppState('action-suggest')}
+      {/* 3D Dice Roll Overlay */}
+      {appState === "dice-roll" && selectedMood && (
+        <Dice3D
+          mood={selectedMood}
+          action={currentAction}
+          diceRollId={diceRollId}
+          onStartAction={handleStartAction}
+          soundEnabled={soundEnabled}
+          onSoundToggle={() => setSoundEnabled(!soundEnabled)}
+        />
+      )}
+
+      {/* Action Timer Overlay */}
+      {appState === "action-timer" && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <ActionTimer
+            action={currentAction}
+            diceRollId={diceRollId}
+            plannedDuration={plannedDuration}
+            onComplete={handleActionComplete}
+            soundEnabled={soundEnabled}
+            onSoundToggle={() => setSoundEnabled(!soundEnabled)}
           />
-        )}
-        
-        {appState === 'action-suggest' && selectedMood && (
-          <ActionSuggestion mood={selectedMood} onReset={handleReset} />
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Doom Scrolling Intervention */}
-      <DoomScrollingIntervention
-        isOpen={shouldShowIntervention}
-        onClose={resetPattern}
-        onStartMoodCheck={handleStartMoodCheck}
-      />
+      {/* Completion Celebration Overlay */}
+      {appState === "completion-celebration" && completionResult && (
+        <CompletionCelebration
+          result={completionResult}
+          action={currentAction}
+          plannedDuration={plannedDuration}
+          actualDuration={actualDuration}
+          onContinue={handleCompletionContinue}
+          soundEnabled={soundEnabled}
+        />
+      )}
     </div>
   );
 };
