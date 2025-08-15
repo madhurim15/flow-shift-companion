@@ -14,6 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_completions: {
+        Row: {
+          actual_duration: number
+          completed_at: string
+          completion_type: string
+          dice_roll_id: string
+          id: string
+          planned_duration: number
+          user_id: string
+        }
+        Insert: {
+          actual_duration: number
+          completed_at?: string
+          completion_type: string
+          dice_roll_id: string
+          id?: string
+          planned_duration: number
+          user_id: string
+        }
+        Update: {
+          actual_duration?: number
+          completed_at?: string
+          completion_type?: string
+          dice_roll_id?: string
+          id?: string
+          planned_duration?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_completions_dice_roll_id_fkey"
+            columns: ["dice_roll_id"]
+            isOneToOne: false
+            referencedRelation: "dice_roll_usage"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      action_streaks: {
+        Row: {
+          best_streak: number
+          created_at: string
+          current_streak: number
+          id: string
+          last_completion_date: string | null
+          total_completions: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          best_streak?: number
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_completion_date?: string | null
+          total_completions?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          best_streak?: number
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_completion_date?: string | null
+          total_completions?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       check_in_reminders: {
         Row: {
           completed_at: string | null
@@ -40,6 +111,33 @@ export type Database = {
           mood_response?: string | null
           reminder_type?: string
           scheduled_time?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      dice_roll_usage: {
+        Row: {
+          action_suggested: string
+          cooldown_expires_at: string
+          created_at: string
+          id: string
+          mood: string
+          user_id: string
+        }
+        Insert: {
+          action_suggested: string
+          cooldown_expires_at?: string
+          created_at?: string
+          id?: string
+          mood: string
+          user_id: string
+        }
+        Update: {
+          action_suggested?: string
+          cooldown_expires_at?: string
+          created_at?: string
+          id?: string
+          mood?: string
           user_id?: string
         }
         Relationships: []
@@ -220,7 +318,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      complete_action: {
+        Args: {
+          p_actual_duration: number
+          p_dice_roll_id: string
+          p_planned_duration: number
+        }
+        Returns: Json
+      }
+      request_dice_roll: {
+        Args: { p_action: string; p_mood: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
