@@ -160,20 +160,33 @@ export const useDiceSystem = (): UseDiceSystemReturn => {
 
   const getDiceSystemStatus = useCallback(async (): Promise<DiceSystemResult> => {
     try {
-      // Get today's roll count
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) {
+        return { success: false, error: "User not authenticated" };
+      }
+
+      // Get today's roll count with proper timezone handling
+      const today = new Date();
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+
       const { data: rollData, error: rollError } = await supabase
         .from('dice_roll_usage')
         .select('created_at, cooldown_expires_at')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-        .gte('created_at', new Date().toISOString().split('T')[0]) // Today
+        .eq('user_id', user.user.id)
+        .gte('created_at', todayStart.toISOString())
+        .lt('created_at', todayEnd.toISOString())
         .order('created_at', { ascending: false });
 
       if (rollError) {
+        console.error('Roll data fetch error:', rollError);
         return { success: false, error: rollError.message };
       }
 
       const todayRolls = rollData?.length || 0;
       const remainingRolls = Math.max(0, 3 - todayRolls);
+
+      console.log('Dice system status:', { todayRolls, remainingRolls, rollData });
 
       // Check cooldown
       const lastRoll = rollData?.[0];
@@ -192,7 +205,7 @@ export const useDiceSystem = (): UseDiceSystemReturn => {
       return {
         success: true,
         remaining_rolls: remainingRolls,
-        next_reset: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        next_reset: todayEnd.toISOString().split('T')[0]
       };
     } catch (error) {
       console.error('Status check failed:', error);

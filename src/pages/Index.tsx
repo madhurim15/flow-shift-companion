@@ -96,7 +96,8 @@ const Index = () => {
   };
 
   const handleCompletionContinue = () => {
-    setAppState("welcome");
+    // Reset to mood selection (not welcome screen)
+    setAppState("mood-selection");
     setSelectedMood(null);
     setCurrentAction("");
     setDiceRollId("");
@@ -106,13 +107,27 @@ const Index = () => {
   };
 
   const handleReset = () => {
+    setAppState("mood-selection");
     setSelectedMood(null);
     setCurrentAction("");
     setDiceRollId("");
     setCompletionResult(null);
     setPlannedDuration(0);
     setActualDuration(0);
-    setAppState("welcome");
+  };
+
+  // Daily nature background
+  const getDailyBackground = () => {
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+    const backgrounds = [
+      'nature-sunrise',
+      'nature-forest',
+      'nature-ocean',
+      'nature-mountain',
+      'nature-meadow',
+      'nature-sunset'
+    ];
+    return backgrounds[dayOfYear % backgrounds.length];
   };
 
   const handleBackToWelcome = () => {
@@ -163,7 +178,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+    <div className={`min-h-screen ${getDailyBackground()}`}>
       {shouldShowIntervention && (
         <DoomScrollingIntervention 
           isOpen={shouldShowIntervention}

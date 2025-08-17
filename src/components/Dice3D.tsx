@@ -23,26 +23,65 @@ const Dice3D: React.FC<Dice3DProps> = ({
   const [isRolling, setIsRolling] = useState(true);
   const [showAction, setShowAction] = useState(false);
 
+  // Generate pleasant rolling and result sounds
+  const playRollingSound = () => {
+    if (!soundEnabled) return;
+    
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Gentle rolling sound - soft sine wave with frequency modulation
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 2);
+    
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.1);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 2);
+    
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 2);
+  };
+
+  const playResultSound = () => {
+    if (!soundEnabled) return;
+    
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Pleasant chime sound - major chord
+    const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5
+    
+    frequencies.forEach((freq, index) => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+      
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.08, audioContext.currentTime + 0.1 + index * 0.1);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+      
+      oscillator.start(audioContext.currentTime + index * 0.1);
+      oscillator.stop(audioContext.currentTime + 1);
+    });
+  };
+
   useEffect(() => {
-    // Play rolling sound if enabled
-    if (soundEnabled) {
-      const audio = new Audio();
-      audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUYrTp66hVFApGn+DyvmwhBT2a1/DWeykELIHO8tiJOQcXaLvt559NEAxPqOPwtmMdBC2QzOzPeysCJH3K8dOLPwkSarsO+1scdC2QyuNpZJCKs4KFbrK1ZYx3p8O1VTFJ5WleH5nWkGOq5IxP7L0eGJ6OlHTRHzFJcGOPd2LE';
-      audio.play().catch(() => {}); // Ignore autoplay policy errors
-    }
+    playRollingSound();
 
     const rollTimer = setTimeout(() => {
       setIsRolling(false);
-      
-      // Play result sound if enabled
-      if (soundEnabled) {
-        const audio = new Audio();
-        audio.src = 'data:audio/wav;base64,UklGRhwBAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0Ya4AAADjD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycA==';
-        audio.play().catch(() => {});
-      }
-      
-      setTimeout(() => setShowAction(true), 200);
-    }, 3000); // 3 second roll duration
+      playResultSound();
+      setTimeout(() => setShowAction(true), 400);
+    }, 4000); // Increased to 4 seconds for gentler experience
 
     return () => clearTimeout(rollTimer);
   }, [soundEnabled]);
@@ -78,15 +117,14 @@ const Dice3D: React.FC<Dice3DProps> = ({
             {/* 3D Dice Animation */}
             <div className="flex justify-center py-8">
               <div
-                className={`text-8xl select-none transition-all duration-300 ${
+                className={`text-8xl select-none transition-all duration-1000 ${
                   isRolling
-                    ? "animate-spin dice-3d-rolling"
+                    ? "dice-gentle-roll"
                     : "dice-3d-settled animate-scale-in"
                 }`}
                 style={{
                   transformStyle: "preserve-3d",
-                  animationDuration: isRolling ? "0.3s" : undefined,
-                  filter: isRolling ? "blur(2px)" : "none",
+                  filter: isRolling ? "blur(1px)" : "none",
                 }}
               >
                 🎲
@@ -130,24 +168,37 @@ const Dice3D: React.FC<Dice3DProps> = ({
         </CardContent>
       </Card>
 
-      {/* CSS for 3D effects */}
+      {/* CSS for gentle 3D effects */}
       <style>{`
-        .dice-3d-rolling {
-          transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
-          animation: roll3d 0.3s linear infinite;
+        .dice-gentle-roll {
+          animation: gentleRoll 4s ease-in-out;
+          transform-origin: center;
         }
         
         .dice-3d-settled {
           transform: rotateX(15deg) rotateY(-15deg);
-          text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+          text-shadow: 2px 2px 8px rgba(0,0,0,0.2);
         }
         
-        @keyframes roll3d {
-          0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
-          25% { transform: rotateX(90deg) rotateY(90deg) rotateZ(90deg); }
-          50% { transform: rotateX(180deg) rotateY(180deg) rotateZ(180deg); }
-          75% { transform: rotateX(270deg) rotateY(270deg) rotateZ(270deg); }
-          100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg); }
+        @keyframes gentleRoll {
+          0% { 
+            transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(1); 
+          }
+          25% { 
+            transform: rotateX(180deg) rotateY(90deg) rotateZ(45deg) scale(1.1);
+          }
+          50% { 
+            transform: rotateX(360deg) rotateY(180deg) rotateZ(90deg) scale(1);
+          }
+          75% { 
+            transform: rotateX(540deg) rotateY(270deg) rotateZ(135deg) scale(1.05);
+          }
+          90% {
+            transform: rotateX(700deg) rotateY(350deg) rotateZ(170deg) scale(1.02);
+          }
+          100% { 
+            transform: rotateX(720deg) rotateY(360deg) rotateZ(180deg) scale(1);
+          }
         }
       `}</style>
     </div>

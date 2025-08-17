@@ -108,4 +108,97 @@
   .gentle-hover {
     @apply transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-lg;
   }
+
+  /* Daily Nature Backgrounds */
+  .nature-sunrise {
+    background: linear-gradient(135deg, 
+      hsl(45 100% 95%) 0%,
+      hsl(35 80% 90%) 25%,
+      hsl(25 70% 88%) 50%,
+      hsl(15 60% 92%) 75%,
+      hsl(210 40% 96%) 100%
+    );
+    animation: gentle-glow 20s ease-in-out infinite;
+  }
+
+  .nature-forest {
+    background: linear-gradient(135deg,
+      hsl(120 40% 95%) 0%,
+      hsl(110 35% 92%) 30%,
+      hsl(100 30% 90%) 60%,
+      hsl(90 25% 93%) 100%
+    );
+    animation: forest-sway 25s ease-in-out infinite;
+  }
+
+  .nature-ocean {
+    background: linear-gradient(135deg,
+      hsl(200 60% 95%) 0%,
+      hsl(190 50% 92%) 40%,
+      hsl(180 45% 90%) 70%,
+      hsl(170 40% 93%) 100%
+    );
+    animation: ocean-wave 18s ease-in-out infinite;
+  }
+
+  .nature-mountain {
+    background: linear-gradient(135deg,
+      hsl(220 30% 96%) 0%,
+      hsl(210 25% 94%) 35%,
+      hsl(200 20% 92%) 65%,
+      hsl(190 15% 95%) 100%
+    );
+    animation: mountain-mist 30s ease-in-out infinite;
+  }
+
+  .nature-meadow {
+    background: linear-gradient(135deg,
+      hsl(80 50% 95%) 0%,
+      hsl(70 45% 92%) 30%,
+      hsl(60 40% 90%) 60%,
+      hsl(50 35% 93%) 100%
+    );
+    animation: meadow-breeze 22s ease-in-out infinite;
+  }
+
+  .nature-sunset {
+    background: linear-gradient(135deg,
+      hsl(320 40% 95%) 0%,
+      hsl(310 35% 92%) 25%,
+      hsl(300 30% 90%) 50%,
+      hsl(290 25% 93%) 75%,
+      hsl(280 20% 96%) 100%
+    );
+    animation: sunset-fade 24s ease-in-out infinite;
+  }
+
+  @keyframes gentle-glow {
+    0%, 100% { filter: brightness(1) saturate(1); }
+    50% { filter: brightness(1.05) saturate(1.1); }
+  }
+
+  @keyframes forest-sway {
+    0%, 100% { filter: hue-rotate(0deg) brightness(1); }
+    50% { filter: hue-rotate(5deg) brightness(1.02); }
+  }
+
+  @keyframes ocean-wave {
+    0%, 100% { filter: hue-rotate(0deg) saturate(1); }
+    50% { filter: hue-rotate(-5deg) saturate(1.05); }
+  }
+
+  @keyframes mountain-mist {
+    0%, 100% { filter: blur(0px) brightness(1); }
+    50% { filter: blur(0.5px) brightness(1.03); }
+  }
+
+  @keyframes meadow-breeze {
+    0%, 100% { filter: brightness(1) contrast(1); }
+    50% { filter: brightness(1.02) contrast(1.02); }
+  }
+
+  @keyframes sunset-fade {
+    0%, 100% { filter: brightness(1) saturate(1); }
+    50% { filter: brightness(1.04) saturate(1.08); }
+  }
 }
