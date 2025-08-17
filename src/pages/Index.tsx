@@ -228,8 +228,8 @@ const Index = () => {
           <main className="container py-8">
             {appState === "mood-selection" && (
               <div className="space-y-6">
-                <DiceSystemStatus />
                 <MoodSelector onMoodSelect={handleMoodSelect} />
+                <DiceSystemStatus />
               </div>
             )}
           </main>
