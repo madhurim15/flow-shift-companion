@@ -109,36 +109,36 @@
     @apply transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-lg;
   }
 
-  /* Daily Nature Backgrounds */
+  /* Daily Nature Backgrounds - Enhanced Visibility */
   .nature-sunrise {
     background: linear-gradient(135deg, 
-      hsl(45 100% 95%) 0%,
-      hsl(35 80% 90%) 25%,
-      hsl(25 70% 88%) 50%,
-      hsl(15 60% 92%) 75%,
-      hsl(210 40% 96%) 100%
+      hsl(45 80% 92%) 0%,
+      hsl(35 70% 88%) 25%,
+      hsl(25 60% 85%) 50%,
+      hsl(15 50% 90%) 75%,
+      hsl(210 30% 94%) 100%
     );
-    animation: gentle-glow 20s ease-in-out infinite;
+    animation: gentle-glow 15s ease-in-out infinite;
   }
 
   .nature-forest {
     background: linear-gradient(135deg,
-      hsl(120 40% 95%) 0%,
-      hsl(110 35% 92%) 30%,
-      hsl(100 30% 90%) 60%,
-      hsl(90 25% 93%) 100%
+      hsl(120 30% 93%) 0%,
+      hsl(110 25% 90%) 30%,
+      hsl(100 20% 87%) 60%,
+      hsl(90 15% 91%) 100%
     );
-    animation: forest-sway 25s ease-in-out infinite;
+    animation: forest-sway 20s ease-in-out infinite;
   }
 
   .nature-ocean {
     background: linear-gradient(135deg,
-      hsl(200 60% 95%) 0%,
-      hsl(190 50% 92%) 40%,
-      hsl(180 45% 90%) 70%,
-      hsl(170 40% 93%) 100%
+      hsl(200 50% 93%) 0%,
+      hsl(190 40% 90%) 40%,
+      hsl(180 35% 87%) 70%,
+      hsl(170 30% 91%) 100%
     );
-    animation: ocean-wave 18s ease-in-out infinite;
+    animation: ocean-wave 14s ease-in-out infinite;
   }
 
   .nature-mountain {
@@ -174,17 +174,17 @@
 
   @keyframes gentle-glow {
     0%, 100% { filter: brightness(1) saturate(1); }
-    50% { filter: brightness(1.05) saturate(1.1); }
+    50% { filter: brightness(1.08) saturate(1.15); }
   }
 
   @keyframes forest-sway {
     0%, 100% { filter: hue-rotate(0deg) brightness(1); }
-    50% { filter: hue-rotate(5deg) brightness(1.02); }
+    50% { filter: hue-rotate(8deg) brightness(1.05); }
   }
 
   @keyframes ocean-wave {
     0%, 100% { filter: hue-rotate(0deg) saturate(1); }
-    50% { filter: hue-rotate(-5deg) saturate(1.05); }
+    50% { filter: hue-rotate(-8deg) saturate(1.1); }
   }
 
   @keyframes mountain-mist {

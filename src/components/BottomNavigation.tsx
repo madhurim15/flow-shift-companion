@@ -44,16 +44,27 @@ export const BottomNavigation = () => {
     <>
       {/* Tab Content Overlay */}
       {activeTab && (
-        <div className="fixed inset-0 z-40 bg-background/95 backdrop-blur-sm">
-          <div className="h-full overflow-auto pb-20">
-            {renderTabContent()}
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm animate-fade-in"
+            onClick={() => setActiveTab(null)}
+          />
+          
+          {/* Modal Content - Centered */}
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <div className="w-full max-w-md max-h-[80vh] bg-background/98 backdrop-blur-md rounded-2xl shadow-2xl border border-border/50 overflow-hidden pointer-events-auto animate-scale-in">
+              <div className="h-full overflow-auto">
+                {renderTabContent()}
+              </div>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Bottom Navigation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-border">
-        <div className="flex items-center justify-around px-4 py-2 max-w-md mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/98 backdrop-blur-md border-t border-border/50 shadow-lg">
+        <div className="flex items-center justify-around px-2 py-3 max-w-md mx-auto">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -64,9 +75,9 @@ export const BottomNavigation = () => {
                 key={tab.id}
                 variant="ghost"
                 size="sm"
-                className={`flex flex-col items-center gap-1 h-auto py-2 px-3 ${
-                  isActive ? 'bg-muted' : ''
-                } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted/50'}`}
+                className={`flex flex-col items-center gap-1 h-auto py-3 px-4 rounded-2xl transition-all duration-200 min-h-[60px] min-w-[60px] ${
+                  isActive ? 'bg-primary/10 scale-105' : ''
+                } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted/50 hover:scale-105 active:scale-95'}`}
                 onClick={() => handleTabClick(tab.id)}
                 disabled={isDisabled}
               >

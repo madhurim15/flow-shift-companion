@@ -10,6 +10,7 @@ import StreakDisplay from "@/components/StreakDisplay";
 import UserMenu from "@/components/UserMenu";
 import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { BackgroundIndicator } from "@/components/BackgroundIndicator";
 import { Button } from "@/components/ui/button";
 import { Timer, RotateCcw, Home } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -199,6 +200,7 @@ const Index = () => {
       
       {appState !== "welcome" && (
         <>
+          <BackgroundIndicator />
           <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between">
               <div className="flex items-center gap-4">
