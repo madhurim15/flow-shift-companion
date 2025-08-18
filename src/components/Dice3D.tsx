@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Volume2, VolumeX } from "lucide-react";
 
 interface Dice3DProps {
-  mood: { id: string; label: string; icon: React.ComponentType<{ className?: string }>; description: string };
+  mood: { id: string; label: string; emoji: string; description: string };
   action: string;
   diceRollId: string;
   onStartAction: (diceRollId: string, action: string, immediate?: boolean) => void;
@@ -128,8 +128,8 @@ const Dice3D: React.FC<Dice3DProps> = ({
           <div className="text-center space-y-6">
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Feeling</p>
-              <p className="text-lg font-medium flex items-center justify-center gap-2">
-                {mood.label.toLowerCase()} <mood.icon className="w-5 h-5" />
+              <p className="text-lg font-medium">
+                {mood.label.toLowerCase()} {mood.emoji}
               </p>
             </div>
 
