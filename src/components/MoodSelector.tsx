@@ -11,14 +11,14 @@ type Mood = {
 };
 
 const moods: Mood[] = [
+  { id: 'tired', label: 'Tired', emoji: '😪', description: 'Low energy, need rest' },
+  { id: 'stuck', label: 'Stuck', emoji: '🤯', description: "Don't know where to start" },
+  { id: 'bored', label: 'Bored', emoji: '😐', description: 'Nothing feels interesting' },
+  { id: 'guilty', label: 'Guilty', emoji: '😔', description: 'Been avoiding things' },
   { id: 'overwhelmed', label: 'Overwhelmed', emoji: '😵‍💫', description: 'Too much on my plate' },
   { id: 'anxious', label: 'Anxious', emoji: '😰', description: 'Worried about everything' },
-  { id: 'tired', label: 'Tired', emoji: '😪', description: 'Low energy, need rest' },
-  { id: 'bored', label: 'Bored', emoji: '😐', description: 'Nothing feels interesting' },
-  { id: 'stuck', label: 'Stuck', emoji: '🤯', description: "Don't know where to start" },
-  { id: 'guilty', label: 'Guilty', emoji: '😔', description: 'Been scrolling too much' },
-  { id: 'lazy', label: 'Lazy', emoji: '😴', description: 'Just want to do nothing today' },
-  { id: 'okay', label: 'Actually okay', emoji: '🙂', description: 'Just checking in' }
+  { id: 'motivated', label: 'Motivated', emoji: '🔥', description: 'Ready to take action' },
+  { id: 'avoidant', label: 'Avoidant', emoji: '😬', description: 'Putting things off' }
 ];
 
 type MoodSelectorProps = {

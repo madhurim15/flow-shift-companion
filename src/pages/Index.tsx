@@ -6,6 +6,7 @@ import Dice3D from "@/components/Dice3D";
 import ActionTimer from "@/components/ActionTimer";
 import CompletionCelebration from "@/components/CompletionCelebration";
 import DiceSystemStatus from "@/components/DiceSystemStatus";
+import StreakDisplay from "@/components/StreakDisplay";
 import UserMenu from "@/components/UserMenu";
 import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
 import { Button } from "@/components/ui/button";
@@ -63,11 +64,17 @@ const Index = () => {
     }
   };
 
-  const handleStartAction = (diceRollId: string, action: string) => {
-    // Determine planned duration based on action type
-    const duration = getDurationFromAction(action);
-    setPlannedDuration(duration);
-    setAppState("action-timer");
+  const handleStartAction = (diceRollId: string, action: string, immediate = false) => {
+    if (immediate) {
+      // Handle immediate completion
+      const duration = getDurationFromAction(action);
+      handleActionComplete(diceRollId, duration, 30); // 30 second "quick completion"
+    } else {
+      // Determine planned duration based on action type
+      const duration = getDurationFromAction(action);
+      setPlannedDuration(duration);
+      setAppState("action-timer");
+    }
   };
 
   const handleActionComplete = async (diceRollId: string, plannedDuration: number, actualDuration: number) => {
@@ -243,6 +250,7 @@ const Index = () => {
           <main className="container py-8">
             {appState === "mood-selection" && (
               <div className="space-y-6">
+                <StreakDisplay />
                 <MoodSelector onMoodSelect={handleMoodSelect} />
                 <DiceSystemStatus />
               </div>
