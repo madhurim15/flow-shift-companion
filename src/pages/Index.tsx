@@ -19,7 +19,7 @@ import { toast } from "@/hooks/use-toast";
 export type Mood = {
   id: string;
   label: string;
-  emoji: string;
+  icon: React.ComponentType<{ className?: string }>;
   description: string;
 };
 
@@ -214,8 +214,8 @@ const Index = () => {
                 {selectedMood && (
                   <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
                     <span>Currently:</span>
-                    <span className="font-medium text-foreground">
-                      {selectedMood.emoji} {selectedMood.label}
+                    <span className="font-medium text-foreground flex items-center gap-1">
+                      <selectedMood.icon className="w-4 h-4" /> {selectedMood.label}
                     </span>
                   </div>
                 )}

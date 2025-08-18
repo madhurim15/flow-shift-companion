@@ -2,23 +2,24 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { BatteryLow, HelpCircle, Coffee, Frown, Zap, AlertCircle, Flame, EyeOff } from 'lucide-react';
 
 type Mood = {
   id: string;
   label: string;
-  emoji: string;
+  icon: React.ComponentType<{ className?: string }>;
   description: string;
 };
 
 const moods: Mood[] = [
-  { id: 'tired', label: 'Tired', emoji: '😪', description: 'Low energy, need rest' },
-  { id: 'stuck', label: 'Stuck', emoji: '🤯', description: "Don't know where to start" },
-  { id: 'bored', label: 'Bored', emoji: '😐', description: 'Nothing feels interesting' },
-  { id: 'guilty', label: 'Guilty', emoji: '😔', description: 'Been avoiding things' },
-  { id: 'overwhelmed', label: 'Overwhelmed', emoji: '😵‍💫', description: 'Too much on my plate' },
-  { id: 'anxious', label: 'Anxious', emoji: '😰', description: 'Worried about everything' },
-  { id: 'motivated', label: 'Motivated', emoji: '🔥', description: 'Ready to take action' },
-  { id: 'avoidant', label: 'Avoidant', emoji: '😬', description: 'Putting things off' }
+  { id: 'tired', label: 'Tired', icon: BatteryLow, description: 'Low energy, need rest' },
+  { id: 'stuck', label: 'Stuck', icon: HelpCircle, description: "Don't know where to start" },
+  { id: 'bored', label: 'Bored', icon: Coffee, description: 'Nothing feels interesting' },
+  { id: 'guilty', label: 'Guilty', icon: Frown, description: 'Been avoiding things' },
+  { id: 'overwhelmed', label: 'Overwhelmed', icon: Zap, description: 'Too much on my plate' },
+  { id: 'anxious', label: 'Anxious', icon: AlertCircle, description: 'Worried about everything' },
+  { id: 'motivated', label: 'Motivated', icon: Flame, description: 'Ready to take action' },
+  { id: 'avoidant', label: 'Avoidant', icon: EyeOff, description: 'Putting things off' }
 ];
 
 type MoodSelectorProps = {
@@ -56,7 +57,7 @@ const MoodSelector = ({ onMoodSelect }: MoodSelectorProps) => {
             onClick={() => handleMoodClick(mood)}
           >
             <div className="text-center space-y-2">
-              <div className="text-2xl">{mood.emoji}</div>
+              <mood.icon className="w-6 h-6 mx-auto text-foreground" />
               <div className="font-medium text-sm">{mood.label}</div>
               <div className="text-xs text-muted-foreground">{mood.description}</div>
             </div>
