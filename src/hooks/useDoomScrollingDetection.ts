@@ -7,6 +7,8 @@ interface DoomScrollingPattern {
   totalTimeSpent: number;
   rapidReturns: number;
   lastInterventionTime: number;
+  dailyInterventionCount: number;
+  lastInterventionDate: string;
 }
 
 interface DoomScrollingDetectionResult {
@@ -14,6 +16,7 @@ interface DoomScrollingDetectionResult {
   shouldShowIntervention: boolean;
   pattern: DoomScrollingPattern;
   triggerIntervention: () => void;
+  dismissIntervention: () => void;
   resetPattern: () => void;
 }
 
@@ -21,17 +24,33 @@ const STORAGE_KEY = 'flowlight_doom_scrolling_pattern';
 const INTERVENTION_COOLDOWN = 30 * 60 * 1000; // 30 minutes
 const RAPID_RETURN_THRESHOLD = 5 * 60 * 1000; // 5 minutes
 const MIN_VISITS_FOR_DETECTION = 3;
+const MAX_INTERVENTIONS_PER_DAY = 5;
 
 export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
   const [pattern, setPattern] = useState<DoomScrollingPattern>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : {
+    const defaultPattern = {
       visitCount: 0,
       lastVisit: 0,
       totalTimeSpent: 0,
       rapidReturns: 0,
-      lastInterventionTime: 0
+      lastInterventionTime: 0,
+      dailyInterventionCount: 0,
+      lastInterventionDate: new Date().toDateString()
     };
+    
+    if (stored) {
+      const parsedPattern = JSON.parse(stored);
+      // Reset daily count if it's a new day
+      const today = new Date().toDateString();
+      if (parsedPattern.lastInterventionDate !== today) {
+        parsedPattern.dailyInterventionCount = 0;
+        parsedPattern.lastInterventionDate = today;
+      }
+      return { ...defaultPattern, ...parsedPattern };
+    }
+    
+    return defaultPattern;
   });
 
   const [sessionStartTime] = useState(Date.now());
@@ -84,6 +103,13 @@ export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
   useEffect(() => {
     const now = Date.now();
     const timeSinceLastIntervention = now - pattern.lastInterventionTime;
+    const today = new Date().toDateString();
+    
+    // Check if we've hit daily limit
+    if (pattern.lastInterventionDate === today && 
+        pattern.dailyInterventionCount >= MAX_INTERVENTIONS_PER_DAY) {
+      return;
+    }
     
     if (isLikelyDoomScrolling && 
         timeSinceLastIntervention > INTERVENTION_COOLDOWN && 
@@ -96,7 +122,7 @@ export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
       
       return () => clearTimeout(timer);
     }
-  }, [isLikelyDoomScrolling, pattern.lastInterventionTime, shouldShowIntervention]);
+  }, [isLikelyDoomScrolling, pattern.lastInterventionTime, pattern.dailyInterventionCount, pattern.lastInterventionDate, shouldShowIntervention]);
 
   const triggerIntervention = useCallback(() => {
     setShouldShowIntervention(true);
@@ -106,13 +132,30 @@ export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
     }));
   }, [updatePattern]);
 
+  const dismissIntervention = useCallback(() => {
+    setShouldShowIntervention(false);
+    const now = Date.now();
+    const today = new Date().toDateString();
+    
+    updatePattern(prev => ({
+      ...prev,
+      lastInterventionTime: now,
+      dailyInterventionCount: prev.lastInterventionDate === today 
+        ? prev.dailyInterventionCount + 1 
+        : 1,
+      lastInterventionDate: today
+    }));
+  }, [updatePattern]);
+
   const resetPattern = useCallback(() => {
     const resetData: DoomScrollingPattern = {
       visitCount: 0,
       lastVisit: 0,
       totalTimeSpent: 0,
       rapidReturns: 0,
-      lastInterventionTime: 0
+      lastInterventionTime: 0,
+      dailyInterventionCount: 0,
+      lastInterventionDate: new Date().toDateString()
     };
     setPattern(resetData);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(resetData));
@@ -131,16 +174,12 @@ export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
     }
   }, [resetPattern]);
 
-  // Close intervention when user dismisses
-  const handleInterventionClose = useCallback(() => {
-    setShouldShowIntervention(false);
-  }, []);
-
   return {
     isLikelyDoomScrolling,
     shouldShowIntervention,
     pattern,
     triggerIntervention,
-    resetPattern: handleInterventionClose
+    dismissIntervention,
+    resetPattern
   };
 };

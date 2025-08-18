@@ -18,7 +18,7 @@ const Focus = () => {
   const navigate = useNavigate();
   
   // Doom scrolling detection
-  const { shouldShowIntervention, resetPattern } = useDoomScrollingDetection();
+  const { shouldShowIntervention, dismissIntervention } = useDoomScrollingDetection();
 
   useEffect(() => {
     if (!user) {
@@ -84,7 +84,7 @@ const Focus = () => {
       {/* Doom Scrolling Intervention */}
       <DoomScrollingIntervention
         isOpen={shouldShowIntervention}
-        onClose={resetPattern}
+        onClose={dismissIntervention}
         onStartMoodCheck={() => navigate('/')}
       />
     </div>

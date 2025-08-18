@@ -35,7 +35,7 @@ const Index = () => {
   const [completionResult, setCompletionResult] = useState<CompletionResult | null>(null);
   const [plannedDuration, setPlannedDuration] = useState<number>(0);
   const [actualDuration, setActualDuration] = useState<number>(0);
-  const { shouldShowIntervention, resetPattern } = useDoomScrollingDetection();
+  const { shouldShowIntervention, dismissIntervention } = useDoomScrollingDetection();
   const { requestDiceRoll, completeAction, soundEnabled, setSoundEnabled } = useDiceSystem();
 
   useEffect(() => {
@@ -189,7 +189,7 @@ const Index = () => {
       {shouldShowIntervention && (
         <DoomScrollingIntervention 
           isOpen={shouldShowIntervention}
-          onClose={resetPattern}
+          onClose={dismissIntervention}
           onStartMoodCheck={handleStartMoodCheck}
         />
       )}
