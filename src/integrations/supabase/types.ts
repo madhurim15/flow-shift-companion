@@ -115,6 +115,60 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_journals: {
+        Row: {
+          created_at: string
+          entry: string
+          id: string
+          prompt: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry: string
+          id?: string
+          prompt?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry?: string
+          id?: string
+          prompt?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      daily_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          file_path: string
+          file_size: number | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       dice_roll_usage: {
         Row: {
           action_suggested: string
@@ -309,6 +363,36 @@ export type Database = {
           notifications_enabled?: boolean | null
           timezone?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      voice_notes: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          file_path: string
+          file_size: number | null
+          id: string
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          file_path: string
+          file_size?: number | null
+          id?: string
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          title?: string | null
           user_id?: string
         }
         Relationships: []

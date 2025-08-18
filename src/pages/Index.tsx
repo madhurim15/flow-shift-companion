@@ -9,6 +9,7 @@ import DiceSystemStatus from "@/components/DiceSystemStatus";
 import StreakDisplay from "@/components/StreakDisplay";
 import UserMenu from "@/components/UserMenu";
 import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
+import { BottomNavigation } from "@/components/BottomNavigation";
 import { Button } from "@/components/ui/button";
 import { Timer, RotateCcw, Home } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -247,7 +248,7 @@ const Index = () => {
             </div>
           </header>
           
-          <main className="container py-8">
+          <main className="container py-8 pb-24">
             {appState === "mood-selection" && (
               <div className="space-y-6">
                 <StreakDisplay />
@@ -256,6 +257,9 @@ const Index = () => {
               </div>
             )}
           </main>
+          
+          {/* Bottom Navigation */}
+          <BottomNavigation />
         </>
       )}
 
