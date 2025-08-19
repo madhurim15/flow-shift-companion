@@ -10,6 +10,7 @@ import StreakDisplay from "@/components/StreakDisplay";
 import UserMenu from "@/components/UserMenu";
 import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
 import { BottomNavigation } from "@/components/BottomNavigation";
+import { MainGoalInput } from "@/components/MainGoalInput";
 
 import { Button } from "@/components/ui/button";
 import { Timer, Home } from "lucide-react";
@@ -237,6 +238,7 @@ const Index = () => {
               <div className="space-y-6">
                 <StreakDisplay />
                 <MoodSelector onMoodSelect={handleMoodSelect} />
+                <MainGoalInput />
               </div>
             )}
           </main>
