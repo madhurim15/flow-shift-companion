@@ -27,7 +27,7 @@ export const MainGoalInput = ({ onGoalSet }: MainGoalInputProps) => {
         <Input
           id="main-goal"
           type="text"
-          placeholder="Focus word..."
+          placeholder=""
           value={goal}
           onChange={(e) => handleGoalChange(e.target.value)}
           className="text-center border-primary/30 focus:border-primary bg-background/50 placeholder:text-muted-foreground/60 w-48 text-sm"
