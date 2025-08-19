@@ -37,27 +37,54 @@ export const useDiceSystem = (): UseDiceSystemReturn => {
 
   const getActionForMood = useCallback((mood: string): string => {
     const normalizedMood = mood.trim().toLowerCase();
+    const capitalizedMood = mood.trim().charAt(0).toUpperCase() + mood.trim().slice(1).toLowerCase();
+    
+    // Add timestamp to improve randomization
+    const randomSeed = Math.random() * Date.now();
+    
+    console.log('🎲 Dice Roll Debug:', { 
+      originalMood: mood, 
+      normalizedMood, 
+      capitalizedMood, 
+      timestamp: Date.now() 
+    });
     
     // Check dice actions first (for stuck/overwhelmed)
     if (normalizedMood === "stuck" || normalizedMood === "overwhelmed") {
       const actions = diceActions[normalizedMood];
       if (actions && actions.length > 0) {
-        const randomIndex = Math.floor(Math.random() * Math.min(6, actions.length));
+        const randomIndex = Math.floor((randomSeed % 1) * actions.length);
+        console.log('🎯 DiceActions selected:', { mood: normalizedMood, actionIndex: randomIndex, totalActions: actions.length });
         return actions[randomIndex];
       }
     }
     
-    // Fallback to mood actions data
-    const moodActions = moodActionsData[mood as keyof typeof moodActionsData] || [];
+    // Fallback to mood actions data (using capitalized key)
+    const moodActions = moodActionsData[capitalizedMood as keyof typeof moodActionsData] || [];
     const actionsArray = Array.isArray(moodActions) ? moodActions : [];
     
+    console.log('📋 MoodActions data:', { 
+      capitalizedMood, 
+      foundActions: actionsArray.length,
+      availableKeys: Object.keys(moodActionsData)
+    });
+    
     if (actionsArray.length > 0) {
-      const randomIndex = Math.floor(Math.random() * Math.min(6, actionsArray.length));
+      const randomIndex = Math.floor((randomSeed % 1) * actionsArray.length);
+      console.log('🎯 MoodAction selected:', { mood: capitalizedMood, actionIndex: randomIndex, totalActions: actionsArray.length });
       return actionsArray[randomIndex];
     }
     
-    // Final fallback
-    return "Take a deep breath and try a tiny first step.";
+    // Final fallback with randomization to prevent same default
+    const fallbacks = [
+      "Take a deep breath and try a tiny first step.",
+      "Start with just 2 minutes on any task.",
+      "Change your environment and begin fresh.",
+      "Ask yourself: what feels easiest right now?"
+    ];
+    const fallbackIndex = Math.floor((randomSeed % 1) * fallbacks.length);
+    console.log('⚠️ Using fallback action:', fallbacks[fallbackIndex]);
+    return fallbacks[fallbackIndex];
   }, []);
 
   const requestDiceRoll = useCallback(async (mood: string) => {
