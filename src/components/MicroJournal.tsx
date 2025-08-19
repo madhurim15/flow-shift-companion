@@ -46,7 +46,12 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
     fetchRecentEntries();
   }, []);
 
+  useEffect(() => {
+    console.log('📝 Recent entries state:', recentEntries);
+  }, [recentEntries]);
+
   const fetchRecentEntries = async (offset = 0) => {
+    console.log('🔍 Fetching entries, offset:', offset);
     try {
       const { data, error } = await supabase
         .from('daily_journals')
@@ -55,7 +60,12 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
         .limit(5)
         .range(offset, offset + 4);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching entries:', error);
+        throw error;
+      }
+      
+      console.log('✅ Fetched entries:', data);
       
       if (offset === 0) {
         setRecentEntries(data || []);
@@ -167,8 +177,8 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
             </CardContent>
           </Card>
 
-          {/* Recent Entries */}
-          {recentEntries.length > 0 && (
+           {/* Recent Entries */}
+           {recentEntries.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <div className="h-px bg-border flex-1" />
@@ -183,11 +193,15 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
                   const shouldTruncate = !isExpanded && isLongEntry;
                   
                   return (
-                    <Card 
-                      key={journalEntry.id} 
-                      className="border-muted/50 bg-background/50 hover:bg-background/80 transition-all duration-200 cursor-pointer hover:shadow-md"
-                      onClick={() => setExpandedEntry(isExpanded ? null : journalEntry.id)}
-                    >
+                     <Card 
+                       key={journalEntry.id} 
+                       className="border-muted/50 bg-background/50 hover:bg-background/80 transition-all duration-200 cursor-pointer hover:shadow-md"
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         console.log('🖱️ Entry clicked:', journalEntry.id, 'Expanded:', expandedEntry);
+                         setExpandedEntry(isExpanded ? null : journalEntry.id);
+                       }}
+                     >
                       <CardContent className="p-4 space-y-3">
                         <div className="flex items-start justify-between gap-3">
                           <p className="text-sm text-muted-foreground font-medium leading-relaxed flex-1">
