@@ -28,7 +28,7 @@ const FocusSoundscape = ({ isTimerRunning, onSoundToggle }: FocusSoundscapeProps
       id: 'ocean',
       name: 'Ocean Waves',
       icon: Waves,
-      url: 'https://www.soundjay.com/misc/sounds/ocean-waves.mp3', // Placeholder - would use actual audio files
+      url: 'https://archive.org/download/OceanWavesAudio/OceanWaves.mp3',
       isActive: false,
       volume: 70
     },
@@ -36,7 +36,7 @@ const FocusSoundscape = ({ isTimerRunning, onSoundToggle }: FocusSoundscapeProps
       id: 'rain',
       name: 'Rain',
       icon: Cloud,
-      url: 'https://example.com/rain.mp3', // Placeholder
+      url: 'https://archive.org/download/RainSoundsRelaxing/RainSounds1Hour.mp3',
       isActive: false,
       volume: 60
     },
@@ -44,7 +44,7 @@ const FocusSoundscape = ({ isTimerRunning, onSoundToggle }: FocusSoundscapeProps
       id: 'campfire',
       name: 'Campfire',
       icon: Flame,
-      url: 'https://example.com/campfire.mp3', // Placeholder
+      url: 'https://archive.org/download/CampfireCrackling/CampfireCrackling.mp3',
       isActive: false,
       volume: 50
     },
@@ -52,7 +52,7 @@ const FocusSoundscape = ({ isTimerRunning, onSoundToggle }: FocusSoundscapeProps
       id: 'cafe',
       name: 'Café',
       icon: Coffee,
-      url: 'https://example.com/cafe.mp3', // Placeholder
+      url: 'https://archive.org/download/CoffeeshopAmbience/CoffeeshopAmbience.mp3',
       isActive: false,
       volume: 40
     },
@@ -60,7 +60,7 @@ const FocusSoundscape = ({ isTimerRunning, onSoundToggle }: FocusSoundscapeProps
       id: 'forest',
       name: 'Forest',
       icon: TreePine,
-      url: 'https://example.com/forest.mp3', // Placeholder
+      url: 'https://archive.org/download/ForestSounds/ForestSounds.mp3',
       isActive: false,
       volume: 55
     },
@@ -68,7 +68,7 @@ const FocusSoundscape = ({ isTimerRunning, onSoundToggle }: FocusSoundscapeProps
       id: 'whitenoise',
       name: 'White Noise',
       icon: Radio,
-      url: 'https://example.com/whitenoise.mp3', // Placeholder
+      url: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2q2EcBzuU2O+8bSEELIfJ89aTSQ4RT5zb8K5TEAmtVPjJZ2EQCEykdOSd8I2Si6HTg8eYT+HvzGl6fyc',
       isActive: false,
       volume: 45
     },
@@ -76,7 +76,7 @@ const FocusSoundscape = ({ isTimerRunning, onSoundToggle }: FocusSoundscapeProps
       id: 'binaural',
       name: 'Binaural',
       icon: Heart,
-      url: 'https://example.com/binaural.mp3', // Placeholder
+      url: 'https://archive.org/download/BinauralBeats40Hz/BinauralBeats40Hz.mp3',
       isActive: false,
       volume: 35
     },
@@ -84,7 +84,7 @@ const FocusSoundscape = ({ isTimerRunning, onSoundToggle }: FocusSoundscapeProps
       id: 'nature',
       name: 'Garden',
       icon: Leaf,
-      url: 'https://example.com/garden.mp3', // Placeholder
+      url: 'https://archive.org/download/BirdsSinging/BirdsSinging.mp3',
       isActive: false,
       volume: 50
     }
