@@ -24,14 +24,13 @@ const moods: Mood[] = [
 type MoodSelectorProps = {
   onMoodSelect: (mood: Mood) => void;
   firstName?: string;
+  selectedMoodId?: string | null;
 };
 
-const MoodSelector = ({ onMoodSelect, firstName }: MoodSelectorProps) => {
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+const MoodSelector = ({ onMoodSelect, firstName, selectedMoodId }: MoodSelectorProps) => {
 
   const handleMoodClick = (mood: Mood) => {
-    setSelectedMood(mood.id);
-    setTimeout(() => onMoodSelect(mood), 300);
+    onMoodSelect(mood);
   };
 
   return (
@@ -49,7 +48,7 @@ const MoodSelector = ({ onMoodSelect, firstName }: MoodSelectorProps) => {
           <Card
             key={mood.id}
             className={`p-4 cursor-pointer gentle-hover border-2 transition-all duration-300 ${
-              selectedMood === mood.id
+              selectedMoodId === mood.id
                 ? 'border-primary bg-primary/5 scale-95'
                 : 'border-border hover:border-primary/50'
             }`}

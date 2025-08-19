@@ -32,6 +32,7 @@ const Index = () => {
   } = useAuth();
   const [appState, setAppState] = useState<AppState>("welcome");
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
+  const [selectedMoodId, setSelectedMoodId] = useState<string | null>(null);
   const [currentAction, setCurrentAction] = useState<string>("");
   const [diceRollId, setDiceRollId] = useState<string>("");
   const [completionResult, setCompletionResult] = useState<CompletionResult | null>(null);
@@ -57,6 +58,7 @@ const Index = () => {
   };
   const handleMoodSelect = async (mood: Mood) => {
     setSelectedMood(mood);
+    setSelectedMoodId(mood.id);
 
     // Request dice roll from backend
     const {
@@ -68,8 +70,10 @@ const Index = () => {
       setDiceRollId(result.dice_roll_id);
       setAppState("dice-roll");
     } else {
-      // Handle error - stay on mood selection
-      // Toast already shown by useDiceSystem
+      // Handle error - stay on mood selection and reset selection after a brief delay
+      setTimeout(() => {
+        setSelectedMoodId(null);
+      }, 1000);
     }
   };
   const handleStartAction = (diceRollId: string, action: string, immediate = false) => {
@@ -112,6 +116,7 @@ const Index = () => {
     // Reset to mood selection (not welcome screen)
     setAppState("mood-selection");
     setSelectedMood(null);
+    setSelectedMoodId(null);
     setCurrentAction("");
     setDiceRollId("");
     setCompletionResult(null);
@@ -208,7 +213,7 @@ const Index = () => {
           <main className="container py-8 pb-24">
             {appState === "mood-selection" && <div className="space-y-6">
                 <DailyMantra />
-                <MoodSelector onMoodSelect={handleMoodSelect} firstName={user?.user_metadata?.full_name?.split(' ')[0]} />
+                <MoodSelector onMoodSelect={handleMoodSelect} firstName={user?.user_metadata?.full_name?.split(' ')[0]} selectedMoodId={selectedMoodId} />
                 <MainGoalInput />
               </div>}
           </main>
