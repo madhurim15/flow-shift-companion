@@ -167,27 +167,17 @@ const ActionTimer: React.FC<ActionTimerProps> = ({
               </Button>
             ) : isCompleted ? (
               <Button onClick={handleMarkDone} className="flex items-center gap-2 bg-primary">
-                ✅ Mark as Done
+                ✅ Done
               </Button>
             ) : (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={handlePause}
-                  className="flex items-center gap-2"
-                >
-                  <Pause size={16} />
-                  {isPaused ? "Resume" : "Pause"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleStop}
-                  className="flex items-center gap-2"
-                >
-                  <Square size={16} />
-                  Complete
-                </Button>
-              </>
+              <Button
+                variant="outline"
+                onClick={handlePause}
+                className="flex items-center gap-2"
+              >
+                <Pause size={16} />
+                {isPaused ? "Resume" : "Pause"}
+              </Button>
             )}
           </div>
 
