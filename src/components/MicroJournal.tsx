@@ -186,68 +186,81 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
                 <div className="h-px bg-border flex-1" />
               </div>
               
-              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+              <div className="space-y-3">
                 {recentEntries.map((journalEntry) => {
                   const isExpanded = expandedEntry === journalEntry.id;
-                  const isLongEntry = journalEntry.entry.length > 150;
+                  const isLongEntry = journalEntry.entry.length > 100;
                   const shouldTruncate = !isExpanded && isLongEntry;
                   
                   return (
                      <Card 
                        key={journalEntry.id} 
-                       className="border-muted/50 bg-background/50 hover:bg-background/80 transition-all duration-200 cursor-pointer hover:shadow-md"
-                       onClick={(e) => {
-                         e.stopPropagation();
-                         console.log('🖱️ Entry clicked:', journalEntry.id, 'Expanded:', expandedEntry);
-                         setExpandedEntry(isExpanded ? null : journalEntry.id);
-                       }}
+                       className={`border transition-all duration-200 hover:shadow-lg ${
+                         isExpanded ? 'border-primary bg-primary/5' : 'border-border bg-card hover:bg-accent/50'
+                       }`}
                      >
-                      <CardContent className="p-4 space-y-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <p className="text-sm text-muted-foreground font-medium leading-relaxed flex-1">
-                            {journalEntry.prompt}
-                          </p>
-                          {isLongEntry && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-6 w-6 p-0 shrink-0"
-                            >
-                              {isExpanded ? (
-                                <ChevronUp className="w-3 h-3" />
-                              ) : (
-                                <ChevronDown className="w-3 h-3" />
-                              )}
-                            </Button>
-                          )}
-                        </div>
-                        
-                        <div className="bg-muted/30 rounded-lg p-3">
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                            {shouldTruncate 
-                              ? `${journalEntry.entry.slice(0, 150)}...` 
-                              : journalEntry.entry
-                            }
-                          </p>
-                        </div>
-                        
-                        <div className="flex justify-between items-center pt-1">
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(journalEntry.created_at).toLocaleDateString('en-US', {
-                              weekday: 'short',
-                              month: 'short', 
-                              day: 'numeric',
-                              hour: 'numeric',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className="text-xs">
-                              {journalEntry.entry.length} chars
-                            </Badge>
-                            {isLongEntry && (
+                      <CardContent className="p-0">
+                        {/* Header - Always clickable */}
+                        <div 
+                          className="p-4 cursor-pointer select-none"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setExpandedEntry(isExpanded ? null : journalEntry.id);
+                          }}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-sm text-muted-foreground font-medium leading-relaxed flex-1">
+                              {journalEntry.prompt}
+                            </p>
+                            <div className="flex items-center gap-2 shrink-0">
                               <Badge variant="outline" className="text-xs">
-                                {isExpanded ? 'Click to collapse' : 'Click to expand'}
+                                {journalEntry.entry.length} chars
+                              </Badge>
+                              {isLongEntry && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0 hover:bg-primary/10"
+                                >
+                                  {isExpanded ? (
+                                    <ChevronUp className="w-4 h-4" />
+                                  ) : (
+                                    <ChevronDown className="w-4 h-4" />
+                                  )}
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Entry Content */}
+                        <div className="px-4 pb-4">
+                          <div className={`bg-muted/30 rounded-lg p-3 transition-all duration-200 ${
+                            isExpanded ? 'border border-primary/20' : ''
+                          }`}>
+                            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                              {shouldTruncate 
+                                ? `${journalEntry.entry.slice(0, 100)}...` 
+                                : journalEntry.entry
+                              }
+                            </p>
+                          </div>
+                          
+                          {/* Footer */}
+                          <div className="flex justify-between items-center pt-3">
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(journalEntry.created_at).toLocaleDateString('en-US', {
+                                weekday: 'short',
+                                month: 'short', 
+                                day: 'numeric',
+                                hour: 'numeric',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                            {isLongEntry && (
+                              <Badge variant={isExpanded ? "default" : "secondary"} className="text-xs">
+                                {isExpanded ? 'Expanded' : 'Click to expand'}
                               </Badge>
                             )}
                           </div>
