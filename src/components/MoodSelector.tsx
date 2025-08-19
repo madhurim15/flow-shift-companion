@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { MainGoalInput } from '@/components/MainGoalInput';
 
 type Mood = {
   id: string;
@@ -28,7 +27,6 @@ type MoodSelectorProps = {
 
 const MoodSelector = ({ onMoodSelect }: MoodSelectorProps) => {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
-  const [dailyGoal, setDailyGoal] = useState<string>('');
 
   const handleMoodClick = (mood: Mood) => {
     setSelectedMood(mood.id);
@@ -46,8 +44,6 @@ const MoodSelector = ({ onMoodSelect }: MoodSelectorProps) => {
             No judgment here—just checking in with you 💙
           </p>
         </div>
-        
-        <MainGoalInput onGoalSet={setDailyGoal} />
       </div>
       
       <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
