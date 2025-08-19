@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Send, BookOpen } from 'lucide-react';
+import { X, Send, BookOpen, ChevronDown, ChevronUp, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,6 +32,9 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
   const [entry, setEntry] = useState('');
   const [recentEntries, setRecentEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [expandedEntry, setExpandedEntry] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
   const [currentPrompt] = useState(() => 
     journalPrompts[Math.floor(Math.random() * journalPrompts.length)]
   );
@@ -43,19 +46,34 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
     fetchRecentEntries();
   }, []);
 
-  const fetchRecentEntries = async () => {
+  const fetchRecentEntries = async (offset = 0) => {
     try {
       const { data, error } = await supabase
         .from('daily_journals')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(3);
+        .limit(5)
+        .range(offset, offset + 4);
 
       if (error) throw error;
-      setRecentEntries(data || []);
+      
+      if (offset === 0) {
+        setRecentEntries(data || []);
+      } else {
+        setRecentEntries(prev => [...prev, ...(data || [])]);
+      }
+      
+      // Check if there are more entries
+      setHasMore((data || []).length === 5);
     } catch (error) {
       console.error('Error fetching entries:', error);
     }
+  };
+
+  const loadMoreEntries = async () => {
+    setLoadingMore(true);
+    await fetchRecentEntries(recentEntries.length);
+    setLoadingMore(false);
   };
 
   const handleSubmit = async () => {
@@ -113,8 +131,8 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto overscroll-bounce">
+        <div className="p-4 space-y-4 pb-6">
           {/* Current Entry */}
           <Card className="bg-gradient-to-br from-emerald-50/50 to-blue-50/30 dark:from-emerald-950/20 dark:to-blue-950/10 border-emerald-200/50 dark:border-emerald-800/30">
             <CardHeader className="pb-3">
@@ -158,33 +176,88 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
                 <div className="h-px bg-border flex-1" />
               </div>
               
-              <div className="space-y-3">
-                {recentEntries.map((journalEntry) => (
-                  <Card key={journalEntry.id} className="border-muted/50 bg-background/50 hover:bg-background/80 transition-colors">
-                    <CardContent className="p-4 space-y-3">
-                      <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                        {journalEntry.prompt}
-                      </p>
-                      <div className="bg-muted/30 rounded-lg p-3">
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                          {journalEntry.entry}
-                        </p>
-                      </div>
-                      <div className="flex justify-between items-center pt-1">
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(journalEntry.created_at).toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            month: 'short', 
-                            day: 'numeric'
-                          })}
-                        </p>
-                        <Badge variant="secondary" className="text-xs">
-                          {journalEntry.entry.length} chars
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                {recentEntries.map((journalEntry) => {
+                  const isExpanded = expandedEntry === journalEntry.id;
+                  const isLongEntry = journalEntry.entry.length > 150;
+                  const shouldTruncate = !isExpanded && isLongEntry;
+                  
+                  return (
+                    <Card 
+                      key={journalEntry.id} 
+                      className="border-muted/50 bg-background/50 hover:bg-background/80 transition-all duration-200 cursor-pointer hover:shadow-md"
+                      onClick={() => setExpandedEntry(isExpanded ? null : journalEntry.id)}
+                    >
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-sm text-muted-foreground font-medium leading-relaxed flex-1">
+                            {journalEntry.prompt}
+                          </p>
+                          {isLongEntry && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-6 w-6 p-0 shrink-0"
+                            >
+                              {isExpanded ? (
+                                <ChevronUp className="w-3 h-3" />
+                              ) : (
+                                <ChevronDown className="w-3 h-3" />
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                        
+                        <div className="bg-muted/30 rounded-lg p-3">
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                            {shouldTruncate 
+                              ? `${journalEntry.entry.slice(0, 150)}...` 
+                              : journalEntry.entry
+                            }
+                          </p>
+                        </div>
+                        
+                        <div className="flex justify-between items-center pt-1">
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(journalEntry.created_at).toLocaleDateString('en-US', {
+                              weekday: 'short',
+                              month: 'short', 
+                              day: 'numeric',
+                              hour: 'numeric',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="text-xs">
+                              {journalEntry.entry.length} chars
+                            </Badge>
+                            {isLongEntry && (
+                              <Badge variant="outline" className="text-xs">
+                                {isExpanded ? 'Click to collapse' : 'Click to expand'}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+                
+                {/* Load More Button */}
+                {hasMore && (
+                  <div className="pt-4 flex justify-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={loadMoreEntries}
+                      disabled={loadingMore}
+                      className="gap-2"
+                    >
+                      <MoreHorizontal className="w-4 h-4" />
+                      {loadingMore ? 'Loading...' : 'Load More Entries'}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           )}
