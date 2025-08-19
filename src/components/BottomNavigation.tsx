@@ -86,7 +86,6 @@ export const BottomNavigation = () => {
                   isActive ? 'bg-primary/10 scale-105' : ''
                 } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted/50 hover:scale-105 active:scale-95'}`}
                 onClick={() => handleTabClick(tab.id)}
-                disabled={isDisabled}
               >
                 <Icon className={`w-5 h-5 ${isActive ? tab.color : 'text-muted-foreground'}`} />
                 <span className={`text-xs ${isActive ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
