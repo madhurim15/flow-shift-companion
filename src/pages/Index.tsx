@@ -12,7 +12,7 @@ import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
 import { BottomNavigation } from "@/components/BottomNavigation";
 
 import { Button } from "@/components/ui/button";
-import { Timer, RotateCcw, Home } from "lucide-react";
+import { Timer, Home } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDoomScrollingDetection } from "@/hooks/useDoomScrollingDetection";
 import { useDiceSystem, CompletionResult } from "@/hooks/useDiceSystem";
@@ -115,15 +115,6 @@ const Index = () => {
     setActualDuration(0);
   };
 
-  const handleReset = () => {
-    setAppState("mood-selection");
-    setSelectedMood(null);
-    setCurrentAction("");
-    setDiceRollId("");
-    setCompletionResult(null);
-    setPlannedDuration(0);
-    setActualDuration(0);
-  };
 
   // Daily nature background
   const getDailyBackground = () => {
@@ -235,15 +226,6 @@ const Index = () => {
                   Focus Timer
                 </Button>
                 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleReset}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <RotateCcw size={16} />
-                  <span className="sr-only sm:not-sr-only sm:ml-2">Reset</span>
-                </Button>
                 
                 <UserMenu />
               </div>
