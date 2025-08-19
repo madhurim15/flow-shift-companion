@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Play, Pause, RotateCcw, Coffee, Focus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import FocusSoundscape from '@/components/FocusSoundscape';
 import { 
   startPomodoroSession, 
   completePomodoroSession, 
@@ -315,6 +316,13 @@ const PomodoroTimer = () => {
           )}
         </div>
       </Card>
+
+      {/* Focus Soundscape */}
+      {sessionType === 'focus' && (
+        <FocusSoundscape 
+          isTimerRunning={timerState === 'running'} 
+        />
+      )}
 
       {/* Encouraging Note */}
       <Card className="p-4 bg-flow-gentle/10 border-flow-gentle/20">
