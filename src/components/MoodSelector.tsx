@@ -23,9 +23,10 @@ const moods: Mood[] = [
 
 type MoodSelectorProps = {
   onMoodSelect: (mood: Mood) => void;
+  firstName?: string;
 };
 
-const MoodSelector = ({ onMoodSelect }: MoodSelectorProps) => {
+const MoodSelector = ({ onMoodSelect, firstName }: MoodSelectorProps) => {
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
 
   const handleMoodClick = (mood: Mood) => {
@@ -38,7 +39,7 @@ const MoodSelector = ({ onMoodSelect }: MoodSelectorProps) => {
       <div className="text-center space-y-4">
         <div className="space-y-2">
           <h2 className="text-2xl font-medium text-foreground">
-            How are you feeling right now?
+            How are you feeling{firstName ? `, ${firstName}` : ""}?
           </h2>
         </div>
       </div>

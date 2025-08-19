@@ -242,7 +242,10 @@ const Index = () => {
             {appState === "mood-selection" && (
               <div className="space-y-6">
                 <DailyMantra />
-                <MoodSelector onMoodSelect={handleMoodSelect} />
+                <MoodSelector 
+                  onMoodSelect={handleMoodSelect} 
+                  firstName={user?.user_metadata?.full_name?.split(' ')[0]} 
+                />
                 <MainGoalInput />
               </div>
             )}
