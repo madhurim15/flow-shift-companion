@@ -1,7 +1,9 @@
+
 import { useState } from 'react';
 import { BookOpen, Mic, Camera, Flame, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MicroJournal } from './MicroJournal';
 import { VoiceNotes } from './VoiceNotes';
 import { PhotoCapture } from './PhotoCapture';
@@ -46,7 +48,7 @@ export const BottomNavigation = () => {
   };
 
   return (
-    <>
+    <TooltipProvider>
       {/* Tab Content Overlay */}
       {activeTab && (
         <>
@@ -75,7 +77,7 @@ export const BottomNavigation = () => {
             const isActive = activeTab === tab.id;
             const isDisabled = tab.id === 'settings';
 
-            return (
+            const buttonElement = (
               <Button
                 key={tab.id}
                 variant="ghost"
@@ -97,9 +99,25 @@ export const BottomNavigation = () => {
                 )}
               </Button>
             );
+
+            // Wrap Advanced button with tooltip
+            if (isDisabled) {
+              return (
+                <Tooltip key={tab.id}>
+                  <TooltipTrigger asChild>
+                    {buttonElement}
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Coming Soon</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            }
+
+            return buttonElement;
           })}
         </div>
       </div>
-    </>
+    </TooltipProvider>
   );
 };
