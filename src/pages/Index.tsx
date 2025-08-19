@@ -203,8 +203,7 @@ const Index = () => {
                   onClick={handleBackToWelcome}
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  <Home size={18} className="mr-2" />
-                  FlowFocus
+                  <Home size={18} />
                 </Button>
                 
                 {selectedMood && (
@@ -215,6 +214,11 @@ const Index = () => {
                     </span>
                   </div>
                 )}
+              </div>
+              
+              {/* Centered Logo */}
+              <div className="absolute left-1/2 transform -translate-x-1/2">
+                <h1 className="text-lg font-semibold text-foreground">FlowFocus</h1>
               </div>
               
               <div className="flex items-center gap-2">
