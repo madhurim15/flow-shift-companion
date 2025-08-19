@@ -6,7 +6,7 @@ import Dice3D from "@/components/Dice3D";
 import ActionTimer from "@/components/ActionTimer";
 import CompletionCelebration from "@/components/CompletionCelebration";
 import DiceSystemStatus from "@/components/DiceSystemStatus";
-import StreakDisplay from "@/components/StreakDisplay";
+
 import UserMenu from "@/components/UserMenu";
 import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -236,7 +236,6 @@ const Index = () => {
           <main className="container py-8 pb-24">
             {appState === "mood-selection" && (
               <div className="space-y-6">
-                <StreakDisplay />
                 <MoodSelector onMoodSelect={handleMoodSelect} />
                 <MainGoalInput />
               </div>
