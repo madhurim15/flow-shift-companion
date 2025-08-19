@@ -7,6 +7,8 @@ import ActionTimer from "@/components/ActionTimer";
 import CompletionCelebration from "@/components/CompletionCelebration";
 import DiceSystemStatus from "@/components/DiceSystemStatus";
 import UserMenu from "@/components/UserMenu";
+import PomodoroModal from "@/components/PomodoroModal";
+import CalendarModal from "@/components/CalendarModal";
 import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { MainGoalInput } from "@/components/MainGoalInput";
@@ -180,10 +182,12 @@ const Index = () => {
           
           <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <Button variant="ghost" size="sm" onClick={handleBackToWelcome} className="text-muted-foreground hover:text-foreground">
                   <Home size={18} />
                 </Button>
+                
+                <CalendarModal />
                 
                 {selectedMood && <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
                     <span>Currently:</span>
@@ -199,12 +203,7 @@ const Index = () => {
               </div>
               
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate("/focus")} className="hidden sm:flex">
-                  <Timer size={16} className="mr-2" />
-                  Focus Timer
-                </Button>
-                
-                
+                <PomodoroModal />
                 <UserMenu />
               </div>
             </div>
