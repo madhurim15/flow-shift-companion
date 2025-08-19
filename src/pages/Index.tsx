@@ -11,6 +11,7 @@ import UserMenu from "@/components/UserMenu";
 import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { MainGoalInput } from "@/components/MainGoalInput";
+import { DailyMantra } from "@/components/DailyMantra";
 
 import { Button } from "@/components/ui/button";
 import { Timer, Home } from "lucide-react";
@@ -192,6 +193,7 @@ const Index = () => {
       
       {appState !== "welcome" && (
         <>
+          <DailyMantra />
           
           <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between">

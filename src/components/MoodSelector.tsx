@@ -40,9 +40,6 @@ const MoodSelector = ({ onMoodSelect }: MoodSelectorProps) => {
           <h2 className="text-2xl font-medium text-foreground">
             How are you feeling right now?
           </h2>
-          <p className="text-muted-foreground">
-            No judgment here—just checking in with you 💙
-          </p>
         </div>
       </div>
       
