@@ -28,66 +28,12 @@ const FocusSoundscape = ({ isTimerRunning, onSoundToggle }: FocusSoundscapeProps
       id: 'ocean',
       name: 'Ocean Waves',
       icon: Waves,
-      url: 'https://archive.org/download/OceanWavesAudio/OceanWaves.mp3',
+      url: 'https://www2.cs.uic.edu/~i101/SoundFiles/Ocean_Waves.wav', // Reliable university audio file
       isActive: false,
       volume: 70
-    },
-    {
-      id: 'rain',
-      name: 'Rain',
-      icon: Cloud,
-      url: 'https://archive.org/download/RainSoundsRelaxing/RainSounds1Hour.mp3',
-      isActive: false,
-      volume: 60
-    },
-    {
-      id: 'campfire',
-      name: 'Campfire',
-      icon: Flame,
-      url: 'https://archive.org/download/CampfireCrackling/CampfireCrackling.mp3',
-      isActive: false,
-      volume: 50
-    },
-    {
-      id: 'cafe',
-      name: 'Café',
-      icon: Coffee,
-      url: 'https://archive.org/download/CoffeeshopAmbience/CoffeeshopAmbience.mp3',
-      isActive: false,
-      volume: 40
-    },
-    {
-      id: 'forest',
-      name: 'Forest',
-      icon: TreePine,
-      url: 'https://archive.org/download/ForestSounds/ForestSounds.mp3',
-      isActive: false,
-      volume: 55
-    },
-    {
-      id: 'whitenoise',
-      name: 'White Noise',
-      icon: Radio,
-      url: 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D2q2EcBzuU2O+8bSEELIfJ89aTSQ4RT5zb8K5TEAmtVPjJZ2EQCEykdOSd8I2Si6HTg8eYT+HvzGl6fyc',
-      isActive: false,
-      volume: 45
-    },
-    {
-      id: 'binaural',
-      name: 'Binaural',
-      icon: Heart,
-      url: 'https://archive.org/download/BinauralBeats40Hz/BinauralBeats40Hz.mp3',
-      isActive: false,
-      volume: 35
-    },
-    {
-      id: 'nature',
-      name: 'Garden',
-      icon: Leaf,
-      url: 'https://archive.org/download/BirdsSinging/BirdsSinging.mp3',
-      isActive: false,
-      volume: 50
     }
+    // Other sounds temporarily hidden for testing
+    // Will add back once ocean waves works properly
   ]);
 
   const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
@@ -132,7 +78,18 @@ const FocusSoundscape = ({ isTimerRunning, onSoundToggle }: FocusSoundscapeProps
         const audio = audioRefs.current.get(soundId);
         if (audio) {
           if (!sound.isActive) {
-            // Start playing
+            // Stop all other sounds first (single selection)
+            prev.forEach(otherSound => {
+              if (otherSound.id !== soundId && otherSound.isActive) {
+                const otherAudio = audioRefs.current.get(otherSound.id);
+                if (otherAudio) {
+                  otherAudio.pause();
+                  otherAudio.currentTime = 0;
+                }
+              }
+            });
+            
+            // Start playing this sound
             audio.src = sound.url;
             audio.volume = (sound.volume / 100) * (masterVolume[0] / 100);
             audio.play().catch(err => {
@@ -146,6 +103,15 @@ const FocusSoundscape = ({ isTimerRunning, onSoundToggle }: FocusSoundscapeProps
         }
         onSoundToggle?.();
         return { ...sound, isActive: !sound.isActive };
+      }
+      // Deactivate all other sounds (single selection)
+      else if (prev.find(s => s.id === soundId)?.isActive === false && sound.isActive) {
+        const audio = audioRefs.current.get(sound.id);
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+        return { ...sound, isActive: false };
       }
       return sound;
     }));
@@ -245,7 +211,7 @@ const FocusSoundscape = ({ isTimerRunning, onSoundToggle }: FocusSoundscapeProps
                     size="sm"
                     onClick={() => toggleSound(sound.id)}
                     className="h-12 flex flex-col gap-1 p-2 text-xs"
-                    disabled={!isTimerRunning && sound.isActive} // Prevent starting sounds when timer is off
+                    disabled={!isTimerRunning && !sound.isActive} // Allow turning off active sounds, prevent starting new ones
                   >
                     <IconComponent className="h-3 w-3" />
                     <span className="text-[10px] leading-none">{sound.name}</span>
