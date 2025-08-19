@@ -193,7 +193,6 @@ const Index = () => {
       
       {appState !== "welcome" && (
         <>
-          <DailyMantra />
           
           <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between">
@@ -238,6 +237,7 @@ const Index = () => {
           <main className="container py-8 pb-24">
             {appState === "mood-selection" && (
               <div className="space-y-6">
+                <DailyMantra />
                 <MoodSelector onMoodSelect={handleMoodSelect} />
                 <MainGoalInput />
               </div>
