@@ -160,23 +160,13 @@ const Dice3D: React.FC<Dice3DProps> = ({
                   </p>
                 </div>
 
-                <div className="flex gap-3">
-                  <Button
-                    onClick={handleStartAction}
-                    className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
-                    size="lg"
-                  >
-                    🚀 Start Now
-                  </Button>
-                  <Button
-                    onClick={handleMarkDone}
-                    variant="outline"
-                    className="flex-1 border-primary/50 text-primary hover:bg-primary/10"
-                    size="lg"
-                  >
-                    ✅ Mark as Done
-                  </Button>
-                </div>
+                <Button
+                  onClick={handleStartAction}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                  size="lg"
+                >
+                  🚀 Start Now
+                </Button>
               </div>
             )}
 

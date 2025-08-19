@@ -25,6 +25,7 @@ const ActionTimer: React.FC<ActionTimerProps> = ({
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [actualDuration, setActualDuration] = useState(0);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -42,13 +43,13 @@ const ActionTimer: React.FC<ActionTimerProps> = ({
         setTimeRemaining(prev => {
           if (prev <= 1) {
             setIsRunning(false);
+            setIsCompleted(true);
             // Play completion sound
             if (soundEnabled) {
               const audio = new Audio();
               audio.src = 'data:audio/wav;base64,UklGRhwBAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0Ya4AAADjD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycOcPVUM+snDnD1VDPrJw5w9VQz6ycA==';
               audio.play().catch(() => {});
             }
-            onComplete(diceRollId, plannedDuration, actualDuration + 1);
             return 0;
           }
           return prev - 1;
@@ -71,10 +72,15 @@ const ActionTimer: React.FC<ActionTimerProps> = ({
 
   const handleStop = () => {
     setIsRunning(false);
+    setIsCompleted(true);
+  };
+
+  const handleMarkDone = () => {
     onComplete(diceRollId, plannedDuration, actualDuration);
   };
 
   const getTimerMessage = () => {
+    if (isCompleted) return "Great work! Ready to mark it as done?";
     if (!isRunning) return "Ready to start your focused session";
     if (isPaused) return "Paused - take a breath";
     if (timeRemaining <= 60) return "Almost there! Stay focused";
@@ -154,10 +160,14 @@ const ActionTimer: React.FC<ActionTimerProps> = ({
 
           {/* Controls */}
           <div className="flex justify-center gap-3">
-            {!isRunning ? (
+            {!isRunning && !isCompleted ? (
               <Button onClick={handleStart} className="flex items-center gap-2">
                 <Play size={16} />
                 Start Focus
+              </Button>
+            ) : isCompleted ? (
+              <Button onClick={handleMarkDone} className="flex items-center gap-2 bg-primary">
+                ✅ Mark as Done
               </Button>
             ) : (
               <>

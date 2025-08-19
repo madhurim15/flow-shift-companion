@@ -21,10 +21,10 @@ interface DoomScrollingDetectionResult {
 }
 
 const STORAGE_KEY = 'flowlight_doom_scrolling_pattern';
-const INTERVENTION_COOLDOWN = 30 * 60 * 1000; // 30 minutes
+const INTERVENTION_COOLDOWN = 2 * 60 * 60 * 1000; // 2 hours
 const RAPID_RETURN_THRESHOLD = 5 * 60 * 1000; // 5 minutes
-const MIN_VISITS_FOR_DETECTION = 3;
-const MAX_INTERVENTIONS_PER_DAY = 5;
+const MIN_VISITS_FOR_DETECTION = 8;
+const MAX_INTERVENTIONS_PER_DAY = 2;
 
 export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
   const [pattern, setPattern] = useState<DoomScrollingPattern>(() => {
@@ -97,7 +97,7 @@ export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
 
   // Determine if user is likely doom scrolling
   const isLikelyDoomScrolling = pattern.visitCount >= MIN_VISITS_FOR_DETECTION && 
-    (pattern.rapidReturns >= 2 || pattern.visitCount >= 5);
+    (pattern.rapidReturns >= 3 || pattern.visitCount >= 10);
 
   // Check if we should show intervention
   useEffect(() => {

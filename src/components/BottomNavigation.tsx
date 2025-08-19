@@ -11,17 +11,22 @@ type Tab = 'journal' | 'voice' | 'photo' | 'streak' | 'settings';
 
 export const BottomNavigation = () => {
   const [activeTab, setActiveTab] = useState<Tab | null>(null);
+  const [showAdvancedBadge, setShowAdvancedBadge] = useState(false);
 
   const tabs = [
     { id: 'journal' as Tab, icon: BookOpen, label: 'Journal', color: 'text-emerald-500' },
     { id: 'voice' as Tab, icon: Mic, label: 'Voice', color: 'text-blue-500' },
     { id: 'photo' as Tab, icon: Camera, label: 'Photo', color: 'text-purple-500' },
     { id: 'streak' as Tab, icon: Flame, label: 'Streak', color: 'text-orange-500' },
-    { id: 'settings' as Tab, icon: Settings, label: 'Settings', color: 'text-muted-foreground' },
+    { id: 'settings' as Tab, icon: Settings, label: 'Advanced', color: 'text-muted-foreground' },
   ];
 
   const handleTabClick = (tabId: Tab) => {
-    if (tabId === 'settings') return; // Disabled for MVP
+    if (tabId === 'settings') {
+      setShowAdvancedBadge(true);
+      setTimeout(() => setShowAdvancedBadge(false), 2000);
+      return;
+    }
     setActiveTab(activeTab === tabId ? null : tabId);
   };
 
@@ -85,9 +90,9 @@ export const BottomNavigation = () => {
                 <span className={`text-xs ${isActive ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
                   {tab.label}
                 </span>
-                {isDisabled && (
-                  <Badge variant="secondary" className="absolute -top-1 -right-1 text-xs px-1 py-0">
-                    Soon
+                {isDisabled && showAdvancedBadge && (
+                  <Badge variant="secondary" className="absolute -top-1 -right-1 text-xs px-1 py-0 animate-bounce">
+                    Coming Soon
                   </Badge>
                 )}
               </Button>
