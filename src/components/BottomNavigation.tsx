@@ -17,7 +17,7 @@ export const BottomNavigation = () => {
     { id: 'journal' as Tab, icon: BookOpen, label: 'Journal', color: 'text-emerald-500' },
     { id: 'voice' as Tab, icon: Mic, label: 'Voice', color: 'text-blue-500' },
     { id: 'photo' as Tab, icon: Camera, label: 'Photo', color: 'text-purple-500' },
-    { id: 'streak' as Tab, icon: Flame, label: 'Streak', color: 'text-orange-500' },
+    { id: 'streak' as Tab, icon: Flame, label: 'Streaks', color: 'text-orange-500' },
     { id: 'settings' as Tab, icon: Settings, label: 'Advanced', color: 'text-muted-foreground' },
   ];
 
