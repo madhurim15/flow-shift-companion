@@ -23,7 +23,11 @@ import {
 type TimerState = 'idle' | 'running' | 'paused';
 type SessionType = 'focus' | 'break';
 
-const PomodoroTimer = () => {
+interface PomodoroTimerProps {
+  onExitRequest?: () => void;
+}
+
+const PomodoroTimer = ({ onExitRequest }: PomodoroTimerProps) => {
   const [sessionType, setSessionType] = useState<SessionType>('focus');
   const [timeLeft, setTimeLeft] = useState(FOCUS_DURATION);
   const [timerState, setTimerState] = useState<TimerState>('idle');
@@ -153,6 +157,11 @@ const PomodoroTimer = () => {
     updateMessage();
   };
 
+  const exitTimer = async () => {
+    await resetTimer();
+    onExitRequest?.();
+  };
+
   const handleTimerComplete = async () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -208,6 +217,15 @@ const PomodoroTimer = () => {
   };
 
   const handleNavigationConfirm = () => {
+    setShowNavigationDialog(false);
+    if (blockedNavigation) {
+      blockedNavigation();
+    }
+    setBlockedNavigation(null);
+  };
+
+  const handleExitAndStop = async () => {
+    await resetTimer();
     setShowNavigationDialog(false);
     if (blockedNavigation) {
       blockedNavigation();
@@ -315,6 +333,20 @@ const PomodoroTimer = () => {
             </Button>
           )}
         </div>
+
+        {/* Exit Timer Button - Always Available */}
+        {onExitRequest && (
+          <div className="border-t pt-4">
+            <Button
+              onClick={exitTimer}
+              size="sm"
+              variant="ghost"
+              className="w-full text-muted-foreground"
+            >
+              Exit Timer
+            </Button>
+          </div>
+        )}
       </Card>
 
       {/* Focus Soundscape */}
@@ -343,10 +375,13 @@ const PomodoroTimer = () => {
               Leaving now won't help—you can stop after this tiny win. Your focus session is in progress and you're doing great!
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
             <AlertDialogCancel onClick={handleNavigationCancel}>
               Stay focused
             </AlertDialogCancel>
+            <Button variant="outline" onClick={handleExitAndStop}>
+              Stop timer & exit
+            </Button>
             <AlertDialogAction onClick={handleNavigationConfirm}>
               Leave anyway
             </AlertDialogAction>
