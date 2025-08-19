@@ -1,5 +1,3 @@
-import { Sparkles } from 'lucide-react';
-
 const mantras = [
   "Every small step counts towards your bigger dreams ✨",
   "Progress over perfection, always 🌱",
@@ -45,12 +43,10 @@ export const DailyMantra = () => {
   return (
     <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border-b border-border/50">
       <div className="container py-4">
-        <div className="flex items-center justify-center gap-3 text-center">
-          <Sparkles className="w-5 h-5 text-primary shrink-0" />
+        <div className="flex items-center justify-center text-center">
           <p className="text-sm font-medium text-foreground leading-relaxed max-w-2xl">
             {getDailyMantra()}
           </p>
-          <Sparkles className="w-5 h-5 text-primary shrink-0" />
         </div>
       </div>
     </div>
