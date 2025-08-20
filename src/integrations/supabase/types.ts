@@ -259,6 +259,39 @@ export type Database = {
         }
         Relationships: []
       }
+      nudge_responses: {
+        Row: {
+          completed_duration: number | null
+          created_at: string
+          effectiveness_rating: number | null
+          id: string
+          reminder_type: string
+          response_data: Json | null
+          response_type: string
+          user_id: string
+        }
+        Insert: {
+          completed_duration?: number | null
+          created_at?: string
+          effectiveness_rating?: number | null
+          id?: string
+          reminder_type: string
+          response_data?: Json | null
+          response_type: string
+          user_id: string
+        }
+        Update: {
+          completed_duration?: number | null
+          created_at?: string
+          effectiveness_rating?: number | null
+          id?: string
+          reminder_type?: string
+          response_data?: Json | null
+          response_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pomodoro_sessions: {
         Row: {
           actual_duration: number | null

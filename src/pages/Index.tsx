@@ -10,6 +10,7 @@ import UserMenu from "@/components/UserMenu";
 import PomodoroModal from "@/components/PomodoroModal";
 import CalendarModal from "@/components/CalendarModal";
 import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
+import NudgeResponseModal from "@/components/NudgeResponseModal";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { MainGoalInput } from "@/components/MainGoalInput";
 import { DailyMantra } from "@/components/DailyMantra";
@@ -17,8 +18,10 @@ import { Button } from "@/components/ui/button";
 import { Timer, Home } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDoomScrollingDetection } from "@/hooks/useDoomScrollingDetection";
+import { useReminderSystem } from "@/hooks/useReminderSystem";
 import { useDiceSystem, CompletionResult } from "@/hooks/useDiceSystem";
 import { toast } from "@/hooks/use-toast";
+import type { NudgeResponseType } from "@/data/nudgeResponses";
 export type Mood = {
   id: string;
   label: string;
@@ -44,6 +47,12 @@ const Index = () => {
     shouldShowIntervention,
     dismissIntervention
   } = useDoomScrollingDetection();
+  const {
+    showNudgeModal,
+    currentReminderType,
+    handleNudgeResponse,
+    closeNudgeModal
+  } = useReminderSystem();
   const {
     requestDiceRoll,
     completeAction,
@@ -124,6 +133,18 @@ const Index = () => {
     setCompletionResult(null);
     setPlannedDuration(0);
     setActualDuration(0);
+  };
+
+  const handleNudgeResponseSelect = async (responseType: NudgeResponseType, responseData?: any) => {
+    await handleNudgeResponse(responseType, responseData);
+    
+    // Handle specific response types
+    if (responseType === 'mood_check') {
+      // Trigger mood selection flow
+      setAppState("mood-selection");
+    }
+    
+    closeNudgeModal();
   };
 
   // Daily nature background
@@ -231,6 +252,16 @@ const Index = () => {
 
       {/* Completion Celebration Overlay */}
       {appState === "completion-celebration" && completionResult && <CompletionCelebration result={completionResult} action={currentAction} plannedDuration={plannedDuration} actualDuration={actualDuration} onContinue={handleCompletionContinue} soundEnabled={soundEnabled} />}
+
+      {/* Nudge Response Modal */}
+      {showNudgeModal && currentReminderType && (
+        <NudgeResponseModal
+          isOpen={showNudgeModal}
+          onClose={closeNudgeModal}
+          reminderType={currentReminderType}
+          onResponseSelect={handleNudgeResponseSelect}
+        />
+      )}
     </div>;
 };
 export default Index;

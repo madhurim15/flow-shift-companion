@@ -22,10 +22,10 @@ export const defaultReminderTimes = {
 };
 
 export const reminderMessages = {
-  morning: "Good morning! ✨ How are you feeling today?",
-  afternoon: "Afternoon check-in 🌤️ How's your day going?",
-  evening: "Evening reflection 🌅 How did today treat you?",
-  night: "Gentle night check 🌙 How are you before rest?"
+  morning: "Good morning! 🌅 What's one small thing that would make today feel meaningful?",
+  afternoon: "Midday check-in 🌱 How's your energy? Want to try a 2-minute reset?",
+  evening: "Day's winding down 🌆 How did you show up for yourself today?",
+  night: "Before you rest 🌙 What's one thing you're proud of today?"
 };
 
 export const getUserReminderSettings = async () => {
