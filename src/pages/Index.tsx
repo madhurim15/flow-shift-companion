@@ -27,7 +27,14 @@ export type Mood = {
 };
 type AppState = "welcome" | "mood-selection" | "dice-roll" | "action-timer" | "completion-celebration";
 const Index = () => {
-  const navigate = useNavigate();
+  let navigate: ReturnType<typeof useNavigate> | null = null;
+  
+  try {
+    navigate = useNavigate();
+  } catch (error) {
+    console.warn('Router context not available yet:', error);
+  }
+  
   const {
     user,
     loading
@@ -51,7 +58,7 @@ const Index = () => {
     setSoundEnabled
   } = useDiceSystem();
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !user && navigate) {
       navigate("/auth");
     }
   }, [user, loading, navigate]);
