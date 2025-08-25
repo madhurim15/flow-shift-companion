@@ -96,7 +96,7 @@ export const usePushNotifications = () => {
       if (!user) return;
 
       const { error } = await supabase
-        .from('fcm_tokens')
+        .from('fcm_tokens' as any)
         .upsert({
           user_id: user.id,
           token: token,
