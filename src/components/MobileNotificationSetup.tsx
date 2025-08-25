@@ -49,12 +49,12 @@ const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetu
         if ('serviceWorker' in navigator && isServiceWorkerReady) {
           const registration = await navigator.serviceWorker.ready;
           registration.showNotification('FlowLight Setup Complete! ✨', {
-          body: 'You\'ll now receive gentle reminders throughout your day',
-          icon: '/favicon.ico',
-          badge: '/favicon.ico',
-          tag: 'setup-complete',
-          requireInteraction: false
-        });
+            body: 'You\'ll now receive gentle reminders throughout your day',
+            icon: '/favicon.ico',
+            badge: '/favicon.ico',
+            tag: 'setup-complete',
+            requireInteraction: false
+          });
         }
       }
     } catch (error) {
