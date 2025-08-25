@@ -48,7 +48,7 @@ const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetu
         // Show welcome notification
         if ('serviceWorker' in navigator && isServiceWorkerReady) {
           const registration = await navigator.serviceWorker.ready;
-        registration.showNotification('FlowLight Setup Complete! ✨', {
+          registration.showNotification('FlowLight Setup Complete! ✨', {
           body: 'You\'ll now receive gentle reminders throughout your day',
           icon: '/favicon.ico',
           badge: '/favicon.ico',
