@@ -138,13 +138,36 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
   return permission === 'granted';
 };
 
-export const showNotification = (type: ReminderType) => {
+export const showNotification = async (type: ReminderType) => {
+  const message = reminderMessages[type];
+  
+  // Try service worker first (better for mobile/PWA)
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      await registration.showNotification('FlowLight Gentle Reminder', {
+        body: message,
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
+        tag: 'flowlight-reminder',
+        requireInteraction: true,
+        data: {
+          reminderType: type,
+          timestamp: Date.now()
+        }
+      });
+      return;
+    } catch (error) {
+      console.log('Service worker notification failed, falling back to basic notification:', error);
+    }
+  }
+  
+  // Fallback to basic notification
   if (Notification.permission === 'granted') {
-    new Notification('Flowlight Check-in', {
-      body: reminderMessages[type],
+    new Notification('FlowLight Gentle Reminder', {
+      body: message,
       icon: '/favicon.ico',
-      tag: `reminder-${type}`,
-      requireInteraction: true
+      tag: 'flowlight-reminder'
     });
   }
 };
