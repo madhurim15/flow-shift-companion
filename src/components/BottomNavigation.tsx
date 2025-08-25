@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { BookOpen, Mic, Camera, Flame, Settings } from 'lucide-react';
+import { BookOpen, Mic, Camera, Flame, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -8,8 +8,9 @@ import { MicroJournal } from './MicroJournal';
 import { VoiceNotes } from './VoiceNotes';
 import { PhotoCapture } from './PhotoCapture';
 import { EnhancedStreakDisplay } from './EnhancedStreakDisplay';
+import MobileNotificationSetup from './MobileNotificationSetup';
 
-type Tab = 'journal' | 'voice' | 'photo' | 'streak' | 'settings';
+type Tab = 'journal' | 'voice' | 'photo' | 'streak' | 'notifications';
 
 export const BottomNavigation = () => {
   const [activeTab, setActiveTab] = useState<Tab | null>(null);
@@ -20,15 +21,10 @@ export const BottomNavigation = () => {
     { id: 'voice' as Tab, icon: Mic, label: 'Voice', color: 'text-blue-500' },
     { id: 'photo' as Tab, icon: Camera, label: 'Photo', color: 'text-purple-500' },
     { id: 'streak' as Tab, icon: Flame, label: 'Streaks', color: 'text-orange-500' },
-    { id: 'settings' as Tab, icon: Settings, label: 'Advanced', color: 'text-muted-foreground' },
+    { id: 'notifications' as Tab, icon: Bell, label: 'Notifications', color: 'text-cyan-500' },
   ];
 
   const handleTabClick = (tabId: Tab) => {
-    if (tabId === 'settings') {
-      setShowAdvancedBadge(true);
-      setTimeout(() => setShowAdvancedBadge(false), 2000);
-      return;
-    }
     setActiveTab(activeTab === tabId ? null : tabId);
   };
 
@@ -42,6 +38,16 @@ export const BottomNavigation = () => {
         return <PhotoCapture onClose={() => setActiveTab(null)} />;
       case 'streak':
         return <EnhancedStreakDisplay onClose={() => setActiveTab(null)} />;
+      case 'notifications':
+        return (
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Notifications</h2>
+              <Button variant="ghost" size="sm" onClick={() => setActiveTab(null)}>✕</Button>
+            </div>
+            <MobileNotificationSetup onPermissionGranted={() => {}} />
+          </div>
+        );
       default:
         return null;
     }
@@ -75,43 +81,23 @@ export const BottomNavigation = () => {
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            const isDisabled = tab.id === 'settings';
 
             const buttonElement = (
               <Button
                 key={tab.id}
                 variant="ghost"
                 size="sm"
-                className={`flex flex-col items-center gap-1 h-auto py-3 px-4 rounded-2xl transition-all duration-200 min-h-[60px] min-w-[60px] ${
+                className={`flex flex-col items-center gap-1 h-auto py-3 px-4 rounded-2xl transition-all duration-200 min-h-[60px] min-w-[60px] hover:bg-muted/50 hover:scale-105 active:scale-95 ${
                   isActive ? 'bg-primary/10 scale-105' : ''
-                } ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted/50 hover:scale-105 active:scale-95'}`}
+                }`}
                 onClick={() => handleTabClick(tab.id)}
               >
                 <Icon className={`w-5 h-5 ${isActive ? tab.color : 'text-muted-foreground'}`} />
                 <span className={`text-xs ${isActive ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
                   {tab.label}
                 </span>
-                {isDisabled && showAdvancedBadge && (
-                  <Badge variant="secondary" className="absolute -top-1 -right-1 text-xs px-1 py-0 animate-bounce">
-                    Coming Soon
-                  </Badge>
-                )}
               </Button>
             );
-
-            // Wrap Advanced button with tooltip
-            if (isDisabled) {
-              return (
-                <Tooltip key={tab.id}>
-                  <TooltipTrigger asChild>
-                    {buttonElement}
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Coming Soon</p>
-                  </TooltipContent>
-                </Tooltip>
-              );
-            }
 
             return buttonElement;
           })}
