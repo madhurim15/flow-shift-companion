@@ -8,6 +8,7 @@ interface MobileNotificationSetupProps {
   onPermissionGranted: () => void;
 }
 
+// Mobile Notification Setup Component
 const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetupProps) => {
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
   const [isServiceWorkerReady, setIsServiceWorkerReady] = useState(false);
