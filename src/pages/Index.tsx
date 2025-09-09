@@ -22,6 +22,7 @@ import { useReminderSystem } from "@/hooks/useReminderSystem";
 import { useDiceSystem, CompletionResult } from "@/hooks/useDiceSystem";
 import { toast } from "@/hooks/use-toast";
 import type { NudgeResponseType } from "@/data/nudgeResponses";
+import Landing from "./Landing";
 export type Mood = {
   id: string;
   label: string;
@@ -59,11 +60,10 @@ const Index = () => {
     soundEnabled,
     setSoundEnabled
   } = useDiceSystem();
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate("/auth");
-    }
-  }, [user, loading, navigate]);
+  // Show landing page if not authenticated
+  if (!loading && !user) {
+    return <Landing onShowAuth={() => navigate('/auth')} />;
+  }
   const handleStart = () => {
     setAppState("mood-selection");
   };
@@ -191,8 +191,10 @@ const Index = () => {
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>;
   }
+
+  // Show landing page if not authenticated
   if (!user) {
-    return null;
+    return <Landing onShowAuth={() => navigate('/auth')} />;
   }
   return <div className={`min-h-screen ${getDailyBackground()}`}>
       {shouldShowIntervention && <DoomScrollingIntervention isOpen={shouldShowIntervention} onClose={dismissIntervention} onStartMoodCheck={handleStartMoodCheck} />}
