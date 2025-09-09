@@ -80,7 +80,7 @@ export default function Landing({ onShowAuth }: LandingProps) {
           
           <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 animate-fade-in-up">
             Productivity that 
-            <span className="flow-gradient bg-clip-text text-transparent"> flows </span>
+            <span className="flow-gradient"> flows </span>
             with your mood
           </h1>
           
