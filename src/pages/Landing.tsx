@@ -4,7 +4,20 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { WaitlistForm } from '@/components/WaitlistForm';
 import { WaitlistSuccess } from '@/components/WaitlistSuccess';
-import { CheckCircle, Target, Timer, Brain, Star, ArrowRight, Sparkles } from 'lucide-react';
+import { 
+  CheckCircle, 
+  Target, 
+  Timer, 
+  Brain, 
+  ArrowRight, 
+  Sparkles, 
+  Smartphone,
+  Heart,
+  Zap,
+  TrendingUp,
+  Clock,
+  Smile
+} from 'lucide-react';
 
 interface LandingProps {
   onShowAuth: () => void;
@@ -13,51 +26,12 @@ interface LandingProps {
 export default function Landing({ onShowAuth }: LandingProps) {
   const [showWaitlistSuccess, setShowWaitlistSuccess] = useState(false);
 
-  const features = [
-    {
-      icon: <Timer className="h-6 w-6 text-primary" />,
-      title: "Gentle Productivity",
-      description: "No harsh deadlines. Just mindful action and progress at your own pace."
-    },
-    {
-      icon: <Brain className="h-6 w-6 text-primary" />,
-      title: "Mood-Aware Flow",
-      description: "Actions that adapt to how you feel, making productivity sustainable and enjoyable."
-    },
-    {
-      icon: <Target className="h-6 w-6 text-primary" />,
-      title: "Bite-Sized Actions",
-      description: "Break overwhelm into manageable moments. Small steps, meaningful progress."
-    }
-  ];
-
-  const testimonials = [
-    {
-      name: "Sarah Chen",
-      role: "Creative Professional",
-      content: "FlowFocus helped me rediscover my love for creating without the burnout.",
-      rating: 5
-    },
-    {
-      name: "Michael Rodriguez",
-      role: "Software Developer",
-      content: "Finally, a productivity app that respects my mental health and energy levels.",
-      rating: 5
-    },
-    {
-      name: "Emma Thompson",
-      role: "Graduate Student",
-      content: "The mood-based approach changed how I tackle my studies completely.",
-      rating: 5
-    }
-  ];
-
   if (showWaitlistSuccess) {
     return <WaitlistSuccess onClose={() => setShowWaitlistSuccess(false)} />;
   }
 
   return (
-    <div className="min-h-screen nature-sunrise">
+    <div className="min-h-screen lavender-gradient">
       {/* Header */}
       <header className="container mx-auto px-4 py-6 flex justify-between items-center">
         <div className="flex items-center space-x-2">
@@ -72,150 +46,224 @@ export default function Landing({ onShowAuth }: LandingProps) {
       </header>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 text-center">
+      <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-4xl mx-auto">
-          <Badge variant="secondary" className="mb-6 animate-fade-in-up">
-            🌱 Gentle Productivity for Modern Life
+          <Badge variant="secondary" className="mb-6 animate-fade-in floating-animation">
+            🌱 Gentle Productivity Companion
           </Badge>
           
-          <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 animate-fade-in-up">
-            Productivity that 
-            <span className="flow-gradient"> flows </span>
-            with your mood
+          <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-8 animate-fade-in">
+            An accountability partner that{' '}
+            <span className="flow-gradient">understands you</span>
           </h1>
           
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-fade-in-up">
-            Stop fighting your energy. Start flowing with it. FlowFocus adapts to how you feel, 
-            turning productivity into a sustainable, enjoyable practice.
+          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in">
+            FlowFocus is a gentle productivity companion that works with your brain—not against it. 
+            <br className="hidden md:block" />
+            <strong>No guilt. No shame. Just smart nudges at the right time.</strong>
           </p>
 
-          <div className="animate-fade-in-up">
+          <div className="animate-fade-in mb-8">
             <WaitlistForm onSuccess={() => setShowWaitlistSuccess(true)} />
           </div>
 
-          <p className="text-sm text-muted-foreground mt-4">
-            Join 2,500+ mindful achievers. No spam, just gentle nudges.
+          <p className="text-sm text-muted-foreground">
+            Join 2,500+ people breaking the procrastination cycle. No spam, just gentle progress.
           </p>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
-            Productivity without the pressure
+      {/* Pain Point Section - NEW */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-12">
+            Still stuck in the <span className="text-primary">doomscroll spiral?</span>
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            FlowFocus respects your natural rhythms and energy levels, making progress feel effortless.
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          {features.map((feature, index) => (
-            <Card key={index} className="p-6 soft-shadow gentle-hover animate-fade-in-up">
-              <div className="mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                {feature.title}
-              </h3>
+          
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            <Card className="p-8 soft-shadow gentle-hover">
+              <Smartphone className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-3 text-foreground">The "5 Minute" Trap</h3>
               <p className="text-muted-foreground">
-                {feature.description}
+                You open your phone for "5 minutes" and lose an hour to endless scrolling.
               </p>
             </Card>
-          ))}
+            
+            <Card className="p-8 soft-shadow gentle-hover">
+              <Heart className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-3 text-foreground">Guilt Cycle</h3>
+              <p className="text-muted-foreground">
+                You feel guilty but can't break the cycle. The shame just makes it worse.
+              </p>
+            </Card>
+            
+            <Card className="p-8 soft-shadow gentle-hover">
+              <Timer className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-3 text-foreground">App Burnout</h3>
+              <p className="text-muted-foreground">
+                You've tried harsh productivity apps—only to uninstall them within days.
+              </p>
+            </Card>
+          </div>
+          
+          <div className="text-center">
+            <Badge variant="secondary" className="text-lg px-6 py-2">
+              💜 How FlowFocus helps
+            </Badge>
+          </div>
         </div>
       </section>
 
-      {/* Problem/Solution Section */}
-      <section className="container mx-auto px-4 py-16">
+      {/* Solution & Features Section - NEW 4-Card Grid */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+            Why FlowFocus is Different
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Most apps demand discipline. FlowFocus builds it gently.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          <Card className="p-6 soft-shadow gentle-hover group">
+            <div className="mb-4">
+              <Zap className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Personalized Nudges
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Sent at key moments when you need them most
+            </p>
+            <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
+          </Card>
+
+          <Card className="p-6 soft-shadow gentle-hover group">
+            <div className="mb-4">
+              <TrendingUp className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Dopamine Trade-Offs
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Replace mindless scrolling with tiny wins
+            </p>
+            <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
+          </Card>
+
+          <Card className="p-6 soft-shadow gentle-hover group">
+            <div className="mb-4">
+              <Smile className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Mood & Energy Tracker
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Understand your patterns, not punish yourself
+            </p>
+            <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
+          </Card>
+
+          <Card className="p-6 soft-shadow gentle-hover group">
+            <div className="mb-4">
+              <Target className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Long-term Goal Tracking
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Stay inspired with all-in-one simplicity
+            </p>
+            <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
+          </Card>
+        </div>
+      </section>
+
+      {/* Pricing Section - NEW */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-8">
+            Try FlowFocus Free
+          </h2>
+          
+          <Card className="p-8 soft-shadow">
+            <div className="mb-6">
+              <CheckCircle className="h-12 w-12 text-primary mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-foreground mb-2">
+                ✅ Join Waitlist → Be first to try our 14-day free trial
+              </h3>
+              <p className="text-muted-foreground">No credit card required</p>
+            </div>
+            
+            <div className="border-t pt-6">
+              <p className="text-lg text-muted-foreground mb-6">
+                After launch: just <strong>₹199/month (India)</strong> or <strong>$4.99/month (Global)</strong>
+              </p>
+              
+              <WaitlistForm onSuccess={() => setShowWaitlistSuccess(true)} />
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* Gentle Accountability Section - NEW */}
+      <section className="container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold text-foreground mb-6">
-                Tired of productivity apps that ignore how you feel?
+                Your gentle accountability partner for chronic procrastination
               </h2>
               <div className="space-y-4 text-muted-foreground">
                 <div className="flex items-start space-x-3">
-                  <div className="h-2 w-2 rounded-full bg-destructive mt-2 flex-shrink-0"></div>
-                  <p>Rigid schedules that don't account for low energy days</p>
+                  <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <p>Break long-term goal paralysis with bite-sized daily actions</p>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <div className="h-2 w-2 rounded-full bg-destructive mt-2 flex-shrink-0"></div>
-                  <p>Overwhelming task lists that create more anxiety</p>
+                  <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <p>Combat phone addiction with mindful intervention nudges</p>
                 </div>
                 <div className="flex items-start space-x-3">
-                  <div className="h-2 w-2 rounded-full bg-destructive mt-2 flex-shrink-0"></div>
-                  <p>Guilt when you can't stick to impossible standards</p>
+                  <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <p>Transform doomscrolling into intentional progress</p>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <p>No shame, no guilt - just supportive guidance</p>
                 </div>
               </div>
             </div>
             
-            <div>
-              <h3 className="text-2xl font-bold text-foreground mb-6">
-                FlowFocus works with your natural rhythms
+            <Card className="p-8 soft-shadow floating-animation">
+              <Brain className="h-16 w-16 text-primary mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-foreground mb-4 text-center">
+                Built for your brain, not against it
               </h3>
-              <div className="space-y-4 text-muted-foreground">
-                <div className="flex items-start space-x-3">
-                  <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <p>Mood-aware suggestions that match your energy</p>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <p>Gentle nudges that support, never pressure</p>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <CheckCircle className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                  <p>Progress tracking that celebrates small wins</p>
-                </div>
-              </div>
-            </div>
+              <p className="text-muted-foreground text-center">
+                FlowFocus understands that productivity isn't about forcing yourself into rigid systems. 
+                It's about working with your natural rhythms and energy patterns.
+              </p>
+            </Card>
           </div>
         </div>
       </section>
 
-      {/* Social Proof */}
-      <section className="container mx-auto px-4 py-16 bg-card/30 backdrop-blur-sm rounded-lg mx-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-foreground mb-4">
-            Loved by mindful achievers everywhere
-          </h2>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {testimonials.map((testimonial, index) => (
-            <Card key={index} className="p-6 soft-shadow gentle-hover">
-              <div className="flex items-center mb-4">
-                {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <p className="text-muted-foreground mb-4 italic">
-                "{testimonial.content}"
-              </p>
-              <div>
-                <p className="font-semibold text-foreground">{testimonial.name}</p>
-                <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="container mx-auto px-4 py-16 text-center">
+      {/* Final CTA Section */}
+      <section className="container mx-auto px-4 py-20 text-center">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl font-bold text-foreground mb-6">
-            Ready to find your flow?
-          </h2>
-          <p className="text-xl text-muted-foreground mb-8">
-            Join the waitlist for early access to gentle, sustainable productivity.
-          </p>
+          <blockquote className="text-3xl md:text-4xl font-bold text-foreground mb-12 italic">
+            "Don't fight procrastination alone. Let FlowFocus be your calm guide."
+          </blockquote>
           
-          <WaitlistForm onSuccess={() => setShowWaitlistSuccess(true)} />
+          <div className="mb-8">
+            <WaitlistForm onSuccess={() => setShowWaitlistSuccess(true)} />
+          </div>
           
-          <div className="flex items-center justify-center space-x-6 mt-8 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-primary" />
-              <span>14-day free trial</span>
+              <span>14-day free trial after launch</span>
             </div>
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-primary" />
@@ -232,7 +280,7 @@ export default function Landing({ onShowAuth }: LandingProps) {
       {/* Footer */}
       <footer className="container mx-auto px-4 py-8 border-t border-border/20">
         <div className="text-center text-muted-foreground">
-          <p>&copy; 2024 FlowFocus. Gentle productivity for mindful achievers.</p>
+          <p>&copy; 2025 FlowFocus. Built with 💜 and care.</p>
         </div>
       </footer>
     </div>

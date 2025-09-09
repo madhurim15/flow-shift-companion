@@ -9,7 +9,7 @@ interface WaitlistSuccessProps {
 }
 
 export function WaitlistSuccess({ onClose }: WaitlistSuccessProps) {
-  const shareText = "Just joined the FlowFocus waitlist! 🌱 Finally, a productivity app that works WITH your mood, not against it. Can't wait to try gentle, sustainable productivity! #FlowFocus #MindfulProductivity";
+  const shareText = "Just joined the FlowFocus waitlist! 🌱 Finally, a gentle accountability partner that understands chronic procrastination and works WITH your brain, not against it. No more doomscrolling guilt! #FlowFocus #GentleProductivity";
   const shareUrl = "https://flowfocus.app"; // Update with actual URL
 
   const handleTwitterShare = () => {
@@ -27,7 +27,7 @@ export function WaitlistSuccess({ onClose }: WaitlistSuccessProps) {
   };
 
   return (
-    <div className="min-h-screen nature-sunrise flex items-center justify-center p-4">
+    <div className="min-h-screen lavender-gradient flex items-center justify-center p-4">
       <Card className="max-w-lg w-full p-8 soft-shadow animate-fade-in-up text-center">
         <div className="mb-6">
           <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
