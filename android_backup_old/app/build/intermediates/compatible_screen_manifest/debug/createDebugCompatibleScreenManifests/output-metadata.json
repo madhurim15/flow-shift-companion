@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "COMPATIBLE_SCREEN_MANIFEST",
+    "kind": "Directory"
+  },
+  "applicationId": "app.lovable.a35e05c71a3c040e8bd0b8d3342281688",
+  "variantName": "debug",
+  "elements": []
+}

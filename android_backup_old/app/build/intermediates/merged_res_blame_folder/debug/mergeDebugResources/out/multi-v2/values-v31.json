@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.app-mergeDebugResources-28:/values-v31/values-v31.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\Asus\\.gradle\\caches\\transforms-4\\67040409c25dff58618f1af7fde8c7a7\\transformed\\jetified-core-splashscreen-1.0.1\\res\\values-v31\\values-v31.xml",
+                    "from": {
+                        "startLines": "2,9",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,473",
+                        "endLines": "8,13",
+                        "endColumns": "12,12",
+                        "endOffsets": "468,697"
+                    }
+                }
+            ]
+        }
+    ]
+}

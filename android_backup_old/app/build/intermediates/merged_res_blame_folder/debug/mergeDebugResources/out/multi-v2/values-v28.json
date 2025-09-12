@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.app-mergeDebugResources-28:/values-v28/values-v28.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\Asus\\.gradle\\caches\\transforms-4\\b9a7a00d4d487dfbfe7c4be7b90b0df9\\transformed\\appcompat-1.6.1\\res\\values-v28\\values-v28.xml",
+                    "from": {
+                        "startLines": "2,3,4,8",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,130,217,397",
+                        "endLines": "2,3,7,11",
+                        "endColumns": "74,86,12,12",
+                        "endOffsets": "125,212,392,584"
+                    }
+                }
+            ]
+        }
+    ]
+}

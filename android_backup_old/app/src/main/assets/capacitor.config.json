@@ -1,0 +1,19 @@
+{
+	"appId": "app.lovable.35e05c71a3c040e8bd0b8d3342281688",
+	"appName": "flowlight-app",
+	"webDir": "dist",
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 2000,
+			"backgroundColor": "#000000",
+			"showSpinner": false
+		},
+		"PushNotifications": {
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"alert"
+			]
+		}
+	}
+}

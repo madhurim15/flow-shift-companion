@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.app-mergeDebugResources-28:/values-watch-v21/values-watch-v21.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\Asus\\.gradle\\caches\\transforms-4\\b9a7a00d4d487dfbfe7c4be7b90b0df9\\transformed\\appcompat-1.6.1\\res\\values-watch-v21\\values-watch-v21.xml",
+                    "from": {
+                        "startLines": "2,6,10",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,271,499",
+                        "endLines": "5,9,13",
+                        "endColumns": "12,12,12",
+                        "endOffsets": "266,494,724"
+                    }
+                }
+            ]
+        }
+    ]
+}
