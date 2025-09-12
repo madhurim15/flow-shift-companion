@@ -12,7 +12,7 @@
         <activity
             android:exported="true"
             android:launchMode="singleTask"
-            android:name=".MainActivity"
+            android:name="app.lovable.flowlight.MainActivity"
             android:theme="@style/AppTheme.NoActionBarLaunch">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
