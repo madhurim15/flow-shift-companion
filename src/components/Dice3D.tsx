@@ -126,11 +126,16 @@ const Dice3D: React.FC<Dice3DProps> = ({
           </div>
 
           <div className="text-center space-y-6">
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Feeling</p>
-              <p className="text-lg font-medium">
-                {mood.label.toLowerCase()} {mood.emoji}
-              </p>
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Feeling</p>
+                <p className="text-lg font-medium">
+                  {mood.label.toLowerCase()} {mood.emoji}
+                </p>
+              </div>
+              <div className="text-xs text-muted-foreground max-w-xs mx-auto leading-relaxed">
+                We're rolling the dice to find the perfect micro-action to help you move forward while feeling {mood.label.toLowerCase()}. Each action is designed to match your current emotional state.
+              </div>
             </div>
 
             {/* 3D Dice Animation */}

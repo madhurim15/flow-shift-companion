@@ -43,21 +43,21 @@ const MoodSelector = ({ onMoodSelect, firstName, selectedMoodId }: MoodSelectorP
         </div>
       </div>
       
-      <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
+      <div className="grid grid-cols-2 gap-2 max-w-sm mx-auto">
         {moods.map((mood) => (
           <Card
             key={mood.id}
-            className={`p-4 cursor-pointer gentle-hover border-2 transition-all duration-300 ${
+            className={`p-3 cursor-pointer gentle-hover border-2 transition-all duration-300 ${
               selectedMoodId === mood.id
                 ? 'border-primary bg-primary/5 scale-95'
                 : 'border-border hover:border-primary/50'
             }`}
             onClick={() => handleMoodClick(mood)}
           >
-            <div className="text-center space-y-2">
-              <div className="text-2xl">{mood.emoji}</div>
-              <div className="font-medium text-sm">{mood.label}</div>
-              <div className="text-xs text-muted-foreground">{mood.description}</div>
+            <div className="text-center space-y-1">
+              <div className="text-lg">{mood.emoji}</div>
+              <div className="font-medium text-xs">{mood.label}</div>
+              <div className="text-[10px] text-muted-foreground leading-tight">{mood.description}</div>
             </div>
           </Card>
         ))}
