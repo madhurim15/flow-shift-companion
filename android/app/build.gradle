@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "app.lovable.a35e05c71a3c040e8bd0b8d3342281688"
+    namespace "app.lovable.flowlight"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "app.lovable.a35e05c71a3c040e8bd0b8d3342281688"
+        applicationId "app.lovable.flowlight"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
