@@ -6,6 +6,7 @@ import Dice3D from "@/components/Dice3D";
 import ActionTimer from "@/components/ActionTimer";
 import CompletionCelebration from "@/components/CompletionCelebration";
 import DiceSystemStatus from "@/components/DiceSystemStatus";
+import DiceRollsRemaining from "@/components/DiceRollsRemaining";
 import UserMenu from "@/components/UserMenu";
 import PomodoroModal from "@/components/PomodoroModal";
 import CalendarModal from "@/components/CalendarModal";
@@ -230,8 +231,8 @@ const Index = () => {
             </div>
           </header>
           
-          <main className="container py-8 pb-24">
-            {appState === "mood-selection" && <div className="space-y-6">
+          <main className="container py-4 pb-20 px-4">
+            {appState === "mood-selection" && <div className="space-y-4">
                 <DailyMantra />
                 <MoodSelector onMoodSelect={handleMoodSelect} firstName={user?.user_metadata?.full_name?.split(' ')[0]} selectedMoodId={selectedMoodId} />
                 <MainGoalInput />
@@ -262,6 +263,9 @@ const Index = () => {
           onResponseSelect={handleNudgeResponseSelect}
         />
       )}
+
+      {/* Dice Rolls Remaining Display */}
+      <DiceRollsRemaining show={appState === "completion-celebration"} />
     </div>;
 };
 export default Index;

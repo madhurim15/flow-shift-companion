@@ -217,9 +217,14 @@ serve(async (req) => {
             },
             data: data || {},
             android: {
+              priority: 'high',
               notification: {
                 icon: 'ic_notification',
-                click_action: 'FLUTTER_NOTIFICATION_CLICK'
+                click_action: 'FLUTTER_NOTIFICATION_CLICK',
+                priority: 'high',
+                visibility: 'public',
+                importance: 'high',
+                channel_id: 'high_importance_channel'
               }
             },
             apns: {

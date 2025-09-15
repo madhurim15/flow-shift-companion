@@ -3,6 +3,10 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Smartphone, Bell, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useLocalNotifications } from '@/hooks/useLocalNotifications';
+import { Capacitor } from '@capacitor/core';
 
 interface MobileNotificationSetupProps {
   onPermissionGranted: () => void;
@@ -13,77 +17,165 @@ const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetu
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermission>('default');
   const [isServiceWorkerReady, setIsServiceWorkerReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const { toast } = useToast();
+  const { isNative, requestPermissions, sendTestNotification } = usePushNotifications();
 
   useEffect(() => {
-    // Check if mobile
-    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    setIsMobile(isMobileDevice);
+    const initializeNotifications = async () => {
+      // Check if mobile or native
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || Capacitor.isNativePlatform();
+      setIsMobile(isMobileDevice);
 
-    // Check notification permission
-    if ('Notification' in window) {
-      setPermissionStatus(Notification.permission);
-    }
-
-    // Check service worker status
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then(() => {
+      if (isNative) {
+        // Native mobile - use Capacitor push notifications
         setIsServiceWorkerReady(true);
-      });
-    }
-  }, []);
+        setPermissionStatus('default');
+      } else {
+        // Web browser - check notification permission
+        if ('Notification' in window) {
+          setPermissionStatus(Notification.permission);
+        }
+
+        // Check service worker status
+        if ('serviceWorker' in navigator) {
+          try {
+            await navigator.serviceWorker.ready;
+            setIsServiceWorkerReady(true);
+          } catch (error) {
+            console.log('Service worker not ready');
+          }
+        }
+      }
+    };
+
+    initializeNotifications();
+  }, [isNative]);
 
   const requestNotificationPermission = async () => {
-    if (!('Notification' in window)) {
-      alert('This browser does not support notifications');
-      return;
-    }
-
     try {
-      const permission = await Notification.requestPermission();
-      setPermissionStatus(permission);
-      
-      if (permission === 'granted') {
-        onPermissionGranted();
+      if (isNative) {
+        // Use Capacitor push notifications for native
+        const granted = await requestPermissions();
+        if (granted) {
+          setPermissionStatus('granted');
+          toast({
+            title: "Notifications enabled!",
+            description: "You'll receive gentle reminders throughout the day.",
+          });
+          onPermissionGranted();
+        } else {
+          setPermissionStatus('denied');
+          toast({
+            title: "Permission denied",
+            description: "You can enable notifications in your device settings.",
+            variant: "destructive"
+          });
+        }
+      } else {
+        // Web browser notifications
+        if (!('Notification' in window)) {
+          toast({
+            title: "Not supported",
+            description: "This browser does not support notifications",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        const permission = await Notification.requestPermission();
+        setPermissionStatus(permission);
         
-        // Show welcome notification
-        if ('serviceWorker' in navigator && isServiceWorkerReady) {
-          const registration = await navigator.serviceWorker.ready;
-          registration.showNotification('FlowLight Setup Complete! ✨', {
-            body: 'You\'ll now receive gentle reminders throughout your day',
-            icon: '/favicon.ico',
-            badge: '/favicon.ico',
-            tag: 'setup-complete',
-            requireInteraction: false
+        if (permission === 'granted') {
+          onPermissionGranted();
+          
+          // Show welcome notification
+          if ('serviceWorker' in navigator && isServiceWorkerReady) {
+            const registration = await navigator.serviceWorker.ready;
+            registration.showNotification('FlowFocus Setup Complete! ✨', {
+              body: 'You\'ll now receive gentle reminders throughout your day',
+              icon: '/favicon.ico',
+              badge: '/favicon.ico',
+              tag: 'setup-complete',
+              requireInteraction: false
+            });
+          } else {
+            new Notification('FlowFocus Setup Complete! ✨', {
+              body: 'You\'ll now receive gentle reminders throughout your day',
+              icon: '/favicon.ico'
+            });
+          }
+          
+          toast({
+            title: "Notifications enabled!",
+            description: "You'll receive gentle reminders throughout the day.",
+          });
+        } else if (permission === 'denied') {
+          toast({
+            title: "Permission denied",
+            description: "You can enable notifications in your browser settings.",
+            variant: "destructive"
           });
         }
       }
     } catch (error) {
       console.error('Error requesting notification permission:', error);
+      toast({
+        title: "Error",
+        description: "Failed to enable notifications. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
-  const sendTestNotification = async () => {
-    if ('serviceWorker' in navigator && isServiceWorkerReady) {
-      const registration = await navigator.serviceWorker.ready;
-      registration.showNotification('FlowLight Test Notification 🧪', {
-        body: 'This is a test notification to make sure everything works!',
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        tag: 'test-notification',
-        requireInteraction: false
+  const handleTestNotification = async () => {
+    try {
+      if (isNative) {
+        // Use Capacitor test notification
+        await sendTestNotification();
+      } else {
+        // Web browser test notification
+        if ('serviceWorker' in navigator && isServiceWorkerReady) {
+          const registration = await navigator.serviceWorker.ready;
+          registration.showNotification('FlowFocus Test Notification 🧪', {
+            body: 'This is a test notification to make sure everything works!',
+            icon: '/favicon.ico',
+            badge: '/favicon.ico',
+            tag: 'test-notification',
+            requireInteraction: false
+          });
+        } else {
+          new Notification('FlowFocus Test Notification 🧪', {
+            body: 'This is a test notification to make sure everything works!',
+            icon: '/favicon.ico'
+          });
+        }
+        
+        toast({
+          title: "Test notification sent!",
+          description: "Check if you received the notification."
+        });
+      }
+    } catch (error) {
+      console.error('Error sending test notification:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send test notification.",
+        variant: "destructive"
       });
     }
   };
 
   const getStatusInfo = () => {
-    if (permissionStatus === 'granted' && isServiceWorkerReady) {
+    const isReady = isNative ? permissionStatus === 'granted' : (permissionStatus === 'granted' && isServiceWorkerReady);
+    
+    if (isReady) {
       return {
         status: 'ready',
         icon: CheckCircle,
         color: 'bg-green-50 border-green-200',
         textColor: 'text-green-800',
         title: 'Notifications Ready! 🎉',
-        description: 'You\'ll receive gentle reminders throughout your day'
+        description: isNative ? 'Native push notifications are enabled' : 'You\'ll receive gentle reminders throughout your day'
       };
     } else if (permissionStatus === 'denied') {
       return {
@@ -92,7 +184,7 @@ const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetu
         color: 'bg-red-50 border-red-200',
         textColor: 'text-red-800',
         title: 'Notifications Blocked',
-        description: 'Enable in browser settings to get reminders'
+        description: isNative ? 'Enable in device settings to get reminders' : 'Enable in browser settings to get reminders'
       };
     } else {
       return {
@@ -143,10 +235,10 @@ const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetu
           </Button>
         )}
 
-        {permissionStatus === 'granted' && isServiceWorkerReady && (
+        {(permissionStatus === 'granted' && (isNative || isServiceWorkerReady)) && (
           <Button
             variant="outline"
-            onClick={sendTestNotification}
+            onClick={handleTestNotification}
             className="w-full"
             size="sm"
           >
@@ -158,8 +250,9 @@ const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetu
       <div className="pt-2 border-t border-current border-opacity-20">
         <div className="text-xs space-y-1 opacity-70">
           <div>Status: {permissionStatus}</div>
-          <div>Service Worker: {isServiceWorkerReady ? 'Ready' : 'Loading...'}</div>
+          <div>Service Worker: {isNative ? 'Native App' : (isServiceWorkerReady ? 'Ready' : 'Loading...')}</div>
           <div>Device: {isMobile ? 'Mobile' : 'Desktop'}</div>
+          <div>Platform: {isNative ? 'Native' : 'Web'}</div>
         </div>
       </div>
     </Card>

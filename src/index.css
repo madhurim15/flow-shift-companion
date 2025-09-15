@@ -231,4 +231,21 @@
     0%, 100% { filter: brightness(1) saturate(1); }
     50% { filter: brightness(1.04) saturate(1.08); }
   }
+
+  /* Safe Area Utilities for Mobile */
+  .pt-safe-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  
+  .pb-safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  .h-safe-screen {
+    height: 100svh;
+  }
+  
+  .h-safe-content {
+    height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
 }
