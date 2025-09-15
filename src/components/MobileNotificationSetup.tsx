@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Smartphone, Bell, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useLocalNotifications } from '@/hooks/useLocalNotifications';
 import { Capacitor } from '@capacitor/core';
 
 interface MobileNotificationSetupProps {

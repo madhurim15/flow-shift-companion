@@ -12,6 +12,7 @@ import {
 } from '@/utils/reminderUtils';
 import { logNudgeResponse } from '@/utils/nudgeResponseUtils';
 import type { NudgeResponseType } from '@/data/nudgeResponses';
+import { useLocalNotifications } from '@/hooks/useLocalNotifications';
 
 export const useReminderSystem = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
