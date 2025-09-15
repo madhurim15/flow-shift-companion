@@ -23,6 +23,21 @@ export const useLocalNotifications = () => {
 
   const initializeLocalNotifications = async () => {
     try {
+      // Create high-importance notification channel for Android heads-up banners
+      if (Capacitor.getPlatform() === 'android') {
+        await LocalNotifications.createChannel({
+          id: 'flowlight_high',
+          name: 'FlowLight High Priority',
+          description: 'High priority notifications that appear as heads-up banners',
+          importance: 4, // IMPORTANCE_HIGH for heads-up display
+          visibility: 1, // VISIBILITY_PUBLIC
+          sound: 'default',
+          vibration: true,
+          lights: true,
+          lightColor: '#488AFF'
+        });
+      }
+
       const permission = await LocalNotifications.checkPermissions();
       
       setState(prev => ({
@@ -52,22 +67,24 @@ export const useLocalNotifications = () => {
     }
 
     try {
+      const notification: any = {
+        title,
+        body,
+        id: Math.floor(Math.random() * 100000),
+        schedule: { at: new Date(Date.now() + (delaySeconds * 1000)) },
+        extra: {
+          type: 'reminder',
+          timestamp: Date.now()
+        }
+      };
+
+      // Use high priority channel for Android heads-up banners
+      if (Capacitor.getPlatform() === 'android') {
+        notification.channelId = 'flowlight_high';
+      }
+
       await LocalNotifications.schedule({
-        notifications: [
-          {
-            title,
-            body,
-            id: Math.floor(Math.random() * 100000),
-            schedule: { at: new Date(Date.now() + (delaySeconds * 1000)) },
-            sound: undefined,
-            attachments: undefined,
-            actionTypeId: "",
-            extra: {
-              type: 'reminder',
-              timestamp: Date.now()
-            }
-          }
-        ]
+        notifications: [notification]
       });
       return true;
     } catch (error) {
