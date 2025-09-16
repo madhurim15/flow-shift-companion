@@ -20,19 +20,16 @@ export const usePushNotifications = () => {
   });
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (state.isNative) {
-      initializePushNotifications();
-    }
-  }, [state.isNative]);
+// Removed auto-initialization to avoid crashes on Android without FCM config
+// Previously initialized push notifications on native platforms here.
 
   const initializePushNotifications = async () => {
     try {
-      // Check permissions
+      if (!state.isNative) return;
+      // Check permissions only; do not auto-register to avoid Android crash without FCM config
       const permissionStatus = await PushNotifications.checkPermissions();
-      
+
       if (permissionStatus.receive === 'prompt') {
-        // Request permissions
         const result = await PushNotifications.requestPermissions();
         if (result.receive !== 'granted') {
           console.log('Push notification permission denied');
@@ -43,43 +40,8 @@ export const usePushNotifications = () => {
         return;
       }
 
-      // Register for push notifications
-      await PushNotifications.register();
-
-      // Listen for registration events
-      PushNotifications.addListener('registration', async (token) => {
-        console.log('Push registration success, token: ', token.value);
-        await saveFCMToken(token.value);
-        setState(prev => ({
-          ...prev,
-          isEnabled: true,
-          token: token.value,
-          isRegistered: true
-        }));
-      });
-
-      // Listen for registration errors
-      PushNotifications.addListener('registrationError', (error) => {
-        console.error('Error on registration: ', error);
-        toast({
-          title: "Push notification setup failed",
-          description: "Unable to register for push notifications",
-          variant: "destructive"
-        });
-      });
-
-      // Listen for push notifications received
-      PushNotifications.addListener('pushNotificationReceived', (notification) => {
-        console.log('Push notification received: ', notification);
-        // Handle foreground notifications if needed
-      });
-
-      // Listen for notification actions (when user taps)
-      PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-        console.log('Push notification action performed: ', notification);
-        // Handle notification tap actions
-      });
-
+      // Mark enabled (permission granted). Registration for token must be triggered explicitly elsewhere.
+      setState(prev => ({ ...prev, isEnabled: true }));
     } catch (error) {
       console.error('Error initializing push notifications:', error);
       toast({
@@ -127,11 +89,7 @@ export const usePushNotifications = () => {
     try {
       const result = await PushNotifications.requestPermissions();
       const granted = result.receive === 'granted';
-      
-      if (granted) {
-        await PushNotifications.register();
-      }
-      
+      // Do NOT auto-register here to avoid Android crash when FCM is not configured
       return granted;
     } catch (error) {
       console.error('Error requesting push permissions:', error);
