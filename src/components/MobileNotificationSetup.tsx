@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Smartphone, Bell, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useLocalNotifications } from '@/hooks/useLocalNotifications';
 import { Capacitor } from '@capacitor/core';
 
@@ -18,7 +17,8 @@ const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetu
   const [isServiceWorkerReady, setIsServiceWorkerReady] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { toast } = useToast();
-  const { isNative, requestPermissions, sendTestNotification } = usePushNotifications();
+  const localNotifications = useLocalNotifications();
+  const isNative = Capacitor.isNativePlatform();
 
   useEffect(() => {
     const initializeNotifications = async () => {
@@ -53,9 +53,10 @@ const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetu
 
   const requestNotificationPermission = async () => {
     try {
-      if (isNative) {
-        // Use Capacitor push notifications for native
-        const granted = await requestPermissions();
+      if (Capacitor.isNativePlatform()) {
+        // For native platforms, use local notifications only (safer)
+        await localNotifications.initLocalNotifications();
+        const granted = await localNotifications.requestPermissions();
         if (granted) {
           setPermissionStatus('granted');
           toast({
@@ -129,9 +130,25 @@ const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetu
 
   const handleTestNotification = async () => {
     try {
-      if (isNative) {
-        // Use Capacitor test notification
-        await sendTestNotification();
+      if (Capacitor.isNativePlatform()) {
+        // For native platforms, send a test local notification
+        const success = await localNotifications.scheduleHighPriorityReminder(
+          "Test Notification",
+          "FlowLight notifications are working! 🎉",
+          1 // 1 second delay
+        );
+        if (success) {
+          toast({
+            title: "Test notification scheduled",
+            description: "You should see a heads-up banner notification shortly",
+          });
+        } else {
+          toast({
+            title: "Test failed",
+            description: "Unable to schedule notification. Please check permissions.",
+            variant: "destructive"
+          });
+        }
       } else {
         // Web browser test notification
         if ('serviceWorker' in navigator && isServiceWorkerReady) {

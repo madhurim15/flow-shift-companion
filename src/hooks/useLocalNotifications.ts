@@ -15,13 +15,10 @@ export const useLocalNotifications = () => {
     hasPermission: false
   });
 
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      initializeLocalNotifications();
-    }
-  }, []);
+  // Removed auto-initialization to prevent Android crashes
+  // Local notifications will be initialized explicitly when user opts in
 
-  const initializeLocalNotifications = async () => {
+  const initLocalNotifications = async () => {
     try {
       // Create high-importance notification channel for Android heads-up banners
       if (Capacitor.getPlatform() === 'android') {
@@ -118,6 +115,7 @@ export const useLocalNotifications = () => {
   return {
     ...state,
     scheduleHighPriorityReminder,
-    requestPermissions
+    requestPermissions,
+    initLocalNotifications
   };
 };
