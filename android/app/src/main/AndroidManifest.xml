@@ -25,7 +25,7 @@
         <activity
             android:exported="true"
             android:launchMode="singleTask"
-            android:name="app.lovable.flowlight.MainActivity"
+            android:name="app.lovable.a35e05c71a3c040e8bd0b8d3342281688.MainActivity"
             android:theme="@style/AppTheme.NoActionBarLaunch">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
