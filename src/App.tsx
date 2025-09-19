@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Focus from "./pages/Focus";
 import Diagnostics from "./pages/Diagnostics";
+import PermissionHelper from "./pages/PermissionHelper";
 import NotFound from "./pages/NotFound";
 
 // Early startup logging for debugging
@@ -38,6 +39,10 @@ const router = createHashRouter([
   {
     path: "/diagnostics",
     element: <Diagnostics />
+  },
+  {
+    path: "/permission-helper",
+    element: <PermissionHelper />
   },
   {
     path: "*",

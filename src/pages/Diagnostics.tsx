@@ -217,7 +217,7 @@ const Diagnostics = () => {
 
             <Separator />
             
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button onClick={handleRequestPermissions} size="sm">
                 <Bell className="h-4 w-4 mr-2" />
                 Request Permissions
@@ -225,6 +225,9 @@ const Diagnostics = () => {
               <Button onClick={handleTestNotification} variant="outline" size="sm">
                 <TestTube className="h-4 w-4 mr-2" />
                 Test Notification
+              </Button>
+              <Button onClick={() => window.open('#/permission-helper', '_blank', 'noopener,noreferrer')} variant="outline" size="sm">
+                Open Permission Helper
               </Button>
             </div>
           </CardContent>

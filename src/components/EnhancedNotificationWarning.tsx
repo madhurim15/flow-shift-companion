@@ -168,6 +168,16 @@ const EnhancedNotificationWarning = ({
               Enable Notifications
             </Button>
           )}
+
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => window.open('#/permission-helper', '_blank', 'noopener,noreferrer')}
+            className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300"
+          >
+            <ExternalLink className="h-3 w-3 mr-1" />
+            Open Permission Helper
+          </Button>
           
           <Button 
             variant="outline" 
