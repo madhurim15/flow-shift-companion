@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import { useLocalNotifications } from './useLocalNotifications';
+import { SystemMonitoring } from '@/plugins/system-monitoring';
 
 export interface AppUsageSession {
   id?: string;
@@ -210,7 +211,8 @@ export const useSystemWideMonitoring = () => {
       .eq('app_package_name', appPackage)
       .single();
 
-    const threshold = appCategory?.mindful_threshold_minutes * 60 || 15 * 60; // default 15 minutes
+    const debug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debugMonitoring') === '1';
+    const threshold = debug ? 30 : (appCategory?.mindful_threshold_minutes ? appCategory.mindful_threshold_minutes * 60 : 15 * 60); // default 15 minutes or 30s in debug
 
     if (duration >= threshold) {
       await triggerIntervention(appPackage, psychState, sessionId);
@@ -327,6 +329,42 @@ export const useSystemWideMonitoring = () => {
       setState(prev => ({ ...prev, isMonitoring: true }));
     }
   }, []);
+
+  // Integrate with native SystemMonitoring plugin on Android
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    let listener: { remove: () => void } | undefined;
+
+    (async () => {
+      try {
+        await SystemMonitoring.requestPermissions();
+        await SystemMonitoring.startMonitoring();
+        setState(prev => ({ ...prev, isMonitoring: true }));
+
+        listener = await SystemMonitoring.addListener('appChanged', async ({ package: pkg, appName }) => {
+          try {
+            const current = state.currentSession?.app_package_name;
+            if (current && current !== pkg) {
+              await endAppSession(current);
+            }
+            if (!state.currentSession || state.currentSession.app_package_name !== pkg) {
+              await startAppSession(pkg, appName);
+            }
+          } catch (e) {
+            console.error('Error handling appChanged event', e);
+          }
+        });
+      } catch (e) {
+        console.error('SystemMonitoring init failed', e);
+      }
+    })();
+
+    return () => {
+      try { listener && listener.remove(); } catch {}
+      try { SystemMonitoring.stopMonitoring(); } catch {}
+    };
+  }, [state.currentSession, startAppSession, endAppSession]);
 
   return {
     ...state,
