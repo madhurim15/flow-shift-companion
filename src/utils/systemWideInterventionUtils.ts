@@ -1,0 +1,316 @@
+import { supabase } from '@/integrations/supabase/client';
+
+export type PsychologicalState = 'seeking_stimulation' | 'avoidance' | 'emotional_regulation' | 'impulse_driven';
+export type InterventionType = 'gentle_nudge' | 'alternative_offer' | 'reflection_prompt';
+export type AlternativeAction = 'mood_check' | 'journal' | 'breathing' | 'physical_break' | 'gratitude' | 'walk';
+
+export interface InterventionData {
+  id?: string;
+  user_id: string;
+  app_package_name: string;
+  detected_state: PsychologicalState;
+  intervention_type: InterventionType;
+  intervention_message: string;
+  user_response?: 'dismissed' | 'accepted_alternative' | 'reflected';
+  alternative_chosen?: AlternativeAction;
+  effectiveness_rating?: number;
+}
+
+// Psychology-first intervention messages based on detected state and context
+export const getInterventionMessage = (
+  state: PsychologicalState, 
+  type: InterventionType, 
+  appName?: string,
+  timeOfDay?: number
+): string => {
+  const isNightTime = timeOfDay ? (timeOfDay > 22 || timeOfDay < 6) : false;
+  const isEarlyMorning = timeOfDay ? (timeOfDay >= 6 && timeOfDay < 9) : false;
+  
+  const messages = {
+    seeking_stimulation: {
+      gentle_nudge: [
+        "Your mind seems restless - what are you really looking for? 💙",
+        "Feeling scattered? Sometimes our attention seeks what our heart needs 🌱",
+        "This scrolling energy - what if we channeled it into something creative? ✨"
+      ],
+      alternative_offer: [
+        "Want to try a 2-minute creative break instead? 🎨",
+        "Your mind is active - how about a quick journal check-in? 📝",
+        "Feeling understimulated? A few deep breaths might reset your focus 💨"
+      ],
+      reflection_prompt: [
+        "Take a breath - what would truly satisfy this need right now? ✨",
+        "What's your heart actually seeking in this moment? 💭",
+        "If this app disappeared, what would you want to do instead? 🤔"
+      ]
+    },
+    avoidance: {
+      gentle_nudge: [
+        "Feeling overwhelmed? Want to try a 2-minute reset instead? 🌱",
+        isNightTime ? "Late scrolling often means big feelings - want to check in? 🌙" : "This feels like avoidance energy - what's underneath? 💜",
+        "When we scroll to avoid, our feelings are asking for attention 🤗"
+      ],
+      alternative_offer: [
+        "When we avoid, we often need comfort. Want to journal what you're feeling? 📝",
+        "Sometimes movement helps when emotions feel stuck. Gentle stretch? 🧘‍♀️",
+        "What if we gave that feeling 2 minutes of kind attention instead? 💙"
+      ],
+      reflection_prompt: [
+        "What are you avoiding right now? Sometimes naming it helps 🌸",
+        "If this feeling could speak, what would it say? 💭",
+        "What's one small, kind thing you could do for yourself right now? ✨"
+      ]
+    },
+    emotional_regulation: {
+      gentle_nudge: [
+        "Your heart seems heavy. Want to check in with yourself? 💜",
+        isNightTime ? "Night emotions can feel so big - you're not alone 🌙" : "Big feelings deserve gentle attention 🌸",
+        "When emotions are intense, slowing down can help 🌱"
+      ],
+      alternative_offer: [
+        "When emotions are big, movement helps. Want to try a gentle stretch? 🧘‍♀️",
+        "Sometimes talking to yourself like a friend helps. Want to try? 💙",
+        "What if we breathed through this feeling together? 💨"
+      ],
+      reflection_prompt: [
+        "What emotion is asking for your attention right now? 🌸",
+        "If you could give this feeling a color and shape, what would it be? 🎨",
+        "What would you tell a friend feeling exactly this way? 🤗"
+      ]
+    },
+    impulse_driven: {
+      gentle_nudge: [
+        appName?.includes('shop') ? "Shopping when emotions are big - what are you really looking for? ✨" : "This impulse energy - let's pause and check in 💙",
+        isNightTime ? "Late-night impulses often mean we need comfort 🌙" : "Before acting on impulse, want to breathe together? 💨",
+        "What if this urge is pointing to a real need? 💭"
+      ],
+      alternative_offer: [
+        "Before you decide, want to take 3 deep breaths and ask what you really need? 💨",
+        "Sometimes we buy when we need to feel something. Want to journal instead? 📝",
+        "What if we tried a 2-minute mood check first? 💙"
+      ],
+      reflection_prompt: [
+        "What feeling is this impulse trying to fill? 💭",
+        "If money weren't involved, what would truly satisfy this need? ✨",
+        "What's the real hunger underneath this urge? 🌱"
+      ]
+    }
+  };
+
+  const stateMessages = messages[state];
+  const typeMessages = stateMessages[type];
+  
+  // Return random message from the appropriate category
+  return typeMessages[Math.floor(Math.random() * typeMessages.length)];
+};
+
+// Get suggested alternatives based on psychological state and time
+export const getSuggestedAlternatives = (
+  state: PsychologicalState,
+  timeOfDay?: number
+): { action: AlternativeAction; title: string; description: string; duration: string }[] => {
+  const isNightTime = timeOfDay ? (timeOfDay > 22 || timeOfDay < 6) : false;
+  const isEarlyMorning = timeOfDay ? (timeOfDay >= 6 && timeOfDay < 9) : false;
+
+  const baseAlternatives = {
+    seeking_stimulation: [
+      { action: 'journal' as AlternativeAction, title: 'Quick Check-in', description: 'What am I really looking for?', duration: '2 mins' },
+      { action: 'breathing' as AlternativeAction, title: 'Reset Breath', description: 'Calm the mental chatter', duration: '1 min' },
+      { action: 'mood_check' as AlternativeAction, title: 'Mood Pulse', description: 'How am I actually feeling?', duration: '30 secs' }
+    ],
+    avoidance: [
+      { action: 'journal' as AlternativeAction, title: 'Gentle Naming', description: 'What am I avoiding?', duration: '3 mins' },
+      { action: 'breathing' as AlternativeAction, title: 'Comfort Breathing', description: 'Breathe through the discomfort', duration: '2 mins' },
+      { action: 'mood_check' as AlternativeAction, title: 'Feeling Check', description: 'Name the emotion kindly', duration: '1 min' }
+    ],
+    emotional_regulation: [
+      { action: 'breathing' as AlternativeAction, title: 'Emotional Breathing', description: 'Breathe with the feeling', duration: '3 mins' },
+      { action: 'journal' as AlternativeAction, title: 'Feeling Journal', description: 'Give emotions space on paper', duration: '5 mins' },
+      { action: 'mood_check' as AlternativeAction, title: 'Heart Check-in', description: 'How is my heart right now?', duration: '1 min' }
+    ],
+    impulse_driven: [
+      { action: 'breathing' as AlternativeAction, title: 'Pause & Breathe', description: 'Three deep breaths first', duration: '1 min' },
+      { action: 'journal' as AlternativeAction, title: 'Real Need Check', description: 'What do I actually need?', duration: '3 mins' },
+      { action: 'mood_check' as AlternativeAction, title: 'Impulse Check', description: 'What feeling is driving this?', duration: '2 mins' }
+    ]
+  };
+
+  let alternatives = baseAlternatives[state];
+
+  // Add time-specific alternatives
+  if (isNightTime) {
+    alternatives.push({ 
+      action: 'gratitude' as AlternativeAction, 
+      title: 'Bedtime Gratitude', 
+      description: 'End with something beautiful', 
+      duration: '2 mins' 
+    });
+  }
+
+  if (isEarlyMorning) {
+    alternatives.push({ 
+      action: 'walk' as AlternativeAction, 
+      title: 'Morning Movement', 
+      description: 'Gentle start to the day', 
+      duration: '5 mins' 
+    });
+  }
+
+  return alternatives;
+};
+
+// Log intervention response
+export const logInterventionResponse = async (data: Omit<InterventionData, 'user_id'>) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
+  const { data: response, error } = await supabase
+    .from('psychological_interventions')
+    .insert({
+      user_id: user.id,
+      ...data
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return response;
+};
+
+// Update intervention with user response
+export const updateInterventionResponse = async (
+  interventionId: string,
+  response: 'dismissed' | 'accepted_alternative' | 'reflected',
+  alternative?: AlternativeAction,
+  effectivenessRating?: number
+) => {
+  const { data, error } = await supabase
+    .from('psychological_interventions')
+    .update({
+      user_response: response,
+      alternative_chosen: alternative,
+      effectiveness_rating: effectivenessRating
+    })
+    .eq('id', interventionId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+// Get user's intervention effectiveness insights
+export const getInterventionInsights = async (days: number = 30) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+
+  const { data, error } = await supabase
+    .from('psychological_interventions')
+    .select('*')
+    .eq('user_id', user.id)
+    .gte('created_at', startDate.toISOString())
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
+
+// Detect behavioral patterns
+export const detectBehavioralPattern = (
+  sessions: any[],
+  timeWindow: number = 24 * 60 * 60 * 1000 // 24 hours
+): 'rapid_switching' | 'endless_scrolling' | 'late_night_usage' | 'impulse_shopping' | null => {
+  if (!sessions.length) return null;
+
+  const now = Date.now();
+  const recentSessions = sessions.filter(s => 
+    now - new Date(s.created_at).getTime() < timeWindow
+  );
+
+  // Detect rapid app switching (3+ different apps in 30 minutes)
+  const thirtyMinutesAgo = now - (30 * 60 * 1000);
+  const recentApps = new Set(
+    recentSessions
+      .filter(s => new Date(s.created_at).getTime() > thirtyMinutesAgo)
+      .map(s => s.app_package_name)
+  );
+
+  if (recentApps.size >= 3) return 'rapid_switching';
+
+  // Detect endless scrolling (single app usage > 45 minutes)
+  const longSession = recentSessions.find(s => 
+    s.duration_seconds && s.duration_seconds > 45 * 60 &&
+    ['social', 'entertainment'].includes(s.app_category)
+  );
+
+  if (longSession) return 'endless_scrolling';
+
+  // Detect late night usage (after 11 PM)
+  const lateNightSession = recentSessions.find(s => {
+    const hour = new Date(s.session_start).getHours();
+    return hour >= 23 || hour < 6;
+  });
+
+  if (lateNightSession) return 'late_night_usage';
+
+  // Detect impulse shopping (multiple shopping apps in short time)
+  const shoppingSessions = recentSessions.filter(s => 
+    s.app_category === 'shopping'
+  );
+
+  if (shoppingSessions.length >= 2) return 'impulse_shopping';
+
+  return null;
+};
+
+// Update behavioral pattern in database
+export const updateBehavioralPattern = async (
+  patternType: 'rapid_switching' | 'endless_scrolling' | 'late_night_usage' | 'impulse_shopping',
+  successful = false
+) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
+  const { data: existing } = await supabase
+    .from('behavioral_patterns')
+    .select('*')
+    .eq('user_id', user.id)
+    .eq('pattern_type', patternType)
+    .single();
+
+  if (existing) {
+    const { data, error } = await supabase
+      .from('behavioral_patterns')
+      .update({
+        detected_frequency: existing.detected_frequency + 1,
+        last_detected: new Date().toISOString(),
+        successful_interventions: successful 
+          ? existing.successful_interventions + 1 
+          : existing.successful_interventions
+      })
+      .eq('id', existing.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } else {
+    const { data, error } = await supabase
+      .from('behavioral_patterns')
+      .insert({
+        user_id: user.id,
+        pattern_type: patternType,
+        detected_frequency: 1,
+        last_detected: new Date().toISOString(),
+        successful_interventions: successful ? 1 : 0
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+};

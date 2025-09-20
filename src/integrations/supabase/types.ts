@@ -85,6 +85,114 @@ export type Database = {
         }
         Relationships: []
       }
+      app_categories: {
+        Row: {
+          app_name: string | null
+          app_package_name: string
+          category: string
+          created_at: string
+          id: string
+          mindful_threshold_minutes: number | null
+          psychological_triggers: string[] | null
+        }
+        Insert: {
+          app_name?: string | null
+          app_package_name: string
+          category: string
+          created_at?: string
+          id?: string
+          mindful_threshold_minutes?: number | null
+          psychological_triggers?: string[] | null
+        }
+        Update: {
+          app_name?: string | null
+          app_package_name?: string
+          category?: string
+          created_at?: string
+          id?: string
+          mindful_threshold_minutes?: number | null
+          psychological_triggers?: string[] | null
+        }
+        Relationships: []
+      }
+      app_usage_sessions: {
+        Row: {
+          app_category: string | null
+          app_name: string | null
+          app_package_name: string
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          intervention_triggered: boolean | null
+          psychological_state: string | null
+          session_end: string | null
+          session_start: string
+          user_id: string
+        }
+        Insert: {
+          app_category?: string | null
+          app_name?: string | null
+          app_package_name: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          intervention_triggered?: boolean | null
+          psychological_state?: string | null
+          session_end?: string | null
+          session_start: string
+          user_id: string
+        }
+        Update: {
+          app_category?: string | null
+          app_name?: string | null
+          app_package_name?: string
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          intervention_triggered?: boolean | null
+          psychological_state?: string | null
+          session_end?: string | null
+          session_start?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      behavioral_patterns: {
+        Row: {
+          created_at: string
+          detected_frequency: number | null
+          id: string
+          improvement_trend: number | null
+          last_detected: string
+          pattern_type: string
+          successful_interventions: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          detected_frequency?: number | null
+          id?: string
+          improvement_trend?: number | null
+          last_detected?: string
+          pattern_type: string
+          successful_interventions?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          detected_frequency?: number | null
+          id?: string
+          improvement_trend?: number | null
+          last_detected?: string
+          pattern_type?: string
+          successful_interventions?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       check_in_reminders: {
         Row: {
           completed_at: string | null
@@ -388,6 +496,45 @@ export type Database = {
         }
         Relationships: []
       }
+      psychological_interventions: {
+        Row: {
+          alternative_chosen: string | null
+          app_package_name: string
+          created_at: string
+          detected_state: string
+          effectiveness_rating: number | null
+          id: string
+          intervention_message: string | null
+          intervention_type: string
+          user_id: string
+          user_response: string | null
+        }
+        Insert: {
+          alternative_chosen?: string | null
+          app_package_name: string
+          created_at?: string
+          detected_state: string
+          effectiveness_rating?: number | null
+          id?: string
+          intervention_message?: string | null
+          intervention_type: string
+          user_id: string
+          user_response?: string | null
+        }
+        Update: {
+          alternative_chosen?: string | null
+          app_package_name?: string
+          created_at?: string
+          detected_state?: string
+          effectiveness_rating?: number | null
+          id?: string
+          intervention_message?: string | null
+          intervention_type?: string
+          user_id?: string
+          user_response?: string | null
+        }
+        Relationships: []
+      }
       reminder_settings: {
         Row: {
           afternoon_time: string | null
@@ -454,6 +601,36 @@ export type Database = {
           id?: string
           title?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          first_name: string | null
+          id: string
+          referral_source: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_name?: string | null
+          id?: string
+          referral_source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_name?: string | null
+          id?: string
+          referral_source?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }

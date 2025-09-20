@@ -16,7 +16,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { MainGoalInput } from "@/components/MainGoalInput";
 import { DailyMantra } from "@/components/DailyMantra";
 import { Button } from "@/components/ui/button";
-import { Timer, Home } from "lucide-react";
+import { Timer, Home, Brain } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDoomScrollingDetection } from "@/hooks/useDoomScrollingDetection";
 import { useReminderSystem } from "@/hooks/useReminderSystem";

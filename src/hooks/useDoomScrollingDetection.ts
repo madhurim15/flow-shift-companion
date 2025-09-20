@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useSystemWideMonitoring } from './useSystemWideMonitoring';
+import { detectBehavioralPattern, updateBehavioralPattern } from '@/utils/systemWideInterventionUtils';
 
 interface DoomScrollingPattern {
   visitCount: number;
@@ -21,12 +23,14 @@ interface DoomScrollingDetectionResult {
 }
 
 const STORAGE_KEY = 'flowlight_doom_scrolling_pattern';
-const INTERVENTION_COOLDOWN = 2 * 60 * 60 * 1000; // 2 hours
-const RAPID_RETURN_THRESHOLD = 5 * 60 * 1000; // 5 minutes
-const MIN_VISITS_FOR_DETECTION = 8;
-const MAX_INTERVENTIONS_PER_DAY = 2;
+const INTERVENTION_COOLDOWN = 1 * 60 * 60 * 1000; // 1 hour (reduced from 2)
+const RAPID_RETURN_THRESHOLD = 3 * 60 * 1000; // 3 minutes (reduced from 5)
+const MIN_VISITS_FOR_DETECTION = 4; // Reduced from 8
+const MIN_CONTINUOUS_TIME = 15 * 60 * 1000; // 15 minutes continuous usage
+const MAX_INTERVENTIONS_PER_DAY = 4; // Increased from 2
 
 export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
+  const { getBehavioralInsights, triggerIntervention: systemWideIntervention } = useSystemWideMonitoring();
   const [pattern, setPattern] = useState<DoomScrollingPattern>(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     const defaultPattern = {
@@ -95,34 +99,64 @@ export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
     });
   }, []);
 
-  // Determine if user is likely doom scrolling
-  const isLikelyDoomScrolling = pattern.visitCount >= MIN_VISITS_FOR_DETECTION && 
-    (pattern.rapidReturns >= 3 || pattern.visitCount >= 10);
+  // Enhanced doom scrolling detection with time-based and system-wide monitoring
+  const isLikelyDoomScrolling = useCallback(() => {
+    // Local pattern detection (within FlowLight app)
+    const localDetection = pattern.visitCount >= MIN_VISITS_FOR_DETECTION && 
+      (pattern.rapidReturns >= 2 || pattern.visitCount >= 6);
+    
+    // Time-based detection (continuous usage)
+    const continuousUsage = pattern.totalTimeSpent > MIN_CONTINUOUS_TIME;
+    
+    return localDetection || continuousUsage;
+  }, [pattern]);
 
-  // Check if we should show intervention
+  const currentlyDoomScrolling = isLikelyDoomScrolling();
+
+  // Enhanced intervention checking with system-wide monitoring
   useEffect(() => {
-    const now = Date.now();
-    const timeSinceLastIntervention = now - pattern.lastInterventionTime;
-    const today = new Date().toDateString();
-    
-    // Check if we've hit daily limit
-    if (pattern.lastInterventionDate === today && 
-        pattern.dailyInterventionCount >= MAX_INTERVENTIONS_PER_DAY) {
-      return;
-    }
-    
-    if (isLikelyDoomScrolling && 
-        timeSinceLastIntervention > INTERVENTION_COOLDOWN && 
-        !shouldShowIntervention) {
+    const checkForSystemWideIntervention = async () => {
+      const now = Date.now();
+      const timeSinceLastIntervention = now - pattern.lastInterventionTime;
+      const today = new Date().toDateString();
       
-      // Delay intervention slightly to not interrupt immediate navigation
-      const timer = setTimeout(() => {
-        setShouldShowIntervention(true);
-      }, 3000);
+      // Check if we've hit daily limit
+      if (pattern.lastInterventionDate === today && 
+          pattern.dailyInterventionCount >= MAX_INTERVENTIONS_PER_DAY) {
+        return;
+      }
       
-      return () => clearTimeout(timer);
-    }
-  }, [isLikelyDoomScrolling, pattern.lastInterventionTime, pattern.dailyInterventionCount, pattern.lastInterventionDate, shouldShowIntervention]);
+      if (currentlyDoomScrolling && 
+          timeSinceLastIntervention > INTERVENTION_COOLDOWN && 
+          !shouldShowIntervention) {
+        
+        // Get recent behavioral data from system-wide monitoring
+        const recentSessions = await getBehavioralInsights(1); // Last day
+        const detectedPattern = detectBehavioralPattern(recentSessions);
+        
+        // Update behavioral pattern if detected
+        if (detectedPattern) {
+          await updateBehavioralPattern(detectedPattern);
+        }
+        
+        // Trigger psychology-first intervention
+        await systemWideIntervention(
+          'com.lovable.flowlight', // FlowLight app package
+          'avoidance', // Doom scrolling is typically avoidance behavior
+          'session_' + Date.now()
+        );
+        
+        // Delay intervention slightly to not interrupt immediate navigation
+        const timer = setTimeout(() => {
+          setShouldShowIntervention(true);
+        }, 2000); // Reduced from 3 seconds
+        
+        return () => clearTimeout(timer);
+      }
+    };
+
+    checkForSystemWideIntervention();
+  }, [currentlyDoomScrolling, pattern.lastInterventionTime, pattern.dailyInterventionCount, pattern.lastInterventionDate, shouldShowIntervention, getBehavioralInsights, systemWideIntervention]);
 
   const triggerIntervention = useCallback(() => {
     setShouldShowIntervention(true);
@@ -175,7 +209,7 @@ export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
   }, [resetPattern]);
 
   return {
-    isLikelyDoomScrolling,
+    isLikelyDoomScrolling: currentlyDoomScrolling,
     shouldShowIntervention,
     pattern,
     triggerIntervention,
