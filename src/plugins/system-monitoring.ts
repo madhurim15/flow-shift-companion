@@ -6,6 +6,12 @@ export interface AppChangedEvent {
   appName?: string;
 }
 
+export interface DurationUpdateEvent {
+  package: string;
+  appName?: string;
+  durationSeconds: number;
+}
+
 export interface SystemMonitoringPlugin {
   requestPermissions(): Promise<{ granted: boolean }>;
   startMonitoring(): Promise<void>;
@@ -13,6 +19,10 @@ export interface SystemMonitoringPlugin {
   addListener(
     eventName: 'appChanged',
     listenerFunc: (event: AppChangedEvent) => void
+  ): Promise<PluginListenerHandle>;
+  addListener(
+    eventName: 'durationUpdate', 
+    listenerFunc: (event: DurationUpdateEvent) => void
   ): Promise<PluginListenerHandle>;
 }
 

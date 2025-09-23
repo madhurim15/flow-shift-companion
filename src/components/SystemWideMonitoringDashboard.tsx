@@ -74,25 +74,14 @@ export const SystemWideMonitoringDashboard: React.FC = () => {
   };
 
   const handleInterventionResponse = async (alternative: any) => {
-    if (currentIntervention) {
-      const result = await respondToIntervention(
-        currentIntervention.id,
-        'accepted_alternative',
-        alternative
-      );
-      
-      if (result?.redirectTo) {
-        // Navigate to appropriate FlowLight feature
-        window.location.hash = `#/${result.redirectTo}`;
-      }
-    }
+    // Legacy method - now handled by enhanced intervention system
+    console.log('Alternative chosen:', alternative);
     setInterventionDialogOpen(false);
   };
 
   const handleInterventionDismiss = async () => {
-    if (currentIntervention) {
-      await respondToIntervention(currentIntervention.id, 'dismissed');
-    }
+    // Legacy method - now handled by enhanced intervention system
+    console.log('Intervention dismissed');
     setInterventionDialogOpen(false);
   };
 

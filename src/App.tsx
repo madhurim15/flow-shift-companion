@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { EnhancedInterventionModal } from "@/components/EnhancedInterventionModal";
 import { Capacitor } from "@capacitor/core";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -63,6 +64,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <RouterProvider router={router} />
+          <EnhancedInterventionModal />
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>

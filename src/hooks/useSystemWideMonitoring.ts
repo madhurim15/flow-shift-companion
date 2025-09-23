@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { supabase } from '@/integrations/supabase/client';
-import { useLocalNotifications } from './useLocalNotifications';
 import { SystemMonitoring } from '@/plugins/system-monitoring';
+import { useEnhancedInterventions } from './useEnhancedInterventions';
 
 export interface AppUsageSession {
   id?: string;
@@ -54,7 +53,12 @@ export const useSystemWideMonitoring = () => {
     interventionCooldowns: {}
   });
 
-  const { scheduleHighPriorityReminder } = useLocalNotifications();
+  const { 
+    startSession, 
+    updateSessionDuration, 
+    endSession,
+    isDebugMode 
+  } = useEnhancedInterventions();
 
   // Psychology-first intervention messages
   const interventionMessages = {
@@ -111,215 +115,36 @@ export const useSystemWideMonitoring = () => {
     return 'seeking_stimulation';
   }, []);
 
-  // Track app usage session
-  const startAppSession = useCallback(async (appPackage: string, appName?: string) => {
-    if (!Capacitor.isNativePlatform()) return;
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const sessionStart = new Date();
-    const session: AppUsageSession = {
-      app_package_name: appPackage,
-      app_name: appName,
-      session_start: sessionStart
-    };
-
-    setState(prev => ({ ...prev, currentSession: session }));
-
-    // Get app category and threshold from database
-    const { data: appCategory } = await supabase
-      .from('app_categories')
-      .select('*')
-      .eq('app_package_name', appPackage)
-      .single();
-
-    if (appCategory) {
-      session.app_category = appCategory.category;
-    }
-
-    return session;
+  // Legacy method - now handled by enhanced interventions
+  const startAppSession = useCallback((appPackage: string, appName?: string) => {
+    // This is now handled by the enhanced intervention system
+    return null;
   }, []);
 
-  // End app usage session and analyze for interventions
-  const endAppSession = useCallback(async (appPackage: string) => {
-    if (!state.currentSession || state.currentSession.app_package_name !== appPackage) return;
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const sessionEnd = new Date();
-    const duration = Math.floor((sessionEnd.getTime() - state.currentSession.session_start.getTime()) / 1000);
-    const timeOfDay = sessionEnd.getHours();
-
-    // Detect psychological state
-    const psychState = detectPsychologicalState(appPackage, duration, timeOfDay);
-    
-    // Save session to database
-    const { data: sessionData, error } = await supabase
-      .from('app_usage_sessions')
-      .insert({
-        user_id: user.id,
-        app_package_name: appPackage,
-        app_name: state.currentSession.app_name,
-        app_category: state.currentSession.app_category,
-        session_start: state.currentSession.session_start.toISOString(),
-        session_end: sessionEnd.toISOString(),
-        duration_seconds: duration,
-        psychological_state: psychState,
-        intervention_triggered: false
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error saving app session:', error);
-      return;
-    }
-
-    // Check if intervention should be triggered
-    await checkForIntervention(appPackage, duration, psychState, sessionData.id);
-
-    setState(prev => ({ 
-      ...prev, 
-      currentSession: undefined,
-      dailyUsageStats: {
-        ...prev.dailyUsageStats,
-        [appPackage]: (prev.dailyUsageStats[appPackage] || 0) + duration
-      }
-    }));
-  }, [state.currentSession, detectPsychologicalState]);
-
-  // Check if intervention should be triggered
-  const checkForIntervention = useCallback(async (
-    appPackage: string, 
-    duration: number, 
-    psychState: string,
-    sessionId: string
-  ) => {
-    // Check cooldown
-    const now = Date.now();
-    const lastIntervention = state.interventionCooldowns[appPackage] || 0;
-    const cooldownPeriod = 2 * 60 * 60 * 1000; // 2 hours
-
-    if (now - lastIntervention < cooldownPeriod) return;
-
-    // Get app thresholds
-    const { data: appCategory } = await supabase
-      .from('app_categories')
-      .select('*')
-      .eq('app_package_name', appPackage)
-      .single();
-
-    const debug = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('debugMonitoring') === '1';
-    const threshold = debug ? 30 : (appCategory?.mindful_threshold_minutes ? appCategory.mindful_threshold_minutes * 60 : 15 * 60); // default 15 minutes or 30s in debug
-
-    if (duration >= threshold) {
-      await triggerIntervention(appPackage, psychState, sessionId);
-    }
-  }, [state.interventionCooldowns]);
-
-  // Trigger psychology-first intervention
-  const triggerIntervention = useCallback(async (
-    appPackage: string, 
-    psychState: string,
-    sessionId: string
-  ) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    // Select intervention type and message
-    const interventionType = Math.random() < 0.5 ? 'gentle_nudge' : 'alternative_offer';
-    const messages = interventionMessages[psychState as keyof typeof interventionMessages] || interventionMessages.seeking_stimulation;
-    const message = messages[interventionType as keyof typeof messages];
-
-    // Create intervention record
-    const { data: intervention } = await supabase
-      .from('psychological_interventions')
-      .insert({
-        user_id: user.id,
-        app_package_name: appPackage,
-        detected_state: psychState,
-        intervention_type: interventionType,
-        intervention_message: message
-      })
-      .select()
-      .single();
-
-    // Mark session as intervention triggered
-    await supabase
-      .from('app_usage_sessions')
-      .update({ intervention_triggered: true })
-      .eq('id', sessionId);
-
-    // Send notification
-    await scheduleHighPriorityReminder(
-      "FlowLight Gentle Nudge",
-      message,
-      0
-    );
-
-    // Update state
-    if (intervention) {
-      setState(prev => ({
-        ...prev,
-        activeInterventions: [...prev.activeInterventions, intervention as PsychologicalIntervention],
-        interventionCooldowns: {
-          ...prev.interventionCooldowns,
-          [appPackage]: Date.now()
-        }
-      }));
-    }
-  }, [interventionMessages, scheduleHighPriorityReminder]);
-
-  // Respond to intervention
-  const respondToIntervention = useCallback(async (
-    interventionId: string,
-    response: 'dismissed' | 'accepted_alternative' | 'reflected',
-    alternative?: 'mood_check' | 'journal' | 'breathing' | 'physical_break'
-  ) => {
-    const { error } = await supabase
-      .from('psychological_interventions')
-      .update({
-        user_response: response,
-        alternative_chosen: alternative
-      })
-      .eq('id', interventionId);
-
-    if (error) {
-      console.error('Error updating intervention response:', error);
-      return;
-    }
-
-    // Remove from active interventions
-    setState(prev => ({
-      ...prev,
-      activeInterventions: prev.activeInterventions.filter(i => i.id !== interventionId)
-    }));
-
-    // If user accepted alternative, redirect them to FlowLight
-    if (response === 'accepted_alternative' && alternative) {
-      // This would trigger the appropriate FlowLight feature
-      return { redirectTo: alternative };
-    }
+  // Legacy method - now handled by enhanced interventions
+  const endAppSession = useCallback((appPackage: string) => {
+    // This is now handled by the enhanced intervention system
   }, []);
 
-  // Get behavioral insights
-  const getBehavioralInsights = useCallback(async (days: number = 7) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+  // Legacy method - now handled by enhanced interventions
+  const checkForIntervention = useCallback(() => {
+    // This is now handled by the enhanced intervention system
+  }, []);
 
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+  // Legacy method - now handled by enhanced interventions
+  const triggerIntervention = useCallback(() => {
+    // This is now handled by the enhanced intervention system
+  }, []);
 
-    const { data: sessions } = await supabase
-      .from('app_usage_sessions')
-      .select('*')
-      .eq('user_id', user.id)
-      .gte('created_at', startDate.toISOString())
-      .order('created_at', { ascending: false });
+  // Legacy method - now handled by enhanced interventions
+  const respondToIntervention = useCallback(() => {
+    // This is now handled by the enhanced intervention system
+  }, []);
 
-    return sessions || [];
+  // Legacy method - now handled by enhanced interventions
+  const getBehavioralInsights = useCallback(() => {
+    // This is now handled by the enhanced intervention system
+    return [];
   }, []);
 
   // Initialize monitoring (would integrate with native app monitoring APIs)
@@ -334,37 +159,83 @@ export const useSystemWideMonitoring = () => {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
-    let listener: { remove: () => void } | undefined;
+    let appChangeListener: { remove: () => void } | undefined;
+    let durationListener: { remove: () => void } | undefined;
 
     (async () => {
       try {
-        await SystemMonitoring.requestPermissions();
+        // Request permissions with better error handling
+        const permissionResult = await SystemMonitoring.requestPermissions();
+        if (!permissionResult.granted) {
+          console.warn('Usage access permission not granted');
+          setState(prev => ({ ...prev, isMonitoring: false }));
+          return;
+        }
+
         await SystemMonitoring.startMonitoring();
         setState(prev => ({ ...prev, isMonitoring: true }));
 
-        listener = await SystemMonitoring.addListener('appChanged', async ({ package: pkg, appName }) => {
+        console.log(`[SystemWideMonitoring] Started monitoring ${isDebugMode ? '(Debug Mode)' : ''}`);
+
+        // Listen for app changes
+        appChangeListener = await SystemMonitoring.addListener('appChanged', async ({ package: pkg, appName }) => {
           try {
-            const current = state.currentSession?.app_package_name;
-            if (current && current !== pkg) {
-              await endAppSession(current);
+            console.log(`[SystemWideMonitoring] App changed to: ${appName} (${pkg})`);
+            
+            // End previous session
+            if (state.currentSession?.app_package_name && state.currentSession.app_package_name !== pkg) {
+              endSession(state.currentSession.app_package_name);
             }
-            if (!state.currentSession || state.currentSession.app_package_name !== pkg) {
-              await startAppSession(pkg, appName);
-            }
+            
+            // Start new session
+            startSession(pkg, appName || 'Unknown App');
+            
+            setState(prev => ({
+              ...prev,
+              currentSession: {
+                app_package_name: pkg,
+                app_name: appName,
+                session_start: new Date()
+              }
+            }));
           } catch (e) {
             console.error('Error handling appChanged event', e);
           }
         });
+
+        // Listen for duration updates
+        durationListener = await SystemMonitoring.addListener('durationUpdate', async ({ package: pkg, appName, durationSeconds }) => {
+          try {
+            console.log(`[SystemWideMonitoring] Duration update: ${appName} - ${durationSeconds}s`);
+            
+            // Update session duration for intervention logic
+            updateSessionDuration(pkg, durationSeconds);
+            
+            // Update daily stats
+            setState(prev => ({
+              ...prev,
+              dailyUsageStats: {
+                ...prev.dailyUsageStats,
+                [pkg]: durationSeconds
+              }
+            }));
+          } catch (e) {
+            console.error('Error handling durationUpdate event', e);
+          }
+        });
+
       } catch (e) {
         console.error('SystemMonitoring init failed', e);
+        setState(prev => ({ ...prev, isMonitoring: false }));
       }
     })();
 
     return () => {
-      try { listener && listener.remove(); } catch {}
+      try { appChangeListener && appChangeListener.remove(); } catch {}
+      try { durationListener && durationListener.remove(); } catch {}
       try { SystemMonitoring.stopMonitoring(); } catch {}
     };
-  }, [state.currentSession, startAppSession, endAppSession]);
+  }, [startSession, updateSessionDuration, endSession, isDebugMode]);
 
   return {
     ...state,

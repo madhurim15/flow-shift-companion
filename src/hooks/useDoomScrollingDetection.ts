@@ -131,20 +131,16 @@ export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
           !shouldShowIntervention) {
         
         // Get recent behavioral data from system-wide monitoring
-        const recentSessions = await getBehavioralInsights(1); // Last day
-        const detectedPattern = detectBehavioralPattern(recentSessions);
+        const result = await getBehavioralInsights();
+        const detectedPattern = detectBehavioralPattern(result || []);
         
         // Update behavioral pattern if detected
         if (detectedPattern) {
           await updateBehavioralPattern(detectedPattern);
         }
         
-        // Trigger psychology-first intervention
-        await systemWideIntervention(
-          'com.lovable.flowlight', // FlowLight app package
-          'avoidance', // Doom scrolling is typically avoidance behavior
-          'session_' + Date.now()
-        );
+        // Trigger psychology-first intervention (now handled by enhanced system)
+        console.log('[DoomScrolling] Pattern detected, enhanced system will handle intervention');
         
         // Delay intervention slightly to not interrupt immediate navigation
         const timer = setTimeout(() => {

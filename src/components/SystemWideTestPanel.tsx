@@ -9,7 +9,7 @@ import { getInterventionMessage, type PsychologicalState } from '@/utils/systemW
 import { Smartphone, TestTube, Zap, Brain, AlertCircle } from 'lucide-react';
 
 export const SystemWideTestPanel: React.FC = () => {
-  const { startAppSession, endAppSession, triggerIntervention, isMonitoring } = useSystemWideMonitoring();
+  const { isMonitoring } = useSystemWideMonitoring();
   const [selectedApp, setSelectedApp] = useState<string>('com.instagram.android');
   const [selectedState, setSelectedState] = useState<PsychologicalState>('seeking_stimulation');
   const [testDialogOpen, setTestDialogOpen] = useState(false);
@@ -48,16 +48,15 @@ export const SystemWideTestPanel: React.FC = () => {
   ];
 
   const handleStartSession = async () => {
-    const selectedAppData = testApps.find(app => app.package === selectedApp);
-    const session = await startAppSession(selectedApp, selectedAppData?.name);
-    setCurrentSession(session);
+    // Legacy method - now handled by enhanced intervention system
+    console.log('Starting session for:', selectedApp);
+    setCurrentSession({ app_package_name: selectedApp });
   };
 
   const handleEndSession = async () => {
-    if (currentSession) {
-      await endAppSession(selectedApp);
-      setCurrentSession(null);
-    }
+    // Legacy method - now handled by enhanced intervention system
+    console.log('Ending session for:', selectedApp);
+    setCurrentSession(null);
   };
 
   const handleTestIntervention = async () => {
@@ -65,8 +64,8 @@ export const SystemWideTestPanel: React.FC = () => {
     setTestMessage(message);
     setTestDialogOpen(true);
     
-    // Also trigger the actual intervention for logging
-    await triggerIntervention(selectedApp, selectedState, 'test_session_' + Date.now());
+    // Log test intervention
+    console.log('Testing intervention for:', selectedApp, selectedState);
   };
 
   return (

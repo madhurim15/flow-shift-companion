@@ -23,7 +23,10 @@ public class SystemMonitoringService extends Service {
 
   private Handler handler;
   private Runnable pollTask;
+  private Runnable durationTask;
   private String lastPackage;
+  private long sessionStartTime;
+  private String currentAppName;
 
   @Override
   public void onCreate() {
@@ -38,6 +41,8 @@ public class SystemMonitoringService extends Service {
     startForeground(NOTIF_ID, notification);
 
     handler = new Handler();
+    
+    // Poll for app changes every 5 seconds
     pollTask = new Runnable() {
       @Override
       public void run() {
@@ -46,6 +51,9 @@ public class SystemMonitoringService extends Service {
           if (current != null && !current.equals(lastPackage)) {
             lastPackage = current;
             String appName = getAppName(current);
+            currentAppName = appName;
+            sessionStartTime = System.currentTimeMillis();
+            
             Intent i = new Intent("FLOWLIGHT_APP_CHANGED");
             i.putExtra("package", current);
             i.putExtra("appName", appName);
@@ -55,7 +63,29 @@ public class SystemMonitoringService extends Service {
         handler.postDelayed(this, 5000); // poll every 5s
       }
     };
+    
+    // Broadcast duration updates every 30 seconds for current app
+    durationTask = new Runnable() {
+      @Override
+      public void run() {
+        try {
+          if (lastPackage != null && sessionStartTime > 0) {
+            long currentTime = System.currentTimeMillis();
+            int durationSeconds = (int) ((currentTime - sessionStartTime) / 1000);
+            
+            Intent i = new Intent("FLOWLIGHT_DURATION_UPDATE");
+            i.putExtra("package", lastPackage);
+            i.putExtra("appName", currentAppName);
+            i.putExtra("durationSeconds", durationSeconds);
+            sendBroadcast(i);
+          }
+        } catch (Exception ignored) {}
+        handler.postDelayed(this, 30000); // broadcast every 30s
+      }
+    };
+    
     handler.post(pollTask);
+    handler.post(durationTask);
   }
 
   @Override
@@ -66,8 +96,13 @@ public class SystemMonitoringService extends Service {
   @Override
   public void onDestroy() {
     super.onDestroy();
-    if (handler != null && pollTask != null) {
-      handler.removeCallbacks(pollTask);
+    if (handler != null) {
+      if (pollTask != null) {
+        handler.removeCallbacks(pollTask);
+      }
+      if (durationTask != null) {
+        handler.removeCallbacks(durationTask);
+      }
     }
   }
 

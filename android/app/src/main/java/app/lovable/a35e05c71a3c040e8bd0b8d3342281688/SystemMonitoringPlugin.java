@@ -18,35 +18,49 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 
 @CapacitorPlugin(name = "SystemMonitoring")
 public class SystemMonitoringPlugin extends Plugin {
-  private BroadcastReceiver appChangedReceiver;
+  private BroadcastReceiver appChangeReceiver;
 
   @Override
   public void load() {
     super.load();
-    // Listen for broadcasts from the foreground service
-    appChangedReceiver = new BroadcastReceiver() {
+    // Register receiver for app change events
+    appChangeReceiver = new BroadcastReceiver() {
       @Override
       public void onReceive(Context context, Intent intent) {
-        if ("FLOWLIGHT_APP_CHANGED".equals(intent.getAction())) {
-          String pkg = intent.getStringExtra("package");
-          String appName = intent.getStringExtra("appName");
+        String action = intent.getAction();
+        String pkg = intent.getStringExtra("package");
+        String appName = intent.getStringExtra("appName");
+        
+        if (pkg != null) {
           JSObject data = new JSObject();
           data.put("package", pkg);
-          data.put("appName", appName);
-          notifyListeners("appChanged", data);
+          if (appName != null) {
+            data.put("appName", appName);
+          }
+          
+          if ("FLOWLIGHT_APP_CHANGED".equals(action)) {
+            notifyListeners("appChanged", data);
+          } else if ("FLOWLIGHT_DURATION_UPDATE".equals(action)) {
+            int durationSeconds = intent.getIntExtra("durationSeconds", 0);
+            data.put("durationSeconds", durationSeconds);
+            notifyListeners("durationUpdate", data);
+          }
         }
       }
     };
-    IntentFilter filter = new IntentFilter("FLOWLIGHT_APP_CHANGED");
-    getContext().registerReceiver(appChangedReceiver, filter);
+    
+    IntentFilter filter = new IntentFilter();
+    filter.addAction("FLOWLIGHT_APP_CHANGED");
+    filter.addAction("FLOWLIGHT_DURATION_UPDATE");
+    getContext().registerReceiver(appChangeReceiver, filter);
   }
 
   @Override
   protected void handleOnDestroy() {
     super.handleOnDestroy();
-    if (appChangedReceiver != null) {
+    if (appChangeReceiver != null) {
       try {
-        getContext().unregisterReceiver(appChangedReceiver);
+        getContext().unregisterReceiver(appChangeReceiver);
       } catch (Exception ignored) {}
     }
   }
