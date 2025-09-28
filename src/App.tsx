@@ -7,6 +7,7 @@ import { createHashRouter, RouterProvider } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { EnhancedInterventionModal } from "@/components/EnhancedInterventionModal";
+import { MonitoringBootstrap } from "@/components/MonitoringBootstrap";
 import { Capacitor } from "@capacitor/core";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -65,6 +66,7 @@ const App = () => (
           <Sonner />
           <RouterProvider router={router} />
           <EnhancedInterventionModal />
+          <MonitoringBootstrap />
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>

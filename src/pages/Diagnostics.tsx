@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalNotifications } from '@/hooks/useLocalNotifications';
+import { MonitoringStatus } from '@/components/MonitoringStatus';
 import { Capacitor } from '@capacitor/core';
 import { 
   Smartphone, 
@@ -180,6 +181,9 @@ const Diagnostics = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* System-Wide Monitoring Status */}
+        <MonitoringStatus />
 
         {/* Notification Status */}
         <Card>

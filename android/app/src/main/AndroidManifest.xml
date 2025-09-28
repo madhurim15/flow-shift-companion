@@ -44,6 +44,11 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
+        <!-- Nudge action receiver -->
+        <receiver
+            android:name=".NudgeActions"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

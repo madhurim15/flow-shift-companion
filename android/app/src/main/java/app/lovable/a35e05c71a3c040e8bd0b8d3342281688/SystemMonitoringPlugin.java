@@ -81,8 +81,20 @@ public class SystemMonitoringPlugin extends Plugin {
   }
 
   @PluginMethod
+  public void checkPermissions(PluginCall call) {
+    JSObject ret = new JSObject();
+    ret.put("usageAccess", hasUsageStatsPermission(getContext()));
+    call.resolve(ret);
+  }
+
+  @PluginMethod
   public void startMonitoring(PluginCall call) {
     Intent serviceIntent = new Intent(getContext(), SystemMonitoringService.class);
+    
+    // Pass debug flag if provided
+    boolean debug = call.getBoolean("debug", false);
+    serviceIntent.putExtra("debug", debug);
+    
     try {
       ContextCompat.startForegroundService(getContext(), serviceIntent);
       call.resolve();

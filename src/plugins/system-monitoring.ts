@@ -14,7 +14,8 @@ export interface DurationUpdateEvent {
 
 export interface SystemMonitoringPlugin {
   requestPermissions(): Promise<{ granted: boolean }>;
-  startMonitoring(): Promise<void>;
+  checkPermissions(): Promise<{ usageAccess: boolean }>;
+  startMonitoring(options?: { debug?: boolean }): Promise<void>;
   stopMonitoring(): Promise<void>;
   addListener(
     eventName: 'appChanged',
