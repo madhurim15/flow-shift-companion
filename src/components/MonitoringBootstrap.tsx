@@ -7,8 +7,9 @@ import { useToast } from '@/hooks/use-toast';
 export const MonitoringBootstrap = () => {
   const [hasUsageAccess, setHasUsageAccess] = useState(false);
   const [isBootstrapped, setIsBootstrapped] = useState(false);
+  const [toastIds, setToastIds] = useState<string[]>([]);
   const { initLocalNotifications, requestPermissions: requestNotificationPermissions } = useLocalNotifications();
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
 
   const isDebugMode = typeof window !== 'undefined' && (
     new URLSearchParams(window.location.search).get('debug') === '1' ||
@@ -26,11 +27,12 @@ export const MonitoringBootstrap = () => {
         
         // Show debug mode confirmation if enabled
         if (isDebugMode) {
-          toast({
+          const debugToast = toast({
             title: "🐛 Debug Mode Active",
             description: "Short thresholds enabled for testing (30-60 seconds instead of 15 minutes)",
             duration: 5000
           });
+          setToastIds(prev => [...prev, debugToast.id]);
         }
         
         // 1. Initialize local notifications
@@ -47,12 +49,15 @@ export const MonitoringBootstrap = () => {
         setHasUsageAccess(permissionStatus.usageAccess);
 
         if (!permissionStatus.usageAccess) {
-          // Show persistent toast about required permission
-          toast({
-            title: "🔑 Permission Required",
-            description: "FlowLight needs Usage Access to monitor apps. Please enable it in the settings that will open.",
-            duration: 10000
-          });
+          // Add delay before showing permission toast to avoid overlap
+          setTimeout(() => {
+            const permissionToast = toast({
+              title: "🔑 Permission Required",
+              description: "FlowLight needs Usage Access to monitor apps. Please enable it in the settings that will open.",
+              duration: 10000
+            });
+            setToastIds(prev => [...prev, permissionToast.id]);
+          }, isDebugMode ? 1000 : 500);
 
           try {
             // Open usage access settings
@@ -78,12 +83,15 @@ export const MonitoringBootstrap = () => {
 
         setIsBootstrapped(true);
 
-        // Success confirmation
-        toast({
-          title: "✅ FlowLight Active",
-          description: `Monitoring started ${isDebugMode ? '(Debug Mode - Quick nudges!)' : ''}`,
-          duration: 4000
-        });
+        // Success confirmation with delay to avoid overlap
+        setTimeout(() => {
+          const successToast = toast({
+            title: "✅ FlowLight Active",
+            description: `Monitoring started ${isDebugMode ? '(Debug Mode - Quick nudges!)' : ''}`,
+            duration: 4000
+          });
+          setToastIds(prev => [...prev, successToast.id]);
+        }, 1000);
 
       } catch (error) {
         console.error('[MonitoringBootstrap] Failed to bootstrap:', error);
@@ -98,7 +106,7 @@ export const MonitoringBootstrap = () => {
     bootstrapMonitoring();
   }, [isBootstrapped, initLocalNotifications, requestNotificationPermissions, toast, isDebugMode]);
 
-  // Re-check permissions when app resumes
+  // Re-check permissions when app resumes  
   useEffect(() => {
     if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
       return;
@@ -114,20 +122,32 @@ export const MonitoringBootstrap = () => {
           await SystemMonitoring.startMonitoring({ debug: isDebugMode });
           setIsBootstrapped(true);
           
-          toast({
-            title: "Ready to Go!",
-            description: "FlowLight is now monitoring your app usage for mindful nudges.",
-            duration: 4000
-          });
+          console.log('[MonitoringBootstrap] Monitoring started after resume');
+          
+          // Show success toast after resume
+          setTimeout(() => {
+            const resumeToast = toast({
+              title: "✅ FlowLight Resumed", 
+              description: "Monitoring reactivated after permission granted",
+              duration: 3000
+            });
+            setToastIds(prev => [...prev, resumeToast.id]);
+          }, 500);
         }
       } catch (error) {
         console.error('[MonitoringBootstrap] Error checking permissions on resume:', error);
       }
     };
 
-    document.addEventListener('resume', handleAppResume);
-    return () => document.removeEventListener('resume', handleAppResume);
-  }, [isBootstrapped, toast, isDebugMode]);
+    // Use document events for app resume detection
+    document.addEventListener('visibilitychange', handleAppResume);
+    return () => {
+      document.removeEventListener('visibilitychange', handleAppResume);
+      
+      // Cleanup any active toasts on unmount
+      toastIds.forEach(id => dismiss(id));
+    };
+  }, [hasUsageAccess, isBootstrapped, toast, toastIds, dismiss, isDebugMode]);
 
   // This component renders nothing - it's just for side effects
   return null;
