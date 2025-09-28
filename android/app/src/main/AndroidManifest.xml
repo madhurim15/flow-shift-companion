@@ -31,7 +31,11 @@
             android:exported="true"
             android:launchMode="singleTask"
             android:name="app.lovable.a35e05c71a3c040e8bd0b8d3342281688.MainActivity"
-            android:theme="@style/AppTheme.NoActionBarLaunch">
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:resizeableActivity="false"
+            android:supportsPictureInPicture="false"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|screenLayout|uiMode"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

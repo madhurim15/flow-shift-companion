@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { SystemMonitoring } from '@/plugins/system-monitoring';
 import { useLocalNotifications } from '@/hooks/useLocalNotifications';
@@ -10,29 +10,81 @@ export const MonitoringBootstrap = () => {
   const [toastIds, setToastIds] = useState<string[]>([]);
   const { initLocalNotifications, requestPermissions: requestNotificationPermissions } = useLocalNotifications();
   const { toast, dismiss } = useToast();
+  
+  // Refs to prevent unnecessary re-renders and stabilize callbacks
+  const bootstrapInProgressRef = useRef(false);
+  const lastPermissionCheckRef = useRef(0);
+  const activeToastTypesRef = useRef(new Set<string>());
 
   const isDebugMode = typeof window !== 'undefined' && (
     new URLSearchParams(window.location.search).get('debug') === '1' ||
     new URLSearchParams(window.location.hash.split('?')[1] || '').get('debug') === '1'
   );
 
+  // Debounced toast function to prevent spam and flickering
+  const showToast = useCallback((type: string, title: string, description: string, duration: number = 4000) => {
+    // Prevent duplicate toasts of the same type
+    if (activeToastTypesRef.current.has(type)) {
+      return;
+    }
+    
+    activeToastTypesRef.current.add(type);
+    
+    const toastResult = toast({
+      title,
+      description,
+      duration
+    });
+    
+    setToastIds(prev => [...prev, toastResult.id]);
+    
+    // Remove type from active set after toast duration
+    setTimeout(() => {
+      activeToastTypesRef.current.delete(type);
+    }, duration + 500);
+    
+    return toastResult;
+  }, [toast]);
+
+  // Debounced permission check to prevent rapid UI updates
+  const checkPermissionsWithDebounce = useCallback(async () => {
+    const now = Date.now();
+    if (now - lastPermissionCheckRef.current < 2000) {
+      return null; // Skip if checked recently
+    }
+    
+    lastPermissionCheckRef.current = now;
+    
+    try {
+      const permissionStatus = await SystemMonitoring.checkPermissions();
+      setHasUsageAccess(permissionStatus.usageAccess);
+      return permissionStatus;
+    } catch (error) {
+      console.error('[MonitoringBootstrap] Permission check failed:', error);
+      return null;
+    }
+  }, []);
+
   useEffect(() => {
-    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android' || isBootstrapped) {
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android' || isBootstrapped || bootstrapInProgressRef.current) {
       return;
     }
 
     const bootstrapMonitoring = async () => {
+      if (bootstrapInProgressRef.current) return;
+      bootstrapInProgressRef.current = true;
+      
       try {
         console.log('[MonitoringBootstrap] Starting bootstrap process');
         
-        // Show debug mode confirmation if enabled
+        // Show debug mode confirmation if enabled (with deduplication)
         if (isDebugMode) {
-          const debugToast = toast({
-            title: "🐛 Debug Mode Active",
-            description: "Short thresholds enabled for testing (30-60 seconds instead of 15 minutes)",
-            duration: 5000
-          });
-          setToastIds(prev => [...prev, debugToast.id]);
+          showToast(
+            'debug-mode',
+            "🐛 Debug Mode Active",
+            "Short thresholds enabled for testing (30-60 seconds instead of 15 minutes)",
+            5000
+          );
         }
         
         // 1. Initialize local notifications
@@ -44,19 +96,22 @@ export const MonitoringBootstrap = () => {
           console.warn('[MonitoringBootstrap] Notification permission denied');
         }
 
-        // 3. Check usage access permission with retry logic
-        const permissionStatus = await SystemMonitoring.checkPermissions();
-        setHasUsageAccess(permissionStatus.usageAccess);
+        // 3. Check usage access permission with debouncing
+        const permissionStatus = await checkPermissionsWithDebounce();
+        if (!permissionStatus) {
+          bootstrapInProgressRef.current = false;
+          return;
+        }
 
         if (!permissionStatus.usageAccess) {
           // Add delay before showing permission toast to avoid overlap
           setTimeout(() => {
-            const permissionToast = toast({
-              title: "🔑 Permission Required",
-              description: "FlowLight needs Usage Access to monitor apps. Please enable it in the settings that will open.",
-              duration: 10000
-            });
-            setToastIds(prev => [...prev, permissionToast.id]);
+            showToast(
+              'permission-required',
+              "🔑 Permission Required", 
+              "FlowLight needs Usage Access to monitor apps. Please enable it in the settings that will open.",
+              10000
+            );
           }, isDebugMode ? 1000 : 500);
 
           try {
@@ -65,14 +120,17 @@ export const MonitoringBootstrap = () => {
             
             // Don't start monitoring yet - wait for user to return with permission
             console.log('[MonitoringBootstrap] Waiting for Usage Access permission...');
+            bootstrapInProgressRef.current = false;
             return;
           } catch (error) {
             console.error('[MonitoringBootstrap] Failed to open Usage Access settings:', error);
-            toast({
-              title: "Settings Error",
-              description: "Could not open Usage Access settings. Please enable manually in Android Settings.",
-              duration: 8000
-            });
+            showToast(
+              'settings-error',
+              "Settings Error",
+              "Could not open Usage Access settings. Please enable manually in Android Settings.",
+              8000
+            );
+            bootstrapInProgressRef.current = false;
             return;
           }
         }
@@ -85,69 +143,89 @@ export const MonitoringBootstrap = () => {
 
         // Success confirmation with delay to avoid overlap
         setTimeout(() => {
-          const successToast = toast({
-            title: "✅ FlowLight Active",
-            description: `Monitoring started ${isDebugMode ? '(Debug Mode - Quick nudges!)' : ''}`,
-            duration: 4000
-          });
-          setToastIds(prev => [...prev, successToast.id]);
+          showToast(
+            'monitoring-active',
+            "✅ FlowLight Active",
+            `Monitoring started ${isDebugMode ? '(Debug Mode - Quick nudges!)' : ''}`,
+            4000
+          );
         }, 1000);
 
       } catch (error) {
         console.error('[MonitoringBootstrap] Failed to bootstrap:', error);
-        toast({
-          title: "Setup Issue",
-          description: "Could not start monitoring. Please check app permissions.",
-          duration: 5000
-        });
+        showToast(
+          'setup-error',
+          "Setup Issue", 
+          "Could not start monitoring. Please check app permissions.",
+          5000
+        );
+      } finally {
+        bootstrapInProgressRef.current = false;
       }
     };
 
     bootstrapMonitoring();
-  }, [isBootstrapped, initLocalNotifications, requestNotificationPermissions, toast, isDebugMode]);
+  }, [isBootstrapped, initLocalNotifications, requestNotificationPermissions, showToast, checkPermissionsWithDebounce, isDebugMode]);
 
-  // Re-check permissions when app resumes  
+  // Re-check permissions when app resumes with debouncing
   useEffect(() => {
     if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
       return;
     }
 
     const handleAppResume = async () => {
+      if (document.hidden) return; // Only handle when app becomes visible
+      
       try {
-        const permissionStatus = await SystemMonitoring.checkPermissions();
-        setHasUsageAccess(permissionStatus.usageAccess);
+        const permissionStatus = await checkPermissionsWithDebounce();
+        if (!permissionStatus) return;
         
-        if (permissionStatus.usageAccess && !isBootstrapped) {
+        if (permissionStatus.usageAccess && !isBootstrapped && !bootstrapInProgressRef.current) {
           // User granted permission - restart monitoring
-          await SystemMonitoring.startMonitoring({ debug: isDebugMode });
-          setIsBootstrapped(true);
+          bootstrapInProgressRef.current = true;
           
-          console.log('[MonitoringBootstrap] Monitoring started after resume');
-          
-          // Show success toast after resume
-          setTimeout(() => {
-            const resumeToast = toast({
-              title: "✅ FlowLight Resumed", 
-              description: "Monitoring reactivated after permission granted",
-              duration: 3000
-            });
-            setToastIds(prev => [...prev, resumeToast.id]);
-          }, 500);
+          try {
+            await SystemMonitoring.startMonitoring({ debug: isDebugMode });
+            setIsBootstrapped(true);
+            
+            console.log('[MonitoringBootstrap] Monitoring started after resume');
+            
+            // Show success toast after resume (with deduplication)
+            setTimeout(() => {
+              showToast(
+                'monitoring-resumed',
+                "✅ FlowLight Resumed",
+                "Monitoring reactivated after permission granted",
+                3000
+              );
+            }, 500);
+          } finally {
+            bootstrapInProgressRef.current = false;
+          }
         }
       } catch (error) {
         console.error('[MonitoringBootstrap] Error checking permissions on resume:', error);
+        bootstrapInProgressRef.current = false;
       }
     };
 
-    // Use document events for app resume detection
-    document.addEventListener('visibilitychange', handleAppResume);
+    // Use document events for app resume detection with debouncing
+    let resumeTimeout: NodeJS.Timeout;
+    const debouncedHandleAppResume = () => {
+      clearTimeout(resumeTimeout);
+      resumeTimeout = setTimeout(handleAppResume, 1000); // Debounce rapid visibility changes
+    };
+
+    document.addEventListener('visibilitychange', debouncedHandleAppResume);
     return () => {
-      document.removeEventListener('visibilitychange', handleAppResume);
+      document.removeEventListener('visibilitychange', debouncedHandleAppResume);
+      clearTimeout(resumeTimeout);
       
       // Cleanup any active toasts on unmount
       toastIds.forEach(id => dismiss(id));
+      activeToastTypesRef.current.clear();
     };
-  }, [hasUsageAccess, isBootstrapped, toast, toastIds, dismiss, isDebugMode]);
+  }, [hasUsageAccess, isBootstrapped, showToast, checkPermissionsWithDebounce, toastIds, dismiss, isDebugMode]);
 
   // This component renders nothing - it's just for side effects
   return null;
