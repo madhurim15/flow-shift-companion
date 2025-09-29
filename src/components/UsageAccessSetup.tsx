@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Shield, Settings, CheckCircle } from 'lucide-react';
+import { Shield, Settings, CheckCircle, Smartphone, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Capacitor } from '@capacitor/core';
 import { SystemMonitoring } from '@/plugins/system-monitoring';
@@ -106,13 +106,13 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
             setIsChecking(false);
             return;
           }
-          if (Date.now() - startedAt < 30000) {
+          if (Date.now() - startedAt < 60000) {
             setTimeout(poll, 1000);
           } else {
             setIsChecking(false);
             toast({
               title: "Still need permission",
-              description: "On Samsung: Settings → Apps → Special access → Usage data access → enable FlowLight.",
+              description: "Try 'Open App Settings' below, then Special access → Usage data access → enable FlowLight.",
             });
           }
         } catch (e) {
@@ -128,6 +128,62 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
         title: "Could not open settings",
         description: "Open Settings → Apps → Special access → Usage data access and enable FlowLight.",
       });
+    }
+  };
+
+  const openAppSettings = async () => {
+    try {
+      await SystemMonitoring.requestPermissions();
+      toast({
+        title: "Opening App Settings",
+        description: "Navigate to Special access → Usage data access → enable FlowLight.",
+      });
+    } catch (error) {
+      toast({
+        title: "Manual navigation needed",
+        description: "Settings → Apps → FlowLight → Special access → Usage data access → enable.",
+      });
+    }
+  };
+
+  const checkAgainNow = async () => {
+    setIsChecking(true);
+    try {
+      const result = await SystemMonitoring.checkPermissions();
+      console.log('[UsageAccessSetup] Manual check result:', result);
+      
+      if (result.usageAccess) {
+        setHasUsageAccess(true);
+        toast({
+          title: "Permission Found!",
+          description: "Starting monitoring now...",
+        });
+        
+        try {
+          await requestNotificationPermissions();
+          await SystemMonitoring.startMonitoring();
+          onPermissionGranted();
+        } catch (e) {
+          console.error('[UsageAccessSetup] Failed to start monitoring:', e);
+          toast({
+            title: "Monitoring Error",
+            description: "Permission granted but failed to start: " + (e as Error).message,
+          });
+        }
+      } else {
+        toast({
+          title: "Permission not found",
+          description: "Please enable Usage data access for FlowLight in Settings.",
+        });
+      }
+    } catch (error) {
+      console.error('[UsageAccessSetup] Manual check failed:', error);
+      toast({
+        title: "Check failed",
+        description: "Could not verify permissions: " + (error as Error).message,
+      });
+    } finally {
+      setIsChecking(false);
     }
   };
 
@@ -225,6 +281,30 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
               {isChecking ? 'Checking...' : 'Grant Permission'}
             </Button>
 
+            <div className="flex gap-2">
+              <Button 
+                onClick={openAppSettings}
+                disabled={isChecking}
+                variant="outline"
+                className="flex-1"
+                size="sm"
+              >
+                <Smartphone className="w-4 h-4 mr-2" />
+                Open App Settings
+              </Button>
+              
+              <Button 
+                onClick={checkAgainNow}
+                disabled={isChecking}
+                variant="outline"
+                className="flex-1"
+                size="sm"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Check Again Now
+              </Button>
+            </div>
+
             <Button 
               onClick={onSkip}
               variant="ghost"
@@ -235,7 +315,7 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Tip for Samsung: Settings → Apps → Special access → Usage data access → enable FlowLight.
+            Samsung: Settings → Apps → FlowLight → Special access → Usage data access → enable.
           </p>
         </div>
       </Card>

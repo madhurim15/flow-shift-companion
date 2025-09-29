@@ -173,7 +173,25 @@ public class SystemMonitoringPlugin extends Plugin {
       } else {
         mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), context.getPackageName());
       }
-      return mode == AppOpsManager.MODE_ALLOWED;
+      
+      if (mode == AppOpsManager.MODE_ALLOWED) {
+        return true;
+      }
+      
+      // Fallback check for Samsung/OEM devices where AppOps might be unreliable
+      try {
+        android.app.usage.UsageStatsManager usageStatsManager = 
+          (android.app.usage.UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+        long endTime = System.currentTimeMillis();
+        long startTime = endTime - 60000; // Last 60 seconds
+        java.util.List<android.app.usage.UsageEvents.Event> events = 
+          usageStatsManager.queryEvents(startTime, endTime);
+        // If we can query events without exception, permission is granted
+        return events != null;
+      } catch (Exception fallbackException) {
+        // If both AppOps and UsageStatsManager fail, no permission
+        return false;
+      }
     } catch (Exception e) {
       return false;
     }

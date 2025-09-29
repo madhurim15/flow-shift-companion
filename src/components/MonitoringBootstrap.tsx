@@ -163,11 +163,17 @@ export const MonitoringBootstrap = () => {
                 3000
               );
             }, 500);
-          } catch (error) {
-            console.error('[MonitoringBootstrap] Failed to start monitoring after resume:', error);
-          } finally {
-            bootstrapInProgressRef.current = false;
-          }
+            } catch (error) {
+              console.error('[MonitoringBootstrap] Failed to start monitoring after resume:', error);
+              showToast(
+                'monitoring-start-error',
+                "Monitoring Error",
+                "Failed to start: " + (error as Error).message,
+                5000
+              );
+            } finally {
+              bootstrapInProgressRef.current = false;
+            }
         }
       } catch (error) {
         console.error('[MonitoringBootstrap] Error checking permissions on resume:', error);
@@ -179,7 +185,7 @@ export const MonitoringBootstrap = () => {
     let resumeTimeout: NodeJS.Timeout;
     const debouncedHandleAppResume = () => {
       clearTimeout(resumeTimeout);
-      resumeTimeout = setTimeout(handleAppResume, 1000); // Debounce rapid visibility changes
+      resumeTimeout = setTimeout(handleAppResume, 1500); // Increased debounce for Samsung reliability
     };
 
     document.addEventListener('visibilitychange', debouncedHandleAppResume);
