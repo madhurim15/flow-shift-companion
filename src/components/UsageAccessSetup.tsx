@@ -5,6 +5,7 @@ import { Shield, Settings, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Capacitor } from '@capacitor/core';
 import { SystemMonitoring } from '@/plugins/system-monitoring';
+import { useLocalNotifications } from '@/hooks/useLocalNotifications';
 
 type UsageAccessSetupProps = {
   onPermissionGranted: () => void;
@@ -15,6 +16,7 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
   const [hasUsageAccess, setHasUsageAccess] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
   const { toast } = useToast();
+  const { requestPermissions: requestNotificationPermissions } = useLocalNotifications();
 
   const checkUsageAccess = async () => {
     if (!Capacitor.isNativePlatform()) {
@@ -33,7 +35,14 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
           title: "Permission Granted!",
           description: "Starting FlowLight monitoring...",
         });
-        
+
+        try {
+          // Request notifications first (Android 13+ requirement)
+          await requestNotificationPermissions();
+        } catch (e) {
+          console.log('[UsageAccessSetup] Notification permission request failed (continuing):', e);
+        }
+
         // Immediately start monitoring after permission is granted
         try {
           await SystemMonitoring.startMonitoring();
@@ -41,7 +50,7 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
         } catch (error) {
           console.error('[UsageAccessSetup] Failed to start monitoring:', error);
         }
-        
+
         onPermissionGranted();
       }
     } catch (error) {
@@ -71,13 +80,53 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
       await SystemMonitoring.requestPermissions();
       toast({
         title: "Opening Settings",
-        description: "Please enable Usage Access for FlowLight in the settings that just opened.",
+        description: "Find Special access → Usage data access, then enable FlowLight.",
       });
+
+      // Poll for up to 30s to detect grant when user returns
+      setIsChecking(true);
+      const startedAt = Date.now();
+      const poll = async (): Promise<void> => {
+        try {
+          const res = await SystemMonitoring.checkPermissions();
+          if (res.usageAccess) {
+            setHasUsageAccess(true);
+            toast({ title: "Permission Granted!", description: "Starting FlowLight monitoring..." });
+            try {
+              await requestNotificationPermissions();
+            } catch (e) {
+              console.log('[UsageAccessSetup] Notification permission request failed (continuing):', e);
+            }
+            try {
+              await SystemMonitoring.startMonitoring();
+            } catch (e) {
+              console.error('[UsageAccessSetup] Failed to start monitoring after grant:', e);
+            }
+            onPermissionGranted();
+            setIsChecking(false);
+            return;
+          }
+          if (Date.now() - startedAt < 30000) {
+            setTimeout(poll, 1000);
+          } else {
+            setIsChecking(false);
+            toast({
+              title: "Still need permission",
+              description: "On Samsung: Settings → Apps → Special access → Usage data access → enable FlowLight.",
+            });
+          }
+        } catch (e) {
+          console.error('[UsageAccessSetup] Poll check failed:', e);
+          setIsChecking(false);
+        }
+      };
+      // kick off polling
+      setTimeout(poll, 1200);
     } catch (error) {
       console.error('Error requesting usage access:', error);
       toast({
-        title: "Opening Settings",
-        description: "Please enable Usage Access for FlowLight in the settings.",
+        title: "Could not open settings",
+        description: "Open Settings → Apps → Special access → Usage data access and enable FlowLight.",
       });
     }
   };
@@ -186,7 +235,7 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
           </div>
 
           <p className="text-xs text-muted-foreground">
-            We'll open your device settings. Look for "Usage Access" or "Apps with usage access" and enable FlowLight.
+            Tip for Samsung: Settings → Apps → Special access → Usage data access → enable FlowLight.
           </p>
         </div>
       </Card>

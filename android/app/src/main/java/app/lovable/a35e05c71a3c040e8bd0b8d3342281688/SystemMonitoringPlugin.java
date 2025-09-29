@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.provider.Settings;
+import android.net.Uri;
 
 import androidx.core.content.ContextCompat;
 
@@ -68,15 +69,58 @@ public class SystemMonitoringPlugin extends Plugin {
   @PluginMethod
   public void requestPermissions(PluginCall call) {
     boolean granted = hasUsageStatsPermission(getContext());
+    Context ctx = getContext();
+
     if (!granted) {
+      boolean opened = false;
+
+      // Try direct Usage Access settings
       try {
         Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        getContext().startActivity(intent);
-      } catch (Exception ignored) {}
+        if (getActivity() != null) {
+          getActivity().startActivity(intent);
+        } else {
+          intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          ctx.startActivity(intent);
+        }
+        opened = true;
+      } catch (Exception e) { /* fallback below */ }
+
+      // Fallback: general security settings (some OEMs route from here)
+      if (!opened) {
+        try {
+          Intent intent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
+          if (getActivity() != null) {
+            getActivity().startActivity(intent);
+          } else {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(intent);
+          }
+          opened = true;
+        } catch (Exception e) { /* fallback below */ }
+      }
+
+      // Last resort: app details -> user can navigate to "Special app access" > "Usage data access"
+      if (!opened) {
+        try {
+          Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+          intent.setData(Uri.fromParts("package", ctx.getPackageName(), null));
+          if (getActivity() != null) {
+            getActivity().startActivity(intent);
+          } else {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(intent);
+          }
+          opened = true;
+        } catch (Exception e) {
+          call.reject("Could not open Usage Access settings");
+          return;
+        }
+      }
     }
+
     JSObject ret = new JSObject();
-    ret.put("granted", hasUsageStatsPermission(getContext()));
+    ret.put("granted", hasUsageStatsPermission(ctx));
     call.resolve(ret);
   }
 
@@ -89,12 +133,18 @@ public class SystemMonitoringPlugin extends Plugin {
 
   @PluginMethod
   public void startMonitoring(PluginCall call) {
+    // Ensure Usage Access is granted before starting service
+    if (!hasUsageStatsPermission(getContext())) {
+      call.reject("Usage access permission not granted");
+      return;
+    }
+
     Intent serviceIntent = new Intent(getContext(), SystemMonitoringService.class);
-    
+
     // Pass debug flag if provided
     boolean debug = call.getBoolean("debug", false);
     serviceIntent.putExtra("debug", debug);
-    
+
     try {
       ContextCompat.startForegroundService(getContext(), serviceIntent);
       call.resolve();
