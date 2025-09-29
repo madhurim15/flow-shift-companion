@@ -43,12 +43,6 @@ public class MainActivity extends BridgeActivity {
         // Ensure proper window flags for system UI visibility
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         
-        // Configure system UI visibility for optimal heads-up notification display
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            controller.setSystemBarsAppearance(
-                WindowInsetsControllerCompat.APPEARANCE_LIGHT_STATUS_BARS,
-                WindowInsetsControllerCompat.APPEARANCE_LIGHT_STATUS_BARS
-            );
-        }
+        // Status bar appearance is handled via XML themes in styles.xml
     }
 }
