@@ -18,8 +18,7 @@ export const MonitoringBootstrap = () => {
 
   const isDebugMode = typeof window !== 'undefined' && (
     new URLSearchParams(window.location.search).get('debug') === '1' ||
-    new URLSearchParams(window.location.hash.split('?')[1] || '').get('debug') === '1' ||
-    localStorage.getItem('debug-panel-enabled') === 'true'
+    new URLSearchParams(window.location.hash.split('?')[1] || '').get('debug') === '1'
   );
 
   // Debounced toast function to prevent spam and flickering
@@ -78,14 +77,11 @@ export const MonitoringBootstrap = () => {
       try {
         console.log('[MonitoringBootstrap] Starting lightweight bootstrap process');
         
-        // Show debug mode confirmation if enabled (with deduplication)
-        if (isDebugMode) {
-          showToast(
-            'debug-mode',
-            "🐛 Debug Mode Active",
-            "Short thresholds enabled for testing (30-60 seconds instead of 15 minutes)",
-            5000
-          );
+        // Request notification permission before starting monitoring
+        try {
+          await requestNotificationPermissions();
+        } catch (error) {
+          console.log('[MonitoringBootstrap] Notification permission request failed, but continuing:', error);
         }
 
         // Check if we already have usage access permission
@@ -98,7 +94,7 @@ export const MonitoringBootstrap = () => {
         if (permissionStatus.usageAccess) {
           // Auto-start monitoring if permission is already granted
           await SystemMonitoring.startMonitoring({ debug: isDebugMode });
-          console.log(`[MonitoringBootstrap] Monitoring auto-started ${isDebugMode ? '(Debug Mode - 25s Instagram threshold)' : '(Production Mode - 15min Instagram threshold)'}`);
+          console.log(`[MonitoringBootstrap] Monitoring auto-started ${isDebugMode ? '(Debug Mode)' : '(Production Mode)'}`);
 
           setIsBootstrapped(true);
 
@@ -107,13 +103,14 @@ export const MonitoringBootstrap = () => {
             showToast(
               'monitoring-active',
               "✅ FlowLight Active",
-              `Monitoring started ${isDebugMode ? '(Debug: 25s Instagram threshold)' : '(15min Instagram threshold)'}. Check for persistent notification.`,
-              6000
+              "Monitoring started. Check for persistent notification.",
+              4000
             );
           }, 1000);
         } else {
           console.log('[MonitoringBootstrap] No usage access - waiting for onboarding to complete');
-          setIsBootstrapped(true); // Mark as bootstrapped but not monitoring
+          // DON'T mark as bootstrapped if we don't have permission - this was the bug!
+          setIsBootstrapped(false);
         }
 
       } catch (error) {
@@ -150,6 +147,8 @@ export const MonitoringBootstrap = () => {
           bootstrapInProgressRef.current = true;
           
           try {
+            // Request notification permission before starting
+            await requestNotificationPermissions();
             await SystemMonitoring.startMonitoring({ debug: isDebugMode });
             setIsBootstrapped(true);
             
@@ -159,11 +158,13 @@ export const MonitoringBootstrap = () => {
             setTimeout(() => {
               showToast(
                 'monitoring-resumed',
-                "✅ FlowLight Resumed",
-                "Monitoring reactivated after permission granted",
+                "✅ FlowLight Active",
+                "Monitoring started successfully",
                 3000
               );
             }, 500);
+          } catch (error) {
+            console.error('[MonitoringBootstrap] Failed to start monitoring after resume:', error);
           } finally {
             bootstrapInProgressRef.current = false;
           }

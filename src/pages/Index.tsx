@@ -10,7 +10,7 @@ import DiceRollsRemaining from "@/components/DiceRollsRemaining";
 import UserMenu from "@/components/UserMenu";
 import PomodoroModal from "@/components/PomodoroModal";
 import CalendarModal from "@/components/CalendarModal";
-import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
+// import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
 import NudgeResponseModal from "@/components/NudgeResponseModal";
 import { SystemWideTestPanel } from "@/components/SystemWideTestPanel";
 import { BottomNavigation } from "@/components/BottomNavigation";
@@ -19,7 +19,7 @@ import { DailyMantra } from "@/components/DailyMantra";
 import { Button } from "@/components/ui/button";
 import { Timer, Home, Brain, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useDoomScrollingDetection } from "@/hooks/useDoomScrollingDetection";
+// import { useDoomScrollingDetection } from "@/hooks/useDoomScrollingDetection";
 import { useReminderSystem } from "@/hooks/useReminderSystem";
 import { useDiceSystem, CompletionResult } from "@/hooks/useDiceSystem";
 import { toast } from "@/hooks/use-toast";
@@ -39,14 +39,14 @@ const Index = () => {
   } = useAuth();
   const [appState, setAppState] = useState<AppState>("welcome");
   
-  // Debug mode detection - check both URL params and localStorage
+  // Debug mode detection - URL param only
   const [isDebugMode, setIsDebugMode] = useState(false);
   
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const debugParam = urlParams.get('debug') === '1';
-    const debugStorage = localStorage.getItem('debug-panel-enabled') === 'true';
-    setIsDebugMode(debugParam || debugStorage);
+    const hashParams = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    const debugParam = urlParams.get('debug') === '1' || hashParams.get('debug') === '1';
+    setIsDebugMode(debugParam);
   }, []);
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedMoodId, setSelectedMoodId] = useState<string | null>(null);
@@ -55,10 +55,10 @@ const Index = () => {
   const [completionResult, setCompletionResult] = useState<CompletionResult | null>(null);
   const [plannedDuration, setPlannedDuration] = useState<number>(0);
   const [actualDuration, setActualDuration] = useState<number>(0);
-  const {
-    shouldShowIntervention,
-    dismissIntervention
-  } = useDoomScrollingDetection();
+  // const {
+  //   shouldShowIntervention,
+  //   dismissIntervention
+  // } = useDoomScrollingDetection();
   const {
     showNudgeModal,
     currentReminderType,
@@ -219,7 +219,11 @@ const Index = () => {
                 size="sm" 
                 onClick={() => {
                   setIsDebugMode(false);
-                  window.history.replaceState({}, '', window.location.pathname);
+                  localStorage.removeItem('debug-panel-enabled'); // Clean up legacy flag
+                  const url = new URL(window.location.href);
+                  url.searchParams.delete('debug');
+                  url.hash = url.hash.replace(/[?&]debug=1/, '');
+                  window.history.replaceState({}, '', url.toString());
                 }}
                 className="text-muted-foreground hover:text-foreground"
               >
@@ -249,7 +253,7 @@ const Index = () => {
   }
   
   return <div className={`min-h-screen ${getDailyBackground()}`}>
-      {shouldShowIntervention && <DoomScrollingIntervention isOpen={shouldShowIntervention} onClose={dismissIntervention} onStartMoodCheck={handleStartMoodCheck} />}
+      {/* Doom scrolling intervention temporarily disabled */}
       
       {appState === "welcome" && <WelcomeScreen onStart={handleStart} />}
       

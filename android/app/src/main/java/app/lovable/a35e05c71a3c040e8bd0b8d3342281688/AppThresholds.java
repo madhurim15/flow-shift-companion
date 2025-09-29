@@ -24,7 +24,7 @@ public class AppThresholds {
                 );
             case "com.instagram.android":
                 return new AppConfig(
-                    new int[]{10 * 60, 20 * 60, 30 * 60, 40 * 60},
+                    new int[]{15 * 60, 25 * 60, 35 * 60, 45 * 60}, // Same as YouTube: 15, 25, 35, 45 minutes
                     new int[]{25, 45, 90, 150},
                     "seeking_stimulation"
                 );

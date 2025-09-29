@@ -31,8 +31,17 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
       if (result.usageAccess) {
         toast({
           title: "Permission Granted!",
-          description: "Usage access enabled successfully.",
+          description: "Starting FlowLight monitoring...",
         });
+        
+        // Immediately start monitoring after permission is granted
+        try {
+          await SystemMonitoring.startMonitoring();
+          console.log('[UsageAccessSetup] Monitoring started immediately after permission grant');
+        } catch (error) {
+          console.error('[UsageAccessSetup] Failed to start monitoring:', error);
+        }
+        
         onPermissionGranted();
       }
     } catch (error) {
@@ -67,9 +76,8 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
     } catch (error) {
       console.error('Error requesting usage access:', error);
       toast({
-        title: "Settings Error",
-        description: "Please manually enable Usage Access in your device settings.",
-        variant: "destructive"
+        title: "Opening Settings",
+        description: "Please enable Usage Access for FlowLight in the settings.",
       });
     }
   };
