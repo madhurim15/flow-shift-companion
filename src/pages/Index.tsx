@@ -12,11 +12,12 @@ import PomodoroModal from "@/components/PomodoroModal";
 import CalendarModal from "@/components/CalendarModal";
 import DoomScrollingIntervention from "@/components/DoomScrollingIntervention";
 import NudgeResponseModal from "@/components/NudgeResponseModal";
+import { SystemWideTestPanel } from "@/components/SystemWideTestPanel";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { MainGoalInput } from "@/components/MainGoalInput";
 import { DailyMantra } from "@/components/DailyMantra";
 import { Button } from "@/components/ui/button";
-import { Timer, Home, Brain } from "lucide-react";
+import { Timer, Home, Brain, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDoomScrollingDetection } from "@/hooks/useDoomScrollingDetection";
 import { useReminderSystem } from "@/hooks/useReminderSystem";
@@ -37,6 +38,15 @@ const Index = () => {
     loading
   } = useAuth();
   const [appState, setAppState] = useState<AppState>("welcome");
+  
+  // Debug mode detection
+  const [isDebugMode, setIsDebugMode] = useState(false);
+  
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const debugParam = urlParams.get('debug');
+    setIsDebugMode(debugParam === '1');
+  }, []);
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedMoodId, setSelectedMoodId] = useState<string | null>(null);
   const [currentAction, setCurrentAction] = useState<string>("");
@@ -195,6 +205,48 @@ const Index = () => {
   if (!user) {
     return null;
   }
+
+  // Render debug mode interface
+  if (isDebugMode) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="container flex h-16 items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => {
+                  setIsDebugMode(false);
+                  window.history.replaceState({}, '', window.location.pathname);
+                }}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Home size={18} />
+                <span className="ml-2">Exit Debug</span>
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-2 bg-orange-100 dark:bg-orange-900/20 px-3 py-1 rounded-full">
+              <Settings size={16} className="text-orange-600 dark:text-orange-400" />
+              <span className="text-sm font-medium text-orange-800 dark:text-orange-300">
+                Debug Mode
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <UserMenu />
+            </div>
+          </div>
+        </header>
+        
+        <main className="container py-8 px-4">
+          <SystemWideTestPanel />
+        </main>
+      </div>
+    );
+  }
+  
   return <div className={`min-h-screen ${getDailyBackground()}`}>
       {shouldShowIntervention && <DoomScrollingIntervention isOpen={shouldShowIntervention} onClose={dismissIntervention} onStartMoodCheck={handleStartMoodCheck} />}
       
