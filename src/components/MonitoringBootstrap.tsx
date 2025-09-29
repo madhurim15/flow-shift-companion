@@ -76,7 +76,7 @@ export const MonitoringBootstrap = () => {
       bootstrapInProgressRef.current = true;
       
       try {
-        console.log('[MonitoringBootstrap] Starting bootstrap process');
+        console.log('[MonitoringBootstrap] Starting lightweight bootstrap process');
         
         // Show debug mode confirmation if enabled (with deduplication)
         if (isDebugMode) {
@@ -87,71 +87,34 @@ export const MonitoringBootstrap = () => {
             5000
           );
         }
-        
-        // 1. Initialize local notifications
-        await initLocalNotifications();
-        
-        // 2. Request notification permissions if needed
-        const notificationGranted = await requestNotificationPermissions();
-        if (!notificationGranted) {
-          console.warn('[MonitoringBootstrap] Notification permission denied');
-        }
 
-        // 3. Check usage access permission with debouncing
+        // Check if we already have usage access permission
         const permissionStatus = await checkPermissionsWithDebounce();
         if (!permissionStatus) {
           bootstrapInProgressRef.current = false;
           return;
         }
 
-        if (!permissionStatus.usageAccess) {
-          console.log('[MonitoringBootstrap] Usage Access permission not granted - opening settings');
-          // Add delay before showing permission toast to avoid overlap
+        if (permissionStatus.usageAccess) {
+          // Auto-start monitoring if permission is already granted
+          await SystemMonitoring.startMonitoring({ debug: isDebugMode });
+          console.log(`[MonitoringBootstrap] Monitoring auto-started ${isDebugMode ? '(Debug Mode - 25s Instagram threshold)' : '(Production Mode - 15min Instagram threshold)'}`);
+
+          setIsBootstrapped(true);
+
+          // Success confirmation
           setTimeout(() => {
             showToast(
-              'permission-required',
-              "🔑 Permission Required", 
-              "FlowLight needs Usage Access to monitor apps. Enable it in settings, then return to the app.",
-              12000
+              'monitoring-active',
+              "✅ FlowLight Active",
+              `Monitoring started ${isDebugMode ? '(Debug: 25s Instagram threshold)' : '(15min Instagram threshold)'}. Check for persistent notification.`,
+              6000
             );
-          }, isDebugMode ? 1000 : 500);
-
-          try {
-            // Open usage access settings
-            await SystemMonitoring.requestPermissions();
-            
-            // Don't start monitoring yet - wait for user to return with permission
-            console.log('[MonitoringBootstrap] Waiting for Usage Access permission...');
-            bootstrapInProgressRef.current = false;
-            return;
-          } catch (error) {
-            console.error('[MonitoringBootstrap] Failed to open Usage Access settings:', error);
-            showToast(
-              'settings-error',
-              "Settings Error",
-              "Could not open Usage Access settings. Please enable manually in Android Settings.",
-              8000
-            );
-            bootstrapInProgressRef.current = false;
-            return;
-          }
+          }, 1000);
+        } else {
+          console.log('[MonitoringBootstrap] No usage access - waiting for onboarding to complete');
+          setIsBootstrapped(true); // Mark as bootstrapped but not monitoring
         }
-
-        // 4. Start monitoring service with debug flag (only if we have permission)
-        await SystemMonitoring.startMonitoring({ debug: isDebugMode });
-        console.log(`[MonitoringBootstrap] Monitoring started ${isDebugMode ? '(Debug Mode - 25s Instagram threshold)' : '(Production Mode - 15min Instagram threshold)'}`);
-
-        setIsBootstrapped(true);
-
-        // Success confirmation with delay to avoid overlap
-        setTimeout(() => {
-          showToast(
-            'monitoring-active',
-            "✅ FlowLight Active",
-            `Monitoring started ${isDebugMode ? '(Debug: 25s Instagram threshold)' : '(15min Instagram threshold)'}. Check for persistent notification.`,
-            6000
-          );
-        }, 1000);
 
       } catch (error) {
         console.error('[MonitoringBootstrap] Failed to bootstrap:', error);
