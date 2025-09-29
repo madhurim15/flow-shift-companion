@@ -6,15 +6,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useSystemWideMonitoring } from '@/hooks/useSystemWideMonitoring';
 import { SystemWideInterventionDialog } from './SystemWideInterventionDialog';
 import { getInterventionMessage, type PsychologicalState } from '@/utils/systemWideInterventionUtils';
-import { Smartphone, TestTube, Zap, Brain, AlertCircle } from 'lucide-react';
+import { Smartphone, TestTube, Zap, Brain, AlertCircle, Settings, CheckCircle, XCircle, PlayCircle, Square } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
+import { SystemMonitoring } from '@/plugins/system-monitoring';
+import { useToast } from '@/hooks/use-toast';
 
 export const SystemWideTestPanel: React.FC = () => {
   const { isMonitoring } = useSystemWideMonitoring();
+  const { toast } = useToast();
   const [selectedApp, setSelectedApp] = useState<string>('com.instagram.android');
   const [selectedState, setSelectedState] = useState<PsychologicalState>('seeking_stimulation');
   const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [testMessage, setTestMessage] = useState('');
   const [currentSession, setCurrentSession] = useState<any>(null);
+  const [hasUsageAccess, setHasUsageAccess] = useState(false);
+  const [isNativeMonitoringActive, setIsNativeMonitoringActive] = useState(false);
+  
+  const isNativeAndroid = Capacitor.getPlatform() === 'android' && Capacitor.isNativePlatform();
 
   const testApps = [
     { package: 'com.instagram.android', name: 'Instagram', category: 'Social Media' },
@@ -59,6 +67,78 @@ export const SystemWideTestPanel: React.FC = () => {
     setCurrentSession(null);
   };
 
+  // Check permissions on component mount
+  React.useEffect(() => {
+    if (isNativeAndroid) {
+      checkPermissions();
+    }
+  }, [isNativeAndroid]);
+
+  const checkPermissions = async () => {
+    try {
+      const permissions = await SystemMonitoring.checkPermissions();
+      setHasUsageAccess(permissions.usageAccess);
+    } catch (error) {
+      console.error('Failed to check permissions:', error);
+    }
+  };
+
+  const handleStartMonitoring = async () => {
+    try {
+      await SystemMonitoring.startMonitoring({ debug: true });
+      setIsNativeMonitoringActive(true);
+      toast({
+        title: "Monitoring Started",
+        description: "FlowLight monitoring active with debug thresholds (25s for Instagram)",
+        duration: 5000
+      });
+      
+      // Re-check permissions
+      checkPermissions();
+    } catch (error) {
+      toast({
+        title: "Failed to Start",
+        description: "Could not start monitoring. Check Usage Access permission.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleStopMonitoring = async () => {
+    try {
+      await SystemMonitoring.stopMonitoring();
+      setIsNativeMonitoringActive(false);
+      toast({
+        title: "Monitoring Stopped",
+        description: "FlowLight monitoring has been paused",
+        duration: 3000
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to Stop",
+        description: "Could not stop monitoring service",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleOpenUsageSettings = async () => {
+    try {
+      await SystemMonitoring.requestPermissions();
+      toast({
+        title: "Opening Settings",
+        description: "Please enable Usage Access for FlowLight and return to the app",
+        duration: 8000
+      });
+    } catch (error) {
+      toast({
+        title: "Settings Error",
+        description: "Could not open Usage Access settings",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleTestIntervention = async () => {
     const message = getInterventionMessage(selectedState, 'gentle_nudge', selectedApp.split('.').pop(), new Date().getHours());
     setTestMessage(message);
@@ -98,6 +178,82 @@ export const SystemWideTestPanel: React.FC = () => {
               </Badge>
             )}
           </div>
+
+          {/* Native Android Controls */}
+          {isNativeAndroid && (
+            <div className="space-y-4 p-4 border-2 border-primary/20 rounded-lg bg-primary/5">
+              <h4 className="font-medium flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Native Android Controls
+              </h4>
+              
+              {/* Permission Status */}
+              <div className="grid gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Usage Access Permission:</span>
+                  <Badge variant={hasUsageAccess ? "default" : "destructive"} className="flex items-center gap-1">
+                    {hasUsageAccess ? <CheckCircle className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                    {hasUsageAccess ? 'Granted' : 'Required'}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Persistent Notification:</span>
+                  <Badge variant="outline" className="text-xs">
+                    Check for "FlowLight monitoring active"
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Control Buttons */}
+              <div className="grid grid-cols-1 gap-2">
+                {!hasUsageAccess && (
+                  <Button onClick={handleOpenUsageSettings} className="w-full" variant="default">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Open Usage Access Settings
+                  </Button>
+                )}
+                
+                {hasUsageAccess && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button 
+                      onClick={handleStartMonitoring} 
+                      disabled={isNativeMonitoringActive}
+                      variant="default"
+                      size="sm"
+                    >
+                      <PlayCircle className="h-4 w-4 mr-2" />
+                      Start Monitoring
+                    </Button>
+                    
+                    <Button 
+                      onClick={handleStopMonitoring}
+                      disabled={!isNativeMonitoringActive}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Square className="h-4 w-4 mr-2" />
+                      Stop Monitoring
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Status Guidance */}
+              <div className="text-xs text-muted-foreground p-3 bg-blue-50 dark:bg-blue-950/20 rounded">
+                <div className="font-medium text-blue-800 dark:text-blue-200 mb-1">
+                  Expected Setup Process:
+                </div>
+                <ol className="text-blue-700 dark:text-blue-300 space-y-1 list-decimal list-inside">
+                  <li>Grant Usage Access permission</li>
+                  <li>Start monitoring service</li>
+                  <li>Verify persistent notification appears</li>
+                  <li>Test Instagram for 25 seconds (debug mode)</li>
+                  <li>Expect gentle intervention nudge</li>
+                </ol>
+              </div>
+            </div>
+          )}
 
           {/* App Selection */}
           <div className="grid gap-4 md:grid-cols-2">

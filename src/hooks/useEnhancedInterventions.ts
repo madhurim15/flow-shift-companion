@@ -39,7 +39,7 @@ const APP_CONFIGS = {
     category: 'entertainment'
   },
   'com.instagram.android': {
-    thresholds: [10 * 60, 20 * 60, 30 * 60, 40 * 60],
+    thresholds: [15 * 60, 25 * 60, 35 * 60, 45 * 60], // Updated to 15 minutes
     debugThresholds: [25, 45, 90, 150],
     psychState: 'seeking_stimulation' as const,
     category: 'social'
@@ -199,8 +199,10 @@ export const useEnhancedInterventions = () => {
   const [currentIntervention, setCurrentIntervention] = useState<InterventionMessage | null>(null);
   const { toast } = useToast();
 
-  const isDebugMode = typeof window !== 'undefined' && 
-    new URLSearchParams(window.location.search).get('debug') === '1';
+  const isDebugMode = typeof window !== 'undefined' && (
+    new URLSearchParams(window.location.search).get('debug') === '1' ||
+    localStorage.getItem('debug-panel-enabled') === 'true'
+  );
 
   // Get app configuration with debug support
   const getAppConfig = useCallback((packageName: string) => {

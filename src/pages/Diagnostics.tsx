@@ -14,15 +14,22 @@ import {
   XCircle, 
   Info, 
   TestTube,
-  ArrowLeft
+  ArrowLeft,
+  PlayCircle,
+  Square,
+  Settings
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { SystemMonitoring } from '@/plugins/system-monitoring';
 
 const Diagnostics = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const localNotifications = useLocalNotifications();
   const [diagnosticsData, setDiagnosticsData] = useState<any>({});
+  const [hasUsageAccess, setHasUsageAccess] = useState(false);
+  
+  const isNativeAndroid = Capacitor.getPlatform() === 'android' && Capacitor.isNativePlatform();
 
   useEffect(() => {
     const gatherDiagnostics = async () => {
@@ -46,6 +53,18 @@ const Diagnostics = () => {
         }
       }
 
+      // Check usage access on native Android
+      let usageAccess = false;
+      if (isNativeAndroid) {
+        try {
+          const permissions = await SystemMonitoring.checkPermissions();
+          usageAccess = permissions.usageAccess;
+          setHasUsageAccess(usageAccess);
+        } catch (error) {
+          console.error('Failed to check usage access:', error);
+        }
+      }
+
       setDiagnosticsData({
         platform,
         isNative,
@@ -54,6 +73,7 @@ const Diagnostics = () => {
         notificationPermission,
         serviceWorkerStatus,
         localNotificationsState: localNotifications,
+        usageAccess,
         timestamp: new Date().toISOString(),
         capacitorVersion: '7.4.2', // From package.json
         environment: import.meta.env.MODE
@@ -61,7 +81,7 @@ const Diagnostics = () => {
     };
 
     gatherDiagnostics();
-  }, [localNotifications]);
+  }, [localNotifications, isNativeAndroid]);
 
   const handleRequestPermissions = async () => {
     try {
@@ -135,6 +155,57 @@ const Diagnostics = () => {
     }
   };
 
+  const handleStartMonitoring = async () => {
+    try {
+      await SystemMonitoring.startMonitoring({ debug: true });
+      toast({
+        title: "Monitoring Started",
+        description: "FlowLight monitoring active with debug thresholds",
+        duration: 4000
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to Start",
+        description: "Could not start monitoring. Check Usage Access permission.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleStopMonitoring = async () => {
+    try {
+      await SystemMonitoring.stopMonitoring();
+      toast({
+        title: "Monitoring Stopped",
+        description: "FlowLight monitoring has been paused",
+        duration: 3000
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to Stop",
+        description: "Could not stop monitoring service",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleOpenUsageSettings = async () => {
+    try {
+      await SystemMonitoring.requestPermissions();
+      toast({
+        title: "Opening Settings",
+        description: "Please enable Usage Access for FlowLight",
+        duration: 5000
+      });
+    } catch (error) {
+      toast({
+        title: "Settings Error",
+        description: "Could not open Usage Access settings",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getStatusBadge = (condition: boolean, trueText: string, falseText: string) => (
     <Badge variant={condition ? "default" : "destructive"} className="ml-2">
       {condition ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
@@ -184,6 +255,71 @@ const Diagnostics = () => {
 
         {/* System-Wide Monitoring Status */}
         <MonitoringStatus />
+
+        {/* Native Android Monitoring Controls */}
+        {isNativeAndroid && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Native Monitoring Controls
+              </CardTitle>
+              <CardDescription>
+                Direct controls for system monitoring service
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span>Usage Access Permission:</span>
+                {getStatusBadge(hasUsageAccess, "Granted", "Required")}
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span>Persistent Notification:</span>
+                <Badge variant="outline" className="text-xs">
+                  Check for "FlowLight monitoring active"
+                </Badge>
+              </div>
+
+              <Separator />
+              
+              <div className="grid grid-cols-1 gap-2">
+                {!hasUsageAccess && (
+                  <Button onClick={handleOpenUsageSettings} className="w-full">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Open Usage Access Settings
+                  </Button>
+                )}
+                
+                {hasUsageAccess && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button onClick={handleStartMonitoring} variant="default" size="sm">
+                      <PlayCircle className="h-4 w-4 mr-2" />
+                      Start Monitoring
+                    </Button>
+                    
+                    <Button onClick={handleStopMonitoring} variant="outline" size="sm">
+                      <Square className="h-4 w-4 mr-2" />
+                      Stop Monitoring  
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="text-xs text-muted-foreground p-3 bg-green-50 dark:bg-green-950/20 rounded">
+                <div className="font-medium text-green-800 dark:text-green-200 mb-1">
+                  Quick Test Process:
+                </div>
+                <ol className="text-green-700 dark:text-green-300 space-y-1 list-decimal list-inside">
+                  <li>Start monitoring service</li>
+                  <li>Open Instagram app</li>
+                  <li>Use for 25 seconds</li>
+                  <li>Expect intervention nudge</li>
+                </ol>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Notification Status */}
         <Card>

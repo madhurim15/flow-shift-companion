@@ -18,7 +18,8 @@ export const MonitoringBootstrap = () => {
 
   const isDebugMode = typeof window !== 'undefined' && (
     new URLSearchParams(window.location.search).get('debug') === '1' ||
-    new URLSearchParams(window.location.hash.split('?')[1] || '').get('debug') === '1'
+    new URLSearchParams(window.location.hash.split('?')[1] || '').get('debug') === '1' ||
+    localStorage.getItem('debug-panel-enabled') === 'true'
   );
 
   // Debounced toast function to prevent spam and flickering
@@ -104,13 +105,14 @@ export const MonitoringBootstrap = () => {
         }
 
         if (!permissionStatus.usageAccess) {
+          console.log('[MonitoringBootstrap] Usage Access permission not granted - opening settings');
           // Add delay before showing permission toast to avoid overlap
           setTimeout(() => {
             showToast(
               'permission-required',
               "🔑 Permission Required", 
-              "FlowLight needs Usage Access to monitor apps. Please enable it in the settings that will open.",
-              10000
+              "FlowLight needs Usage Access to monitor apps. Enable it in settings, then return to the app.",
+              12000
             );
           }, isDebugMode ? 1000 : 500);
 
@@ -137,7 +139,7 @@ export const MonitoringBootstrap = () => {
 
         // 4. Start monitoring service with debug flag (only if we have permission)
         await SystemMonitoring.startMonitoring({ debug: isDebugMode });
-        console.log(`[MonitoringBootstrap] Monitoring started ${isDebugMode ? '(Debug Mode - Short Thresholds)' : ''}`);
+        console.log(`[MonitoringBootstrap] Monitoring started ${isDebugMode ? '(Debug Mode - 25s Instagram threshold)' : '(Production Mode - 15min Instagram threshold)'}`);
 
         setIsBootstrapped(true);
 
@@ -146,8 +148,8 @@ export const MonitoringBootstrap = () => {
           showToast(
             'monitoring-active',
             "✅ FlowLight Active",
-            `Monitoring started ${isDebugMode ? '(Debug Mode - Quick nudges!)' : ''}`,
-            4000
+            `Monitoring started ${isDebugMode ? '(Debug: 25s Instagram threshold)' : '(15min Instagram threshold)'}. Check for persistent notification.`,
+            6000
           );
         }, 1000);
 

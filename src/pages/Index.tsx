@@ -39,13 +39,14 @@ const Index = () => {
   } = useAuth();
   const [appState, setAppState] = useState<AppState>("welcome");
   
-  // Debug mode detection
+  // Debug mode detection - check both URL params and localStorage
   const [isDebugMode, setIsDebugMode] = useState(false);
   
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const debugParam = urlParams.get('debug');
-    setIsDebugMode(debugParam === '1');
+    const debugParam = urlParams.get('debug') === '1';
+    const debugStorage = localStorage.getItem('debug-panel-enabled') === 'true';
+    setIsDebugMode(debugParam || debugStorage);
   }, []);
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
   const [selectedMoodId, setSelectedMoodId] = useState<string | null>(null);
