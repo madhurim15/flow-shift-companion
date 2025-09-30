@@ -15,6 +15,7 @@ export interface DurationUpdateEvent {
 export interface SystemMonitoringPlugin {
   requestPermissions(): Promise<{ granted: boolean }>;
   checkPermissions(): Promise<{ usageAccess: boolean }>;
+  hasUsageStatsPermission(): Promise<{ granted: boolean }>;
   startMonitoring(options?: { debug?: boolean }): Promise<void>;
   stopMonitoring(): Promise<void>;
   addListener(

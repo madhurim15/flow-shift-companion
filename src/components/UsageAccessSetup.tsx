@@ -149,10 +149,10 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
   const checkAgainNow = async () => {
     setIsChecking(true);
     try {
-      const result = await SystemMonitoring.checkPermissions();
-      console.log('[UsageAccessSetup] Manual check result:', result);
+      const result = await SystemMonitoring.hasUsageStatsPermission();
+      console.log('[UsageAccessSetup] hasUsageStatsPermission result:', result);
       
-      if (result.usageAccess) {
+      if (result.granted) {
         setHasUsageAccess(true);
         toast({
           title: "Permission Found!",

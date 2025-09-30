@@ -24,6 +24,7 @@ public class SystemMonitoringPlugin extends Plugin {
   @Override
   public void load() {
     super.load();
+    android.util.Log.i("FlowLight", "SystemMonitoringPlugin loaded");
     // Register receiver for app change events
     appChangeReceiver = new BroadcastReceiver() {
       @Override
@@ -68,73 +69,36 @@ public class SystemMonitoringPlugin extends Plugin {
 
   @PluginMethod
   public void requestPermissions(PluginCall call) {
-    boolean granted = hasUsageStatsPermission(getContext());
     Context ctx = getContext();
+    boolean granted = UsageStatsHelper.hasUsageStatsPermission(ctx);
 
     if (!granted) {
-      boolean opened = false;
-
-      // Try direct Usage Access settings
-      try {
-        Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-        if (getActivity() != null) {
-          getActivity().startActivity(intent);
-        } else {
-          intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-          ctx.startActivity(intent);
-        }
-        opened = true;
-      } catch (Exception e) { /* fallback below */ }
-
-      // Fallback: general security settings (some OEMs route from here)
-      if (!opened) {
-        try {
-          Intent intent = new Intent(Settings.ACTION_SECURITY_SETTINGS);
-          if (getActivity() != null) {
-            getActivity().startActivity(intent);
-          } else {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            ctx.startActivity(intent);
-          }
-          opened = true;
-        } catch (Exception e) { /* fallback below */ }
-      }
-
-      // Last resort: app details -> user can navigate to "Special app access" > "Usage data access"
-      if (!opened) {
-        try {
-          Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-          intent.setData(Uri.fromParts("package", ctx.getPackageName(), null));
-          if (getActivity() != null) {
-            getActivity().startActivity(intent);
-          } else {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            ctx.startActivity(intent);
-          }
-          opened = true;
-        } catch (Exception e) {
-          call.reject("Could not open Usage Access settings");
-          return;
-        }
-      }
+      UsageStatsHelper.openUsageAccessSettings(getActivity(), ctx);
     }
 
     JSObject ret = new JSObject();
-    ret.put("granted", hasUsageStatsPermission(ctx));
+    ret.put("granted", UsageStatsHelper.hasUsageStatsPermission(ctx));
+    call.resolve(ret);
+  }
+
+  @PluginMethod
+  public void hasUsageStatsPermission(PluginCall call) {
+    JSObject ret = new JSObject();
+    ret.put("granted", UsageStatsHelper.hasUsageStatsPermission(getContext()));
     call.resolve(ret);
   }
 
   @PluginMethod
   public void checkPermissions(PluginCall call) {
     JSObject ret = new JSObject();
-    ret.put("usageAccess", hasUsageStatsPermission(getContext()));
+    ret.put("usageAccess", UsageStatsHelper.hasUsageStatsPermission(getContext()));
     call.resolve(ret);
   }
 
   @PluginMethod
   public void startMonitoring(PluginCall call) {
     // Ensure Usage Access is granted before starting service
-    if (!hasUsageStatsPermission(getContext())) {
+    if (!UsageStatsHelper.hasUsageStatsPermission(getContext())) {
       call.reject("Usage access permission not granted");
       return;
     }
@@ -164,36 +128,4 @@ public class SystemMonitoringPlugin extends Plugin {
     }
   }
 
-  private boolean hasUsageStatsPermission(Context context) {
-    try {
-      AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-      int mode;
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        mode = appOps.unsafeCheckOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), context.getPackageName());
-      } else {
-        mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), context.getPackageName());
-      }
-      
-      if (mode == AppOpsManager.MODE_ALLOWED) {
-        return true;
-      }
-      
-      // Fallback check for Samsung/OEM devices where AppOps might be unreliable
-      try {
-        android.app.usage.UsageStatsManager usageStatsManager = 
-          (android.app.usage.UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-        long endTime = System.currentTimeMillis();
-        long startTime = endTime - 60000; // Last 60 seconds
-        android.app.usage.UsageEvents events = 
-          usageStatsManager.queryEvents(startTime, endTime);
-        // If we can query events without exception, permission is granted
-        return events != null;
-      } catch (Exception fallbackException) {
-        // If both AppOps and UsageStatsManager fail, no permission
-        return false;
-      }
-    } catch (Exception e) {
-      return false;
-    }
-  }
 }
