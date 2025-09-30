@@ -184,7 +184,7 @@ public class SystemMonitoringPlugin extends Plugin {
           (android.app.usage.UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
         long endTime = System.currentTimeMillis();
         long startTime = endTime - 60000; // Last 60 seconds
-        java.util.List<android.app.usage.UsageEvents.Event> events = 
+        android.app.usage.UsageEvents events = 
           usageStatsManager.queryEvents(startTime, endTime);
         // If we can query events without exception, permission is granted
         return events != null;
