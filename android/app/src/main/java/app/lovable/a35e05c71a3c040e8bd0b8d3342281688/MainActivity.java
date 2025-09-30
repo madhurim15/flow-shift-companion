@@ -16,6 +16,9 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // Register custom Capacitor plugin
+        registerPlugin(SystemMonitoringPlugin.class);
+        
         // Configure window for proper display cutout handling and heads-up notifications
         configureWindow();
     }
