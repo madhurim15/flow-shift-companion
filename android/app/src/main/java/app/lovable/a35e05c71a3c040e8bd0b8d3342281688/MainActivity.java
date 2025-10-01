@@ -14,11 +14,11 @@ public class MainActivity extends BridgeActivity {
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Register plugins during bridge initialization
-        android.util.Log.i("FlowLight", "Registering SystemMonitoringPlugin via init()");
-        this.init(savedInstanceState, new java.util.ArrayList<>(java.util.Arrays.asList(
-            SystemMonitoringPlugin.class
-        )));
+        super.onCreate(savedInstanceState);
+        
+        // Register custom plugin
+        android.util.Log.i("FlowLight", "Registering SystemMonitoringPlugin");
+        registerPlugin(SystemMonitoringPlugin.class);
         
         // Configure window for proper display cutout handling and heads-up notifications
         configureWindow();
