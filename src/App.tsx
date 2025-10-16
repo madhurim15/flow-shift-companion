@@ -22,6 +22,13 @@ console.log('📱 Platform:', Capacitor.getPlatform());
 console.log('🏠 Native:', Capacitor.isNativePlatform());
 console.log('🌐 URL:', window.location.href);
 console.log('⚙️ Environment:', import.meta.env.MODE);
+if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android') {
+  // Log available Capacitor plugins to confirm native bridge exposure
+  // @ts-ignore
+  const pluginKeys = Object.keys((window as any).Capacitor?.Plugins || {});
+  console.log('🔌 Capacitor plugins:', pluginKeys);
+  console.log('🔎 SystemMonitoring present:', pluginKeys.includes('SystemMonitoring'));
+}
 
 const queryClient = new QueryClient();
 
