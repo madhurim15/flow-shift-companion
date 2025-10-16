@@ -16,43 +16,77 @@ public class UsageStatsHelper {
    * Check if the app has Usage Stats permission using AppOps and UsageStatsManager fallback
    */
   public static boolean hasUsageStatsPermission(Context context) {
+    int mode = AppOpsManager.MODE_ERRORED;
+    boolean granted = false;
+
     try {
       AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-      int mode;
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         mode = appOps.unsafeCheckOpNoThrow(
-          AppOpsManager.OPSTR_GET_USAGE_STATS, 
-          android.os.Process.myUid(), 
+          AppOpsManager.OPSTR_GET_USAGE_STATS,
+          android.os.Process.myUid(),
           context.getPackageName()
         );
       } else {
         mode = appOps.checkOpNoThrow(
-          AppOpsManager.OPSTR_GET_USAGE_STATS, 
-          android.os.Process.myUid(), 
+          AppOpsManager.OPSTR_GET_USAGE_STATS,
+          android.os.Process.myUid(),
           context.getPackageName()
         );
       }
-      
-      if (mode == AppOpsManager.MODE_ALLOWED) {
-        return true;
-      }
-      
-      // Fallback check for Samsung/OEM devices where AppOps might be unreliable
-      try {
-        UsageStatsManager usageStatsManager = 
-          (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-        long endTime = System.currentTimeMillis();
-        long startTime = endTime - 60000; // Last 60 seconds
-        UsageEvents events = usageStatsManager.queryEvents(startTime, endTime);
-        // If we can query events without exception, permission is granted
-        return events != null;
-      } catch (Exception fallbackException) {
-        // If both AppOps and UsageStatsManager fail, no permission
-        return false;
-      }
+      granted = (mode == AppOpsManager.MODE_ALLOWED);
     } catch (Exception e) {
-      return false;
+      mode = AppOpsManager.MODE_ERRORED;
     }
+
+    if (!granted) {
+      // Fallback: actually verify by reading recent events/stats over 24h
+      try {
+        UsageStatsManager usm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+        long end = System.currentTimeMillis();
+        long begin = end - 24L * 60 * 60 * 1000;
+
+        // 1) Try events: confirm there is at least 1 event in the last 24h
+        boolean hasAnyEvent = false;
+        try {
+          UsageEvents events = usm.queryEvents(begin, end);
+          if (events != null) {
+            UsageEvents.Event ev = new UsageEvents.Event();
+            if (events.hasNextEvent()) {
+              events.getNextEvent(ev);
+              hasAnyEvent = true;
+            }
+          }
+        } catch (Exception ignored) {}
+
+        // 2) Try usage stats list: confirm non-empty list in same window
+        boolean hasAnyStat = false;
+        try {
+          java.util.List<android.app.usage.UsageStats> stats =
+            usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, begin, end);
+          hasAnyStat = (stats != null && !stats.isEmpty());
+        } catch (Exception ignored) {}
+
+        granted = hasAnyEvent || hasAnyStat;
+        android.util.Log.i(
+          "FlowLight",
+          "hasUsageStatsPermission: appOpsMode=" + mode +
+          ", fallbackAnyEvent=" + hasAnyEvent +
+          ", fallbackAnyStat=" + hasAnyStat +
+          ", granted=" + granted
+        );
+      } catch (Exception e) {
+        android.util.Log.i(
+          "FlowLight",
+          "hasUsageStatsPermission: appOpsMode=" + mode + ", fallbackError=" + e.getMessage()
+        );
+        granted = false;
+      }
+    } else {
+      android.util.Log.i("FlowLight", "hasUsageStatsPermission: appOpsMode=" + mode + ", granted=true");
+    }
+
+    return granted;
   }
 
   /**
