@@ -1,10 +1,12 @@
 package app.lovable.a35e05c71a3c040e8bd0b8d3342281688;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -22,6 +24,28 @@ public class MainActivity extends BridgeActivity {
         
         // Configure window for proper display cutout handling and heads-up notifications
         configureWindow();
+        
+        // Auto-start monitoring service if Usage Access is granted
+        autoStartMonitoring();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Re-check and start service when returning from settings
+        autoStartMonitoring();
+    }
+    
+    private void autoStartMonitoring() {
+        if (UsageStatsHelper.hasUsageStatsPermission(getApplicationContext())) {
+            Intent serviceIntent = new Intent(getApplicationContext(), SystemMonitoringService.class);
+            serviceIntent.putExtra("debug", false);
+            ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
+            android.util.Log.i("FlowLight", "Auto-started SystemMonitoringService from MainActivity");
+        } else {
+            android.util.Log.i("FlowLight", "Usage Access not granted, opening settings");
+            UsageStatsHelper.openUsageAccessSettings(this, getApplicationContext());
+        }
     }
     
     private void configureWindow() {
