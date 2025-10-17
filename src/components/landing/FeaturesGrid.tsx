@@ -1,4 +1,5 @@
 import { Heart, Shield, Bell, Clock, BarChart3, Lock } from "lucide-react";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 export const FeaturesGrid = () => {
   const features = [
@@ -35,23 +36,41 @@ export const FeaturesGrid = () => {
   ];
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
-      <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center text-foreground mb-12">
-          Built for Real Change
-        </h2>
+    <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border))_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_110%)] opacity-20"></div>
+      
+      <div className="relative max-w-6xl mx-auto">
+        <ScrollReveal>
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-center text-foreground mb-6">
+            Built for <span className="gradient-text">Real Change</span>
+          </h2>
+          <p className="text-xl text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
+            Everything you need to transform procrastination into productive action
+          </p>
+        </ScrollReveal>
         
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <div key={index} className="p-6 bg-card rounded-lg soft-shadow gentle-hover">
-              <feature.icon className="w-10 h-10 text-primary mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-muted-foreground text-sm">
-                {feature.description}
-              </p>
-            </div>
+            <ScrollReveal key={index} delay={index * 50}>
+              <div className="group relative p-8 bg-card rounded-2xl glass-card lift-hover h-full">
+                {/* Gradient Border on Hover */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 via-accent/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+                
+                {/* Icon */}
+                <div className="w-14 h-14 mb-6 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <feature.icon className="w-7 h-7 text-primary" />
+                </div>
+                
+                {/* Content */}
+                <h3 className="text-xl font-bold text-foreground mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            </ScrollReveal>
           ))}
         </div>
       </div>

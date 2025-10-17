@@ -1,5 +1,6 @@
 import { HeroSection } from "@/components/landing/HeroSection";
 import { ProblemSection } from "@/components/landing/ProblemSection";
+import { WhyDifferentSection } from "@/components/landing/WhyDifferentSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { FeaturesGrid } from "@/components/landing/FeaturesGrid";
 import { ValueDemoSection } from "@/components/landing/ValueDemoSection";
@@ -12,6 +13,7 @@ const Landing = () => {
     <div className="min-h-screen bg-background">
       <HeroSection />
       <ProblemSection />
+      <WhyDifferentSection />
       <HowItWorksSection />
       <FeaturesGrid />
       <ValueDemoSection />
