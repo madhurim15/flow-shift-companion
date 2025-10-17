@@ -12,56 +12,64 @@ export const ValueDemoSection = () => {
   ];
 
   return (
-    <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background"></div>
+    <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-[hsl(50,80%,90%)] to-[hsl(30,70%,88%)]">
+      {/* Decorative blobs */}
+      <div className="absolute top-20 right-10 w-72 h-72 bg-[hsl(50,80%,75%)]/30 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-20 left-10 w-64 h-64 bg-[hsl(30,70%,75%)]/30 rounded-full blur-3xl"></div>
       
-      <div className="relative max-w-5xl mx-auto">
+      <div className="relative max-w-7xl mx-auto">
         <ScrollReveal>
           <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6">
-              What You'll See in <span className="gradient-text">14 Days</span>
+            <h2 className="text-5xl md:text-6xl font-heading font-bold mb-6 text-gray-900">
+              What You'll See in 14 Days
             </h2>
-            <p className="text-xl text-muted-foreground mb-12">
-              Real progress you can measure
+            <p className="text-xl text-gray-800 max-w-3xl mx-auto font-medium mb-12">
+              Real results from understanding your patterns
             </p>
-
-            {/* Stats Preview */}
-            <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto mb-12">
-              <div className="p-6 rounded-2xl glass-card">
-                <div className="text-4xl font-bold gradient-text mb-2">
-                  <AnimatedCounter end={15} suffix="+" />
-                </div>
-                <div className="text-sm text-muted-foreground">Hours Saved</div>
-              </div>
-              <div className="p-6 rounded-2xl glass-card">
-                <div className="text-4xl font-bold gradient-text mb-2">
-                  <AnimatedCounter end={47} suffix="%" />
-                </div>
-                <div className="text-sm text-muted-foreground">Less Scrolling</div>
-              </div>
-              <div className="p-6 rounded-2xl glass-card">
-                <div className="text-4xl font-bold gradient-text mb-2">
-                  <AnimatedCounter end={89} suffix="+" />
-                </div>
-                <div className="text-sm text-muted-foreground">Actions Taken</div>
-              </div>
-            </div>
           </div>
         </ScrollReveal>
-        
-        <div className="grid sm:grid-cols-2 gap-6">
-          {outcomes.map((outcome, index) => (
-            <ScrollReveal key={index} delay={index * 50}>
-              <div className="flex items-start gap-4 p-6 rounded-2xl glass-card lift-hover">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
-                </div>
-                <p className="text-foreground text-lg leading-relaxed">{outcome}</p>
+
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <ScrollReveal delay={100}>
+            <div className="bg-[hsl(340,65%,88%)] p-10 rounded-3xl text-center shadow-lg hover:scale-105 hover:-translate-y-2 transition-all duration-300">
+              <div className="text-6xl font-bold text-[hsl(340,65%,55%)] mb-3">
+                <AnimatedCounter end={4} duration={2000} suffix="+" />
               </div>
-            </ScrollReveal>
-          ))}
+              <p className="text-xl text-gray-800 font-medium">Hours Saved Weekly</p>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={200}>
+            <div className="bg-[hsl(210,65%,88%)] p-10 rounded-3xl text-center shadow-lg hover:scale-105 hover:-translate-y-2 transition-all duration-300">
+              <div className="text-6xl font-bold text-[hsl(210,65%,55%)] mb-3">
+                <AnimatedCounter end={60} duration={2000} suffix="%" />
+              </div>
+              <p className="text-xl text-gray-800 font-medium">Less Scrolling</p>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={300}>
+            <div className="bg-[hsl(160,50%,88%)] p-10 rounded-3xl text-center shadow-lg hover:scale-105 hover:-translate-y-2 transition-all duration-300">
+              <div className="text-6xl font-bold text-[hsl(160,50%,45%)] mb-3">
+                <AnimatedCounter end={12} duration={2000} suffix="+" />
+              </div>
+              <p className="text-xl text-gray-800 font-medium">Actions Taken Daily</p>
+            </div>
+          </ScrollReveal>
         </div>
+        
+        <ScrollReveal delay={400}>
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {outcomes.map((outcome, index) => (
+              <div key={index} className="flex items-start gap-4 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300">
+                <div className="w-10 h-10 rounded-full bg-[hsl(140,50%,75%)] flex items-center justify-center flex-shrink-0 mt-1">
+                  <CheckCircle2 className="w-6 h-6 text-white" />
+                </div>
+                <p className="text-xl text-gray-800 font-medium">{outcome}</p>
+              </div>
+            ))}
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   );

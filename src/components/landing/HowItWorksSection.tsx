@@ -26,11 +26,15 @@ export const HowItWorksSection = () => {
   ];
 
   return (
-    <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background to-muted/20">
+    <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[hsl(200,60%,92%)] via-[hsl(220,55%,90%)] to-[hsl(250,60%,92%)]">
+      {/* Decorative blobs */}
+      <div className="absolute top-20 right-10 w-72 h-72 bg-[hsl(210,65%,75%)]/25 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-20 left-10 w-64 h-64 bg-[hsl(270,60%,75%)]/25 rounded-full blur-3xl"></div>
+      
       <div className="max-w-6xl mx-auto">
         <ScrollReveal>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-center text-foreground mb-20">
-            How It <span className="gradient-text">Works</span>
+          <h2 className="text-5xl md:text-6xl font-heading font-bold text-center mb-20 text-gray-900">
+            How It Works
           </h2>
         </ScrollReveal>
         
@@ -39,30 +43,36 @@ export const HowItWorksSection = () => {
           {/* Connecting Line */}
           <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/20 via-accent/40 to-gradient-teal/20 -translate-y-1/2"></div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-            {steps.map((step, index) => (
-              <ScrollReveal key={index} delay={index * 100}>
-                <div className="relative text-center group">
-                  {/* Step Number */}
-                  <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm border-2 border-primary/20">
-                    {index + 1}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {steps.map((step, index) => {
+              const stepColors = [
+                { bg: 'bg-[hsl(270,60%,88%)]', icon: 'bg-[hsl(270,60%,75%)]' },
+                { bg: 'bg-[hsl(210,65%,88%)]', icon: 'bg-[hsl(210,65%,75%)]' },
+                { bg: 'bg-[hsl(180,55%,88%)]', icon: 'bg-[hsl(180,55%,75%)]' },
+                { bg: 'bg-[hsl(340,65%,88%)]', icon: 'bg-[hsl(340,65%,75%)]' }
+              ];
+              
+              return (
+                <ScrollReveal key={index} delay={index * 150}>
+                  <div className={`relative flex flex-col items-center text-center group ${stepColors[index].bg} p-8 rounded-3xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 shadow-lg hover:shadow-2xl`}>
+                    {/* Step number and icon */}
+                    <div className="relative mb-6">
+                      <div className={`w-24 h-24 rounded-full ${stepColors[index].icon} flex items-center justify-center text-3xl font-bold text-white group-hover:scale-110 transition-all duration-300 shadow-lg`}>
+                        {index + 1}
+                      </div>
+                      <div className={`absolute -bottom-2 -right-2 w-16 h-16 rounded-xl bg-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md`}>
+                        <step.icon className="w-8 h-8 text-gray-700" />
+                      </div>
+                    </div>
+
+                    <h3 className="text-2xl font-heading font-bold mb-4 text-gray-900">{step.title}</h3>
+                    <p className="text-xl text-gray-800 leading-relaxed max-w-sm">
+                      {step.description}
+                    </p>
                   </div>
-                  
-                  {/* Icon Container */}
-                  <div className="relative z-10 w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg">
-                    <step.icon className="w-10 h-10 text-primary" />
-                  </div>
-                  
-                  {/* Content */}
-                  <h3 className="text-xl font-bold text-foreground mb-3">
-                    {step.title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {step.description}
-                  </p>
-                </div>
-              </ScrollReveal>
-            ))}
+                </ScrollReveal>
+              );
+            })}
           </div>
         </div>
       </div>

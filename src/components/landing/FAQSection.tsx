@@ -32,35 +32,35 @@ export const FAQSection = () => {
   ];
 
   return (
-    <section className="py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-muted/20 to-background">
-      <div className="max-w-3xl mx-auto">
+    <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[hsl(160,50%,92%)] to-[hsl(140,45%,90%)]">
+      {/* Decorative blobs */}
+      <div className="absolute top-20 right-10 w-72 h-72 bg-[hsl(160,50%,75%)]/25 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-20 left-10 w-64 h-64 bg-[hsl(140,45%,75%)]/25 rounded-full blur-3xl"></div>
+      
+      <div className="max-w-4xl mx-auto">
         <ScrollReveal>
           <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6">
-              <HelpCircle className="w-4 h-4" />
-              <span>FAQ</span>
-            </div>
-            <h2 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
-              Frequently Asked <span className="gradient-text">Questions</span>
+            <h2 className="text-5xl md:text-6xl font-heading font-bold mb-6 text-gray-900">
+              Common Questions
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-gray-800 font-medium">
               Everything you need to know about FlowLight
             </p>
           </div>
         </ScrollReveal>
         
-        <ScrollReveal delay={100}>
-          <Accordion type="single" collapsible className="w-full space-y-4">
+        <ScrollReveal delay={200}>
+          <Accordion type="single" collapsible className="space-y-4">
             {faqs.map((faq, index) => (
-              <AccordionItem 
-                key={index} 
+              <AccordionItem
+                key={index}
                 value={`item-${index}`}
-                className="border border-border rounded-xl bg-card px-6 py-2 glass-card"
+                className="bg-white/80 backdrop-blur-sm border-0 px-8 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300"
               >
-                <AccordionTrigger className="text-left text-foreground font-semibold text-lg hover:no-underline">
+                <AccordionTrigger className="text-xl font-bold text-gray-900 hover:text-[hsl(270,60%,65%)] transition-colors text-left">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground text-base leading-relaxed pt-2">
+                <AccordionContent className="text-gray-700 text-lg leading-relaxed pt-3">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
