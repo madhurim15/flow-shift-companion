@@ -129,21 +129,25 @@ const router = createHashRouter([
   }
 ]);
 
-const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TrialProvider>
-          <TooltipProvider>
-            <Toaster />
-            <RouterProvider router={router} />
-            <EnhancedInterventionModal />
-            <MonitoringBootstrap />
-          </TooltipProvider>
-        </TrialProvider>
-      </AuthProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
-);
+const App = () => {
+  const isNativeAndroid = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
+  
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <TrialProvider>
+            <TooltipProvider>
+              <Toaster />
+              <RouterProvider router={router} />
+              <EnhancedInterventionModal />
+              {isNativeAndroid && <MonitoringBootstrap />}
+            </TooltipProvider>
+          </TrialProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default App;

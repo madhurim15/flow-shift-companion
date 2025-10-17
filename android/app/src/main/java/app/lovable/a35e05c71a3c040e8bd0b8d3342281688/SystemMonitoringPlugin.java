@@ -132,4 +132,39 @@ public class SystemMonitoringPlugin extends Plugin {
     }
   }
 
+  @PluginMethod
+  public void openBatteryOptimizationSettings(PluginCall call) {
+    try {
+      Intent intent;
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        intent = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      } else {
+        // Fallback to app details for older versions
+        intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.setData(Uri.parse("package:" + getContext().getPackageName()));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      }
+      getContext().startActivity(intent);
+      call.resolve();
+    } catch (Exception e) {
+      android.util.Log.e("FlowLight", "Failed to open battery optimization settings", e);
+      call.reject("Failed to open battery settings: " + e.getMessage());
+    }
+  }
+
+  @PluginMethod
+  public void openAppSettings(PluginCall call) {
+    try {
+      Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+      intent.setData(Uri.parse("package:" + getContext().getPackageName()));
+      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      getContext().startActivity(intent);
+      call.resolve();
+    } catch (Exception e) {
+      android.util.Log.e("FlowLight", "Failed to open app settings", e);
+      call.reject("Failed to open app settings: " + e.getMessage());
+    }
+  }
+
 }

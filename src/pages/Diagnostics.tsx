@@ -197,10 +197,102 @@ const Diagnostics = () => {
         description: "Please enable Usage Access for FlowLight",
         duration: 5000
       });
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000);
     } catch (error) {
       toast({
         title: "Settings Error",
         description: "Could not open Usage Access settings",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleOpenBatterySettings = async () => {
+    try {
+      await SystemMonitoring.openBatteryOptimizationSettings();
+      toast({
+        title: "Opening Battery Settings",
+        description: "Disable battery optimization for FlowLight to ensure monitoring works reliably",
+        duration: 5000
+      });
+    } catch (error) {
+      toast({
+        title: "Settings Error",
+        description: "Could not open battery settings",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleOpenAppSettings = async () => {
+    try {
+      await SystemMonitoring.openAppSettings();
+      toast({
+        title: "Opening App Settings",
+        description: "Check notifications and other permissions",
+        duration: 5000
+      });
+    } catch (error) {
+      toast({
+        title: "Settings Error",
+        description: "Could not open app settings",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRunSelfCheck = async () => {
+    try {
+      const permissions = await SystemMonitoring.checkPermissions();
+      
+      if (!permissions.usageAccess) {
+        toast({
+          title: "Missing Permission",
+          description: "Usage Access is required. Opening settings...",
+          variant: "destructive"
+        });
+        await SystemMonitoring.requestPermissions();
+        setTimeout(async () => {
+          const recheckPerms = await SystemMonitoring.checkPermissions();
+          if (recheckPerms.usageAccess) {
+            await SystemMonitoring.startMonitoring({ debug: true });
+            toast({
+              title: "✅ Self-Check Passed",
+              description: "Monitoring started successfully!",
+            });
+            window.location.reload();
+          } else {
+            toast({
+              title: "Permission Still Missing",
+              description: "Please enable Usage Access manually",
+              variant: "destructive"
+            });
+          }
+        }, 3000);
+        return;
+      }
+
+      // Permission granted, try to start monitoring
+      try {
+        await SystemMonitoring.startMonitoring({ debug: true });
+        toast({
+          title: "✅ Self-Check Passed",
+          description: "All systems operational!",
+        });
+        window.location.reload();
+      } catch (startError: any) {
+        toast({
+          title: "Failed to Start Monitoring",
+          description: startError?.message || "Unknown error. Check battery optimization settings.",
+          variant: "destructive"
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Self-Check Failed",
+        description: error?.message || "Could not complete self-check",
         variant: "destructive"
       });
     }
@@ -283,13 +375,28 @@ const Diagnostics = () => {
 
               <Separator />
               
-              <div className="grid grid-cols-1 gap-2">
-                {!hasUsageAccess && (
-                  <Button onClick={handleOpenUsageSettings} className="w-full">
+              <div className="grid grid-cols-1 gap-3">
+                <Button onClick={handleRunSelfCheck} className="w-full" variant="default">
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Run Self-Check & Auto-Fix
+                </Button>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Button onClick={handleOpenUsageSettings} variant="outline" size="sm">
                     <Settings className="h-4 w-4 mr-2" />
-                    Open Usage Access Settings
+                    Usage Access
                   </Button>
-                )}
+                  
+                  <Button onClick={handleOpenBatterySettings} variant="outline" size="sm">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Battery Settings
+                  </Button>
+                </div>
+
+                <Button onClick={handleOpenAppSettings} variant="outline" size="sm" className="w-full">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Open App Settings
+                </Button>
                 
                 {hasUsageAccess && (
                   <div className="grid grid-cols-2 gap-2">
