@@ -14,6 +14,12 @@ import Focus from "./pages/Focus";
 import Diagnostics from "./pages/Diagnostics";
 import PermissionHelper from "./pages/PermissionHelper";
 import SystemWideMonitoring from "./pages/SystemWideMonitoring";
+import QuickJournal from "./pages/QuickJournal";
+import BreathingExercise from "./pages/BreathingExercise";
+import MicroStretch from "./pages/MicroStretch";
+import WalkTimer from "./pages/WalkTimer";
+import VoiceReflection from "./pages/VoiceReflection";
+import QuickGratitude from "./pages/QuickGratitude";
 import NotFound from "./pages/NotFound";
 
 // Early startup logging for debugging
@@ -56,6 +62,30 @@ const router = createHashRouter([
   {
     path: "/monitoring",
     element: <SystemWideMonitoring />
+  },
+  {
+    path: "/journal",
+    element: <QuickJournal />
+  },
+  {
+    path: "/breathing",
+    element: <BreathingExercise />
+  },
+  {
+    path: "/stretch",
+    element: <MicroStretch />
+  },
+  {
+    path: "/walk",
+    element: <WalkTimer />
+  },
+  {
+    path: "/voice",
+    element: <VoiceReflection />
+  },
+  {
+    path: "/gratitude",
+    element: <QuickGratitude />
   },
   {
     path: "*",

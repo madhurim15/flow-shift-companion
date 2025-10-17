@@ -20,79 +20,74 @@ export interface InterventionData {
 export const getInterventionMessage = (
   state: PsychologicalState, 
   type: InterventionType, 
-  appName?: string,
-  timeOfDay?: number
+  appName?: string, 
+  timeOfDay?: number,
+  durationMinutes?: number,
+  dismissalCount?: number
 ): string => {
-  const isNightTime = timeOfDay ? (timeOfDay > 22 || timeOfDay < 6) : false;
-  const isEarlyMorning = timeOfDay ? (timeOfDay >= 6 && timeOfDay < 9) : false;
-  
-  const messages = {
+  // Add behavior context if available
+  const behaviorContext = durationMinutes 
+    ? `You've been using ${appName || 'this app'} for ${durationMinutes} minute${durationMinutes === 1 ? '' : 's'}. `
+    : '';
+
+  // Adjust tone based on dismissal count (progressive accountability)
+  const toneLevel = dismissalCount || 0;
+
+  const messages: Record<PsychologicalState, Record<InterventionType, string[]>> = {
     seeking_stimulation: {
       gentle_nudge: [
-        "Your mind seems restless - what are you really looking for? 💙",
-        "Feeling scattered? Sometimes our attention seeks what our heart needs 🌱",
-        "This scrolling energy - what if we channeled it into something creative? ✨"
+        `${behaviorContext}Your mind is restless - but endless scrolling won't give you what you're really seeking. What would truly satisfy this need? 💙`,
+        `${behaviorContext}I see you searching for something. What if we paused for just a moment? 🌱`
       ],
       alternative_offer: [
-        "Want to try a 2-minute creative break instead? 🎨",
-        "Your mind is active - how about a quick journal check-in? 📝",
-        "Feeling understimulated? A few deep breaths might reset your focus 💨"
+        `${behaviorContext}Your mind seems restless tonight 🌙 What are you really looking for?`,
+        `${behaviorContext}Scrolling endlessly won't get you anywhere in life. You have goals to accomplish, real life to live, not reel life 💪`
       ],
       reflection_prompt: [
-        "Take a breath - what would truly satisfy this need right now? ✨",
-        "What's your heart actually seeking in this moment? 💭",
-        "If this app disappeared, what would you want to do instead? 🤔"
+        `${behaviorContext}What's driving this need for stimulation right now? 🤔`,
+        `${behaviorContext}I care about you too much to let this continue. This pattern isn't serving your best self. Let's break it together 🌱`
       ]
     },
     avoidance: {
       gentle_nudge: [
-        "Feeling overwhelmed? Want to try a 2-minute reset instead? 🌱",
-        isNightTime ? "Late scrolling often means big feelings - want to check in? 🌙" : "This feels like avoidance energy - what's underneath? 💜",
-        "When we scroll to avoid, our feelings are asking for attention 🤗"
+        `${behaviorContext}What are you avoiding right now? Sometimes facing it for just 2 minutes helps more than hours of distraction 🌱`,
+        `${behaviorContext}I see you, friend. Running to this app again? 💙`
       ],
       alternative_offer: [
-        "When we avoid, we often need comfort. Want to journal what you're feeling? 📝",
-        "Sometimes movement helps when emotions feel stuck. Gentle stretch? 🧘‍♀️",
-        "What if we gave that feeling 2 minutes of kind attention instead? 💙"
+        `${behaviorContext}You've been here before. What's really going on? 🤔`,
+        `${behaviorContext}Scrolling endlessly won't solve what you're avoiding. Your future self needs you to choose differently right now 💜`
       ],
       reflection_prompt: [
-        "What are you avoiding right now? Sometimes naming it helps 🌸",
-        "If this feeling could speak, what would it say? 💭",
-        "What's one small, kind thing you could do for yourself right now? ✨"
+        `${behaviorContext}This pattern of avoidance - is it helping or just postponing? 💭`,
+        `${behaviorContext}I care about you too much to stay quiet. What are you really running from? 🌱`
       ]
     },
     emotional_regulation: {
       gentle_nudge: [
-        "Your heart seems heavy. Want to check in with yourself? 💜",
-        isNightTime ? "Night emotions can feel so big - you're not alone 🌙" : "Big feelings deserve gentle attention 🌸",
-        "When emotions are intense, slowing down can help 🌱"
+        `${behaviorContext}Automatic habit triggered again? Let's pause 🌱`,
+        `${behaviorContext}You're in the loop. Time to break free 💙`
       ],
       alternative_offer: [
-        "When emotions are big, movement helps. Want to try a gentle stretch? 🧘‍♀️",
-        "Sometimes talking to yourself like a friend helps. Want to try? 💙",
-        "What if we breathed through this feeling together? 💨"
+        `${behaviorContext}This is becoming a pattern. What would it feel like to choose something different? 💭`,
+        `${behaviorContext}Real life is waiting for you, not reel life. You have the power to choose differently 💪`
       ],
       reflection_prompt: [
-        "What emotion is asking for your attention right now? 🌸",
-        "If you could give this feeling a color and shape, what would it be? 🎨",
-        "What would you tell a friend feeling exactly this way? 🤗"
+        `${behaviorContext}What triggered this automatic reach for your phone? 🤔`,
+        `${behaviorContext}I notice this pattern keeps repeating. Your best self is calling - will you answer? 🌟`
       ]
     },
     impulse_driven: {
       gentle_nudge: [
-        appName?.includes('shop') ? "Shopping when emotions are big - what are you really looking for? ✨" : "This impulse energy - let's pause and check in 💙",
-        isNightTime ? "Late-night impulses often mean we need comfort 🌙" : "Before acting on impulse, want to breathe together? 💨",
-        "What if this urge is pointing to a real need? 💭"
+        `${behaviorContext}Quick impulse check - do you really need this right now? 💙`,
+        `${behaviorContext}Pause. What's the real need underneath this impulse? 🌱`
       ],
       alternative_offer: [
-        "Before you decide, want to take 3 deep breaths and ask what you really need? 💨",
-        "Sometimes we buy when we need to feel something. Want to journal instead? 📝",
-        "What if we tried a 2-minute mood check first? 💙"
+        `${behaviorContext}Scrolling endlessly won't fulfill the real need underneath. What do you actually need - connection, comfort, validation? Let's name it 💜`,
+        `${behaviorContext}This impulse won't serve your goals. Your future self is counting on you 💪`
       ],
       reflection_prompt: [
-        "What feeling is this impulse trying to fill? 💭",
-        "If money weren't involved, what would truly satisfy this need? ✨",
-        "What's the real hunger underneath this urge? 🌱"
+        `${behaviorContext}What would truly satisfy you more than this impulse? 🤔`,
+        `${behaviorContext}I care about your wellbeing. Is this impulse aligned with who you want to be? 🌟`
       ]
     }
   };
@@ -100,8 +95,9 @@ export const getInterventionMessage = (
   const stateMessages = messages[state];
   const typeMessages = stateMessages[type];
   
-  // Return random message from the appropriate category
-  return typeMessages[Math.floor(Math.random() * typeMessages.length)];
+  // Use tone level to select message (0-1 = gentle, 2+ = firmer)
+  const messageIndex = Math.min(toneLevel, typeMessages.length - 1);
+  return typeMessages[messageIndex];
 };
 
 // Get suggested alternatives based on psychological state and time
