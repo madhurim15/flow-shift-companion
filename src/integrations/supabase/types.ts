@@ -277,6 +277,42 @@ export type Database = {
         }
         Relationships: []
       }
+      device_compatibility: {
+        Row: {
+          android_version: string
+          created_at: string
+          device_manufacturer: string
+          device_model: string
+          id: string
+          nudges_working: boolean | null
+          permission_detection_method: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          android_version: string
+          created_at?: string
+          device_manufacturer: string
+          device_model: string
+          id?: string
+          nudges_working?: boolean | null
+          permission_detection_method: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          android_version?: string
+          created_at?: string
+          device_manufacturer?: string
+          device_model?: string
+          id?: string
+          nudges_working?: boolean | null
+          permission_detection_method?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       dice_roll_usage: {
         Row: {
           action_suggested: string

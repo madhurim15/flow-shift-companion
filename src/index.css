@@ -7,41 +7,50 @@
 
 @layer base {
   :root {
-    --background: 250 100% 98%;
-    --foreground: 220 15% 25%;
+    --background: 250 60% 92%;
+    --foreground: 222.2 84% 4.9%;
 
-    --card: 255 100% 100%;
-    --card-foreground: 220 15% 25%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 255 100% 100%;
-    --popover-foreground: 220 15% 25%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 210 80% 65%;
-    --primary-foreground: 255 100% 98%;
+    --primary: 270 60% 65%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 150 30% 92%;
-    --secondary-foreground: 150 15% 35%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 220 15% 55%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 180 40% 88%;
-    --accent-foreground: 180 15% 35%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
-    --destructive: 0 65% 70%;
-    --destructive-foreground: 255 100% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 210 30% 88%;
-    --input: 210 30% 88%;
-    --ring: 210 80% 65%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 270 60% 65%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Flowlight custom colors */
-    --flow-calm: 210 80% 88%;
-    --flow-gentle: 150 50% 80%;
-    --flow-warm: 45 80% 85%;
-    --flow-soft: 270 30% 90%;
+    /* Flowlight pastel colors */
+    --flow-calm: 210 65% 88%;
+    --flow-gentle: 180 50% 88%;
+    --flow-warm: 30 70% 88%;
+    --flow-soft: 270 60% 88%;
+    --flow-mint: 160 50% 88%;
+    --flow-peach: 20 70% 88%;
+    --flow-sky: 200 60% 88%;
+    --flow-pink: 340 65% 88%;
+
+    /* Vibrant gradient colors */
+    --gradient-purple: 270 60% 75%;
+    --gradient-blue: 210 65% 75%;
+    --gradient-teal: 180 55% 70%;
   }
 
   .dark {
@@ -87,12 +96,21 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+    line-height: 1.7;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
   }
 }
 
 @layer utilities {
+  /* Gradient utilities */
   .flow-gradient {
     background: linear-gradient(135deg, hsl(var(--flow-calm)), hsl(var(--flow-gentle)));
   }
@@ -100,13 +118,70 @@
   .warm-gradient {
     background: linear-gradient(135deg, hsl(var(--flow-warm)), hsl(var(--flow-gentle)));
   }
+
+  .accent-gradient {
+    background: linear-gradient(135deg, hsl(var(--gradient-purple)), hsl(var(--gradient-blue)), hsl(var(--gradient-teal)));
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-[hsl(var(--gradient-purple))] via-[hsl(var(--gradient-blue))] to-[hsl(var(--gradient-teal))] bg-clip-text text-transparent;
+  }
+
+  .mesh-gradient {
+    background: 
+      radial-gradient(at 27% 37%, hsla(245, 70%, 60%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 97% 21%, hsla(220, 80%, 60%, 0.12) 0px, transparent 50%),
+      radial-gradient(at 52% 99%, hsla(180, 70%, 55%, 0.1) 0px, transparent 50%),
+      radial-gradient(at 10% 29%, hsla(270, 70%, 60%, 0.08) 0px, transparent 50%),
+      radial-gradient(at 90% 71%, hsla(200, 80%, 60%, 0.1) 0px, transparent 50%);
+  }
   
+  /* Shadow utilities */
   .soft-shadow {
     box-shadow: 0 4px 20px -4px hsl(var(--primary) / 0.1);
   }
+
+  .glow-shadow {
+    box-shadow: 0 8px 32px -8px hsl(var(--primary) / 0.3);
+  }
+
+  .glass-shadow {
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.15),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  }
   
+  /* Hover effects */
   .gentle-hover {
     @apply transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-lg;
+  }
+
+  .lift-hover {
+    @apply transition-all duration-300 ease-out hover:-translate-y-2 hover:shadow-2xl;
+  }
+
+  .scale-hover {
+    @apply transition-transform duration-300 ease-out hover:scale-105;
+  }
+
+  /* Glassmorphism */
+  .glass {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20;
+  }
+
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   /* Daily Nature Backgrounds - Real Photos with Overlay */

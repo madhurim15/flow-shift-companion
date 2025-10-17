@@ -215,95 +215,105 @@ export const VoiceNotes = ({ onClose }: VoiceNotesProps) => {
   };
 
   return (
-    <div className="p-4 space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full">
+      {/* Fixed Header */}
+      <div className="flex items-center justify-between p-4 pb-2 border-b border-border/50">
         <div className="flex items-center gap-2">
-          <Mic className="w-5 h-5 text-blue-500" />
-          <h2 className="text-lg font-medium">Voice Notes</h2>
+          <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/30">
+            <Mic className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">Voice Notes</h2>
+            <p className="text-xs text-muted-foreground">Record your thoughts</p>
+          </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={onClose}>
+        <Button variant="ghost" size="sm" onClick={onClose} className="rounded-full">
           <X className="w-4 h-4" />
         </Button>
       </div>
 
-      {/* Recording Interface */}
-      <Card>
-        <CardContent className="p-4 text-center space-y-4">
-          <div className="flex flex-col items-center gap-2">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-              isRecording ? 'bg-red-100 animate-pulse' : 'bg-muted'
-            }`}>
-              {isRecording ? (
-                <Square 
-                  className="w-6 h-6 text-red-600 cursor-pointer" 
-                  onClick={stopRecording}
-                />
-              ) : (
-                <Mic 
-                  className="w-6 h-6 text-blue-500 cursor-pointer" 
-                  onClick={startRecording}
-                />
-              )}
-            </div>
-            
-            <div className="text-sm text-muted-foreground">
-              {isRecording ? (
-                <>Recording... {formatTime(recordingTime)}</>
-              ) : (
-                'Tap to record (max 60s)'
-              )}
-            </div>
-          </div>
-
-          {loading && (
-            <Badge variant="secondary">Saving your voice note...</Badge>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Recent Voice Notes */}
-      {recentNotes.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-muted-foreground">Recent Voice Notes</h3>
-          {recentNotes.map((note) => (
-            <Card key={note.id} className="border-muted">
-              <CardContent className="p-3 flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="text-sm font-medium">{note.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {note.duration_seconds ? formatTime(note.duration_seconds) : '0:00'} • {' '}
-                    {new Date(note.created_at).toLocaleDateString()}
-                  </p>
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto overscroll-bounce">
+        <div className="p-4 space-y-4 pb-28">
+          {/* Recording Interface */}
+          <Card>
+            <CardContent className="p-4 text-center space-y-4">
+              <div className="flex flex-col items-center gap-2">
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                  isRecording ? 'bg-red-100 animate-pulse' : 'bg-muted'
+                }`}>
+                  {isRecording ? (
+                    <Square 
+                      className="w-6 h-6 text-red-600 cursor-pointer" 
+                      onClick={stopRecording}
+                    />
+                  ) : (
+                    <Mic 
+                      className="w-6 h-6 text-blue-500 cursor-pointer" 
+                      onClick={startRecording}
+                    />
+                  )}
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => playNote(note)}
-                  >
-                    {playingNote === note.id ? (
-                      <Pause className="w-4 h-4" />
-                    ) : (
-                      <Play className="w-4 h-4" />
-                    )}
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => deleteNote(note)}
-                    className="text-muted-foreground hover:text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                <div className="text-sm text-muted-foreground">
+                  {isRecording ? (
+                    <>Recording... {formatTime(recordingTime)}</>
+                  ) : (
+                    'Tap to record (max 60s)'
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+
+              {loading && (
+                <Badge variant="secondary">Saving your voice note...</Badge>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Recent Voice Notes */}
+          {recentNotes.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-muted-foreground">Recent Voice Notes</h3>
+              {recentNotes.map((note) => (
+                <Card key={note.id} className="border-muted">
+                  <CardContent className="p-3 flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{note.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {note.duration_seconds ? formatTime(note.duration_seconds) : '0:00'} • {' '}
+                        {new Date(note.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => playNote(note)}
+                      >
+                        {playingNote === note.id ? (
+                          <Pause className="w-4 h-4" />
+                        ) : (
+                          <Play className="w-4 h-4" />
+                        )}
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteNote(note)}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

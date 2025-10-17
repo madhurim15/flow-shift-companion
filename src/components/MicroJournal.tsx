@@ -142,7 +142,7 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto overscroll-bounce">
-        <div className="p-4 space-y-4 pb-6">
+        <div className="p-4 space-y-4 pb-28">
           {/* Current Entry */}
           <Card className="bg-gradient-to-br from-emerald-50/50 to-blue-50/30 dark:from-emerald-950/20 dark:to-blue-950/10 border-emerald-200/50 dark:border-emerald-800/30">
             <CardHeader className="pb-3">

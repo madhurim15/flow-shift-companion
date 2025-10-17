@@ -83,15 +83,19 @@ public class SystemMonitoringPlugin extends Plugin {
 
   @PluginMethod
   public void hasUsageStatsPermission(PluginCall call) {
+    boolean granted = UsageStatsHelper.hasUsageStatsPermission(getContext());
+    android.util.Log.i("FlowLight", "Plugin.hasUsageStatsPermission -> " + granted);
     JSObject ret = new JSObject();
-    ret.put("granted", UsageStatsHelper.hasUsageStatsPermission(getContext()));
+    ret.put("granted", granted);
     call.resolve(ret);
   }
 
   @PluginMethod
   public void checkPermissions(PluginCall call) {
+    boolean granted = UsageStatsHelper.hasUsageStatsPermission(getContext());
+    android.util.Log.i("FlowLight", "Plugin.checkPermissions -> usageAccess=" + granted);
     JSObject ret = new JSObject();
-    ret.put("usageAccess", UsageStatsHelper.hasUsageStatsPermission(getContext()));
+    ret.put("usageAccess", granted);
     call.resolve(ret);
   }
 

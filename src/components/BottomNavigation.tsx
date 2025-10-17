@@ -64,21 +64,25 @@ export const BottomNavigation = () => {
             onClick={() => setActiveTab(null)}
           />
           
-          {/* Modal Content - Centered */}
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-            <div className="w-full max-w-md max-h-[80vh] bg-background/98 backdrop-blur-md rounded-2xl shadow-2xl border border-border/50 overflow-hidden pointer-events-auto animate-scale-in">
-              <div className="h-full overflow-auto">
-                {renderTabContent()}
-              </div>
-            </div>
+      {/* Modal Content - Centered */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+        <div className="w-full max-w-md max-h-[80vh] bg-background/98 backdrop-blur-md rounded-2xl shadow-2xl border border-border/50 overflow-hidden pointer-events-auto animate-scale-in">
+          <div 
+            className="max-h-[80vh] overflow-y-auto"
+            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)' }}
+          >
+            {renderTabContent()}
           </div>
+        </div>
+      </div>
         </>
       )}
 
-      {/* Bottom Navigation Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/98 backdrop-blur-md border-t border-border/50 shadow-lg">
-        <div className="flex items-center justify-around px-2 py-3 max-w-md mx-auto">
-          {tabs.map((tab) => {
+      {/* Bottom Navigation Bar - Hide when modal is open */}
+      {!activeTab && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/98 backdrop-blur-md border-t border-border/50 shadow-lg">
+          <div className="flex items-center justify-around px-2 py-3 max-w-md mx-auto">
+            {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
 
@@ -101,8 +105,9 @@ export const BottomNavigation = () => {
 
             return buttonElement;
           })}
+          </div>
         </div>
-      </div>
+      )}
     </TooltipProvider>
   );
 };

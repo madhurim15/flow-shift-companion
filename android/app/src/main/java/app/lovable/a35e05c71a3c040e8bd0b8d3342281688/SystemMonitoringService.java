@@ -237,7 +237,7 @@ public class SystemMonitoringService extends Service {
     long now = System.currentTimeMillis();
     
     if (newLevel > lastNudgeLevel && now >= nextAllowedNudgeTime) {
-      showNudgeNotification(packageName, appName, newLevel, config.psychState);
+      showNudgeNotification(packageName, appName, newLevel, durationSeconds, config.psychState);
       lastNudgeLevel = newLevel;
       
       // Set next allowed nudge time based on dismissal count
@@ -246,15 +246,27 @@ public class SystemMonitoringService extends Service {
     }
   }
 
-  private void showNudgeNotification(String packageName, String appName, int level, String psychState) {
+  private void showNudgeNotification(String packageName, String appName, int level, int durationSeconds, String psychState) {
     String[] messageData = AppThresholds.getNudgeMessages(psychState, level);
     String title = messageData[0];
-    String message = messageData[1];
+    String baseMessage = messageData[1];
+    
+    // Add behavior context to message
+    int minutes = durationSeconds / 60;
+    String behaviorContext = String.format("You've been using %s for %d minute%s. ", 
+      appName, minutes, minutes == 1 ? "" : "s");
+    String personalizedMessage = behaviorContext + baseMessage;
 
-    // Create action intents
-    Intent snoozeIntent = new Intent(this, NudgeActions.class);
-    snoozeIntent.setAction(NudgeActions.ACTION_SNOOZE);
-    PendingIntent snoozePendingIntent = PendingIntent.getBroadcast(this, 0, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    // Create deep link action intents
+    Intent journalIntent = new Intent(Intent.ACTION_VIEW);
+    journalIntent.setData(android.net.Uri.parse("flowlight://journal?prompt=What was I avoiding by scrolling " + appName + "?"));
+    journalIntent.setPackage(getPackageName());
+    PendingIntent journalPendingIntent = PendingIntent.getActivity(this, 3, journalIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+    Intent breathingIntent = new Intent(Intent.ACTION_VIEW);
+    breathingIntent.setData(android.net.Uri.parse("flowlight://breathing"));
+    breathingIntent.setPackage(getPackageName());
+    PendingIntent breathingPendingIntent = PendingIntent.getActivity(this, 4, breathingIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
     Intent dismissIntent = new Intent(this, NudgeActions.class);
     dismissIntent.setAction(NudgeActions.ACTION_DISMISS);
@@ -266,13 +278,15 @@ public class SystemMonitoringService extends Service {
 
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NUDGE_CHANNEL_ID)
       .setContentTitle(title)
-      .setContentText(message)
+      .setContentText(personalizedMessage)
+      .setStyle(new NotificationCompat.BigTextStyle().bigText(personalizedMessage))
       .setSmallIcon(getApplicationInfo().icon)
       .setPriority(NotificationCompat.PRIORITY_HIGH)
       .setCategory(NotificationCompat.CATEGORY_REMINDER)
       .setAutoCancel(true)
       .setContentIntent(openPendingIntent)
-      .addAction(R.drawable.ic_launcher_foreground, "Snooze 5min", snoozePendingIntent)
+      .addAction(R.drawable.ic_launcher_foreground, "Journal", journalPendingIntent)
+      .addAction(R.drawable.ic_launcher_foreground, "Breathe", breathingPendingIntent)
       .addAction(R.drawable.ic_launcher_foreground, "I'm OK", dismissPendingIntent);
 
     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
