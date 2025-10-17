@@ -162,100 +162,110 @@ export const PhotoCapture = ({ onClose }: PhotoCaptureProps) => {
   };
 
   return (
-    <div className="p-4 space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full">
+      {/* Fixed Header */}
+      <div className="flex items-center justify-between p-4 pb-2 border-b border-border/50">
         <div className="flex items-center gap-2">
-          <Camera className="w-5 h-5 text-purple-500" />
-          <h2 className="text-lg font-medium">Daily Photos</h2>
+          <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/30">
+            <Camera className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold">Daily Photos</h2>
+            <p className="text-xs text-muted-foreground">Capture mindful moments</p>
+          </div>
         </div>
-        <Button variant="ghost" size="sm" onClick={onClose}>
+        <Button variant="ghost" size="sm" onClick={onClose} className="rounded-full">
           <X className="w-4 h-4" />
         </Button>
       </div>
 
-      {/* Upload Interface */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium">
-            Capture a mindful moment
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* File Input */}
-          <div className="space-y-3">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-            
-            <Button
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full gap-2"
-            >
-              <Upload className="w-4 h-4" />
-              {selectedFile ? 'Change Photo' : 'Select Photo'}
-            </Button>
-
-            {/* Preview */}
-            {previewUrl && (
-              <div className="relative">
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="w-full h-32 object-cover rounded-md"
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto overscroll-bounce">
+        <div className="p-4 space-y-4 pb-28">
+          {/* Upload Interface */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium">
+                Capture a mindful moment
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* File Input */}
+              <div className="space-y-3">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
                 />
+                
+                <Button
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full gap-2"
+                >
+                  <Upload className="w-4 h-4" />
+                  {selectedFile ? 'Change Photo' : 'Select Photo'}
+                </Button>
+
+                {/* Preview */}
+                {previewUrl && (
+                  <div className="relative">
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Caption Input */}
-          <Textarea
-            value={caption}
-            onChange={(e) => setCaption(e.target.value.slice(0, maxCaptionLength))}
-            placeholder="What made this moment special? (optional)"
-            className="resize-none min-h-[60px] text-sm"
-            maxLength={maxCaptionLength}
-          />
-
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">
-              {caption.length}/{maxCaptionLength}
-            </span>
-            
-            <Button
-              onClick={handleUpload}
-              disabled={!selectedFile || loading}
-              size="sm"
-              className="gap-2"
-            >
-              <Camera className="w-4 h-4" />
-              {loading ? 'Saving...' : 'Save Moment'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent Photos */}
-      {recentPhotos.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium text-muted-foreground">Recent Moments</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {recentPhotos.map((photo) => (
-              <PhotoCard 
-                key={photo.id} 
-                photo={photo} 
-                onDelete={deletePhoto}
-                getPhotoUrl={getPhotoUrl}
+              {/* Caption Input */}
+              <Textarea
+                value={caption}
+                onChange={(e) => setCaption(e.target.value.slice(0, maxCaptionLength))}
+                placeholder="What made this moment special? (optional)"
+                className="resize-none min-h-[60px] text-sm"
+                maxLength={maxCaptionLength}
               />
-            ))}
-          </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">
+                  {caption.length}/{maxCaptionLength}
+                </span>
+                
+                <Button
+                  onClick={handleUpload}
+                  disabled={!selectedFile || loading}
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Camera className="w-4 h-4" />
+                  {loading ? 'Saving...' : 'Save Moment'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Photos */}
+          {recentPhotos.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium text-muted-foreground">Recent Moments</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {recentPhotos.map((photo) => (
+                  <PhotoCard 
+                    key={photo.id} 
+                    photo={photo} 
+                    onDelete={deletePhoto}
+                    getPhotoUrl={getPhotoUrl}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
