@@ -140,7 +140,7 @@ export const EnhancedStreakDisplay = ({ onClose }: EnhancedStreakDisplayProps) =
       </Card>
 
       {/* Hours Reclaimed This Week */}
-      {screenTimeData && screenTimeData.lastWeekMinutes > 0 && (
+      {screenTimeData && (
         <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
@@ -151,7 +151,7 @@ export const EnhancedStreakDisplay = ({ onClose }: EnhancedStreakDisplayProps) =
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {screenTimeData.reductionMinutes > 0 ? (
+            {screenTimeData.lastWeekMinutes > 0 && screenTimeData.reductionMinutes > 0 ? (
               <>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-700 dark:text-green-300">
@@ -180,9 +180,7 @@ export const EnhancedStreakDisplay = ({ onClose }: EnhancedStreakDisplayProps) =
             ) : (
               <div className="text-center py-2">
                 <p className="text-sm text-muted-foreground">
-                  {screenTimeData.reductionMinutes === 0 
-                    ? "Keep using FlowLight to see your progress! 📊" 
-                    : getReductionMessage(screenTimeData.reductionMinutes)}
+                  Keep using FlowLight to track your screen time. We'll show your progress here! 📊
                 </p>
               </div>
             )}
@@ -191,7 +189,7 @@ export const EnhancedStreakDisplay = ({ onClose }: EnhancedStreakDisplayProps) =
       )}
 
       {/* Total Impact Since Day 1 */}
-      {screenTimeData && screenTimeData.totalReclaimedMinutes > 0 && (
+      {screenTimeData && (
         <Card className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 border-purple-200 dark:border-purple-800">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
@@ -202,15 +200,23 @@ export const EnhancedStreakDisplay = ({ onClose }: EnhancedStreakDisplayProps) =
             </div>
           </CardHeader>
           <CardContent className="text-center space-y-2">
-            <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-              {formatScreenTime(screenTimeData.totalReclaimedMinutes)}
-            </div>
-            <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200">
-              total time reclaimed
-            </Badge>
-            <p className="text-xs text-purple-600 dark:text-purple-400">
-              {getTotalImpactMessage(Math.floor(screenTimeData.totalReclaimedMinutes / 60))}
-            </p>
+            {screenTimeData.totalReclaimedMinutes > 0 ? (
+              <>
+                <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                  {formatScreenTime(screenTimeData.totalReclaimedMinutes)}
+                </div>
+                <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200">
+                  total time reclaimed
+                </Badge>
+                <p className="text-xs text-purple-600 dark:text-purple-400">
+                  {getTotalImpactMessage(Math.floor(screenTimeData.totalReclaimedMinutes / 60))}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground py-2">
+                Complete a few days to see your total impact! 🌱
+              </p>
+            )}
           </CardContent>
         </Card>
       )}
