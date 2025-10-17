@@ -15,7 +15,7 @@ export const HeroSection = () => {
           Stop Procrastinating.<br />Start Taking Action.
         </h1>
         
-        <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">FlowLight detects doomscrolling patterns and nudges you towards productive micro‑efforts—right when you need them.</p>
+        <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">FlowLight detects doomscrolling patterns on your phone and nudges you towards productive micro‑efforts—right when you need them.</p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
           <Button size="lg" onClick={() => navigate('/auth')} className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8">
