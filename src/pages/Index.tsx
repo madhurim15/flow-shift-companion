@@ -25,7 +25,6 @@ import { useDiceSystem, CompletionResult } from "@/hooks/useDiceSystem";
 import { toast } from "@/hooks/use-toast";
 import type { NudgeResponseType } from "@/data/nudgeResponses";
 import { TrialBanner } from "@/components/TrialBanner";
-import { TimeSavedCard } from "@/components/TimeSavedCard";
 export type Mood = {
   id: string;
   label: string;
@@ -294,7 +293,6 @@ const Index = () => {
             {appState === "mood-selection" && <div className="space-y-4">
                 <TrialBanner />
                 <DailyMantra />
-                <TimeSavedCard />
                 <MoodSelector onMoodSelect={handleMoodSelect} firstName={user?.user_metadata?.full_name?.split(' ')[0]} selectedMoodId={selectedMoodId} />
                 <MainGoalInput />
               </div>}
