@@ -68,7 +68,7 @@ export const BottomNavigation = () => {
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
         <div className="w-full max-w-md max-h-[80vh] bg-background/98 backdrop-blur-md rounded-2xl shadow-2xl border border-border/50 overflow-hidden pointer-events-auto animate-scale-in">
           <div 
-            className="h-full overflow-auto"
+            className="max-h-[80vh] overflow-y-auto"
             style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)' }}
           >
             {renderTabContent()}
