@@ -11,7 +11,7 @@ export const HeroSection = () => {
       <div className="relative max-w-5xl mx-auto text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8 animate-fade-in-up">
           <Sparkles className="w-4 h-4" />
-          <span>Psychology-First Procrastination Help</span>
+          <span>Gentle Accountability Digital Guardian</span>
         </div>
         
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
