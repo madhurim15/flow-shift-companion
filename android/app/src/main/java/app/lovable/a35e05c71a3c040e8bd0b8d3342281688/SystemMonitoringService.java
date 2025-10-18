@@ -16,6 +16,10 @@ import android.os.IBinder;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
+import android.os.PowerManager;
+import android.net.Uri;
+import android.util.Log;
+import java.util.Calendar;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -33,6 +37,9 @@ public class SystemMonitoringService extends Service {
   private long sessionStartTime;
   private String currentAppName;
   private boolean debugMode = false;
+  private String userName = "friend";
+  private PowerManager powerManager;
+  private boolean isScreenOn = true;
   
   // Per-session nudge state
   private int lastNudgeLevel = 0;
@@ -53,11 +60,33 @@ public class SystemMonitoringService extends Service {
     }
   };
 
+  private BroadcastReceiver screenStateReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      String action = intent.getAction();
+      if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+        isScreenOn = false;
+        Log.d("FlowLight", "Screen OFF - pausing tracking");
+      } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+        isScreenOn = true;
+        Log.d("FlowLight", "Screen ON - resuming tracking");
+      }
+    }
+  };
+
   @Override
   public void onCreate() {
     super.onCreate();
     createNotificationChannel();
     createNudgeNotificationChannel();
+    
+    powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+    
+    // Register receiver for screen state changes
+    IntentFilter screenFilter = new IntentFilter();
+    screenFilter.addAction(Intent.ACTION_SCREEN_ON);
+    screenFilter.addAction(Intent.ACTION_SCREEN_OFF);
+    registerReceiver(screenStateReceiver, screenFilter);
     
     // Register receiver for nudge actions
     IntentFilter actionFilter = new IntentFilter();
@@ -133,6 +162,11 @@ public class SystemMonitoringService extends Service {
   public int onStartCommand(Intent intent, int flags, int startId) {
     if (intent != null) {
       debugMode = intent.getBooleanExtra("debug", false);
+      userName = intent.getStringExtra("userName");
+      if (userName == null || userName.isEmpty()) {
+        userName = "friend";
+      }
+      Log.d("FlowLight", "Service started with userName: " + userName + ", debug: " + debugMode);
     }
     return START_STICKY;
   }
@@ -150,6 +184,9 @@ public class SystemMonitoringService extends Service {
     }
     try {
       unregisterReceiver(nudgeActionReceiver);
+    } catch (Exception ignored) {}
+    try {
+      unregisterReceiver(screenStateReceiver);
     } catch (Exception ignored) {}
   }
 
@@ -216,13 +253,37 @@ public class SystemMonitoringService extends Service {
       PackageManager pm = getPackageManager();
       ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
       CharSequence label = pm.getApplicationLabel(ai);
-      return label != null ? label.toString() : pkg;
+      String name = label != null ? label.toString() : null;
+      if (name != null && !name.isEmpty()) {
+        Log.d("FlowLight", "Got app name: " + name + " for package: " + pkg);
+        return name;
+      }
     } catch (Exception e) {
-      return pkg;
+      Log.e("FlowLight", "Failed to get app name for: " + pkg, e);
     }
+    
+    // Fallback: extract simple name from package
+    return extractSimpleName(pkg);
+  }
+  
+  private String extractSimpleName(String packageName) {
+    // "com.instagram.android" -> "Instagram"
+    String[] parts = packageName.split("\\.");
+    String name = parts[parts.length - 1];
+    if (name.equals("android") && parts.length > 1) {
+      name = parts[parts.length - 2];
+    }
+    // Capitalize first letter
+    return name.substring(0, 1).toUpperCase() + name.substring(1);
   }
 
   private void checkForNudge(String packageName, String appName, int durationSeconds) {
+    // Only check nudges when screen is on
+    if (!isScreenOn) {
+      Log.d("FlowLight", "Skipping nudge check - screen is off");
+      return;
+    }
+    
     AppThresholds.AppConfig config = AppThresholds.getAppConfig(packageName);
     int[] thresholds = debugMode ? config.debugThresholds : config.thresholds;
     
@@ -241,41 +302,43 @@ public class SystemMonitoringService extends Service {
       lastNudgeLevel = newLevel;
       
       // Set next allowed nudge time based on dismissal count
-      long cooldownMs = Math.max(60000, 300000 / (dismissalCount + 1)); // 5min to 1min based on dismissals
+      long cooldownMs = Math.max(60000, 300000 / (dismissalCount + 1));
       nextAllowedNudgeTime = now + cooldownMs;
     }
   }
 
   private void showNudgeNotification(String packageName, String appName, int level, int durationSeconds, String psychState) {
-    String[] messageData = AppThresholds.getNudgeMessages(psychState, level);
+    // Get message with rotation
+    String[] messageData = AppThresholds.getNudgeMessage(level);
     String title = messageData[0];
-    String baseMessage = messageData[1];
+    String messageTemplate = messageData[1];
     
-    // Add behavior context to message
+    // Get time-aware suggested action
+    Calendar cal = Calendar.getInstance();
+    int hour = cal.get(Calendar.HOUR_OF_DAY);
+    String suggestedAction = AppThresholds.getSuggestedAction(level, hour);
+    
+    // Personalize message with placeholders
     int minutes = durationSeconds / 60;
-    String behaviorContext = String.format("You've been using %s for %d minute%s. ", 
-      appName, minutes, minutes == 1 ? "" : "s");
-    String personalizedMessage = behaviorContext + baseMessage;
-
-    // Create deep link action intents
-    Intent journalIntent = new Intent(Intent.ACTION_VIEW);
-    journalIntent.setData(android.net.Uri.parse("flowlight://journal?prompt=What was I avoiding by scrolling " + appName + "?"));
-    journalIntent.setPackage(getPackageName());
-    PendingIntent journalPendingIntent = PendingIntent.getActivity(this, 3, journalIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-    Intent breathingIntent = new Intent(Intent.ACTION_VIEW);
-    breathingIntent.setData(android.net.Uri.parse("flowlight://breathing"));
-    breathingIntent.setPackage(getPackageName());
-    PendingIntent breathingPendingIntent = PendingIntent.getActivity(this, 4, breathingIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-    Intent dismissIntent = new Intent(this, NudgeActions.class);
-    dismissIntent.setAction(NudgeActions.ACTION_DISMISS);
-    PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(this, 1, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-    Intent openIntent = new Intent(this, NudgeActions.class);
-    openIntent.setAction(NudgeActions.ACTION_OPEN_APP);
-    PendingIntent openPendingIntent = PendingIntent.getBroadcast(this, 2, openIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
+    String durationStr = minutes + " minute" + (minutes == 1 ? "" : "s");
+    String personalizedMessage = messageTemplate
+      .replace("{name}", userName)
+      .replace("{app}", appName)
+      .replace("{duration}", durationStr);
+    
+    // Create deep link intent for suggested action
+    Intent openIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+    if (openIntent != null) {
+      openIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+      openIntent.setData(Uri.parse("flowlight://action/" + suggestedAction));
+    }
+    
+    PendingIntent pendingIntent = PendingIntent.getActivity(
+      this, 0, openIntent,
+      PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+    );
+    
+    // Build notification without action buttons
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NUDGE_CHANNEL_ID)
       .setContentTitle(title)
       .setContentText(personalizedMessage)
@@ -284,12 +347,11 @@ public class SystemMonitoringService extends Service {
       .setPriority(NotificationCompat.PRIORITY_HIGH)
       .setCategory(NotificationCompat.CATEGORY_REMINDER)
       .setAutoCancel(true)
-      .setContentIntent(openPendingIntent)
-      .addAction(R.drawable.ic_launcher_foreground, "Journal", journalPendingIntent)
-      .addAction(R.drawable.ic_launcher_foreground, "Breathe", breathingPendingIntent)
-      .addAction(R.drawable.ic_launcher_foreground, "I'm OK", dismissPendingIntent);
-
+      .setContentIntent(pendingIntent);
+    
     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(NUDGE_NOTIF_ID, builder.build());
+    
+    Log.d("FlowLight", "Showed nudge: " + title + " | Action: " + suggestedAction + " | User: " + userName);
   }
 }

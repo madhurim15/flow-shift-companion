@@ -55,21 +55,81 @@ public class AppThresholds {
         }
     }
     
-    public static String[] getNudgeMessages(String psychState, int level) {
-        String[][] messages = {
-            // Level 1 - Gentle curiosity
-            {"Just Checking In", "Your mind seems restless - what are you really looking for? 💙"},
-            // Level 2 - Concern check-in  
-            {"How Are You?", "Feeling scattered? Sometimes our attention seeks what our heart needs 🌱"},
-            // Level 3 - Stronger alternative
-            {"Creative Alternative", "Your mind is active - how about a quick journal check-in instead? 📝"},
-            // Level 4 - Pattern recognition
-            {"Pattern Recognition", "You've been here for a while now. This pattern isn't serving your wellbeing. Let's break it together. 🌱"}
+    private static int lastMessageIndex = 0;
+    
+    public static String[][] getNudgeMessageVariants(int level) {
+        String[][][] allMessages = {
+            // Level 1 - Gentle curiosity (5 variants)
+            {
+                {"Just Checking In 👋", "Hey {name}, just checking in... You've been on {app} for a bit. How about a quick 2-min walk? 🚶‍♀️✨"},
+                {"Thumb Break Time 😊", "{name}, your thumbs deserve a break! Try 3 deep breaths or jot down what you're feeling? 📝💭"},
+                {"Stretch Time 🙆‍♂️", "Psst {name}... stretch time! {app} will still be here after a 60-second stretch 💪"},
+                {"Better Alternative? 💭", "Hey {name}! Quick question: Would a 5-min journal check-in feel better than scrolling right now? ✍️"},
+                {"Mindful Pause ⏸️", "{name}, pause for a sec 🌟 What if you took 3 deep breaths instead of that next scroll? 🧘‍♀️"}
+            },
+            // Level 2 - Concern check-in (5 variants)
+            {
+                {"Real Talk Time 🤔", "{name}, real talk - you've been on {app} for {duration}. How about capturing your thoughts in a voice note? 🎙️💜"},
+                {"Movement Break 🌳", "Hey {name} 💜 Still scrolling? Maybe your body needs movement more than your eyes need content. Take a walk? 🚶‍♀️"},
+                {"Pattern Alert 🧘‍♀️", "{name}, I'm seeing a pattern here... Let's try something different. 3 deep breaths? 🌸"},
+                {"What Are You Looking For? ✍️", "Okay {name}, this is getting long 📱 What if you wrote down what you're actually looking for? 💭"},
+                {"Energy Check ⚡", "{name}, how's your energy? 🔋 Maybe a quick stretch or walk would help more than scrolling? 🌤️"}
+            },
+            // Level 3 - Stronger alternative (5 variants)
+            {
+                {"Intervention Time! 🚨", "Alright {name}, intervention time! Put the phone down and do 10 jumping jacks. Your brain will thank you 🧠💪"},
+                {"Break The Loop 🔄", "{name}, love the dedication but... this ain't it 😅 How about a 5-min walk outside? Fresh air > stale scrolling 🌤️"},
+                {"Emotion Check 📝", "Real talk {name}: {duration} on {app}? Time to break the loop. Quick journal - what emotion are you avoiding? 💭"},
+                {"Future Self Calling 🙆‍♀️", "{name}, your future self called - they want you to stretch for 2 minutes instead. Can you do that? 💪"},
+                {"Energy Reset ⚡", "{name}, this much {app} drains you more than it fills you 📉 How about a 3-min walk to reset? 🚶‍♀️✨"}
+            },
+            // Level 4 - Pattern recognition (5 variants)
+            {
+                {"We Need To Talk 🛑", "{name}, we need to talk. This {app} habit is becoming a thing. 20-min walk, now. Your mental health > this content ❤️🚶‍♀️"},
+                {"Tough Love Time 💪", "Listen {name}, tough love time: {duration} on {app}?! Voice record why you're avoiding what you should be doing 🎙️"},
+                {"Stop & Breathe ✋", "{name}!! Stop. Close the app. Take 10 deep breaths. Then write down 3 things you're grateful for 🙏✨"},
+                {"Pattern Not Serving You 😤", "Okay {name}, enough. This pattern isn't serving you. Journal for 5 min about what you're really feeling 📖❤️"},
+                {"Reality Check ⏰", "{name}, real talk: {duration}?! You deserve better than endless scrolling. Take your power back NOW 💪🌟"}
+            }
         };
         
         if (level >= 1 && level <= 4) {
-            return messages[level - 1];
+            return allMessages[level - 1];
         }
-        return messages[0]; // Default to level 1
+        return allMessages[0];
+    }
+    
+    public static String[] getNudgeMessage(int level) {
+        String[][] variants = getNudgeMessageVariants(level);
+        
+        // Rotate through messages to avoid repetition
+        int index = lastMessageIndex % variants.length;
+        lastMessageIndex++;
+        
+        return variants[index];
+    }
+    
+    public static String getSuggestedAction(int level, int hourOfDay) {
+        // Morning (6-11): walk, stretch, journal
+        // Afternoon (12-17): breathing, walk, voice
+        // Evening (18-21): stretch, journal, voice
+        // Night (22-5): breathing, gratitude, journal
+        
+        if (level <= 2) {
+            if (hourOfDay >= 6 && hourOfDay < 12) return "breathing";
+            if (hourOfDay >= 12 && hourOfDay < 18) return "walk";
+            if (hourOfDay >= 18 && hourOfDay < 22) return "stretch";
+            return "breathing";
+        } else if (level == 3) {
+            if (hourOfDay >= 6 && hourOfDay < 12) return "walk";
+            if (hourOfDay >= 12 && hourOfDay < 18) return "stretch";
+            if (hourOfDay >= 18 && hourOfDay < 22) return "journal";
+            return "journal";
+        } else {
+            if (hourOfDay >= 6 && hourOfDay < 12) return "journal";
+            if (hourOfDay >= 12 && hourOfDay < 18) return "voice";
+            if (hourOfDay >= 18 && hourOfDay < 22) return "voice";
+            return "gratitude";
+        }
     }
 }

@@ -109,12 +109,15 @@ public class SystemMonitoringPlugin extends Plugin {
 
     Intent serviceIntent = new Intent(getContext(), SystemMonitoringService.class);
 
-    // Pass debug flag if provided
+    // Pass debug flag and userName if provided
     boolean debug = call.getBoolean("debug", false);
+    String userName = call.getString("userName", "friend");
     serviceIntent.putExtra("debug", debug);
+    serviceIntent.putExtra("userName", userName);
 
     try {
       ContextCompat.startForegroundService(getContext(), serviceIntent);
+      android.util.Log.d("FlowLight", "Started monitoring with userName: " + userName + ", debug: " + debug);
       call.resolve();
     } catch (Exception e) {
       call.reject("Failed to start monitoring: " + e.getMessage());
