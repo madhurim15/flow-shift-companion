@@ -143,7 +143,7 @@ const UserMenu = () => {
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate('/#/account')}>
+        <DropdownMenuItem onClick={() => navigate('/account')}>
           <Settings className="mr-2 h-4 w-4" />
           Account Settings
         </DropdownMenuItem>
@@ -156,7 +156,7 @@ const UserMenu = () => {
               Developer Tools
             </div>
             
-            <DropdownMenuItem onClick={() => navigate('/#/diagnostics')}>
+            <DropdownMenuItem onClick={() => navigate('/diagnostics')}>
               <BarChart3 className="mr-2 h-4 w-4" />
               Diagnostics
             </DropdownMenuItem>

@@ -109,7 +109,7 @@ export const BottomNavigation = () => {
                   onClick={handleAdvancedSettings}
                 >
                   <Settings className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Settings</span>
+                  <span className="text-xs text-muted-foreground">Advanced Features</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
