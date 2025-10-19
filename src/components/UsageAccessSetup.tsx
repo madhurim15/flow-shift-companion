@@ -133,7 +133,7 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
 
   const openAppSettings = async () => {
     try {
-      await SystemMonitoring.requestPermissions();
+      await SystemMonitoring.openAppSettings();
       toast({
         title: "Opening App Settings",
         description: "Navigate to Special access → Usage data access → enable FlowLight.",
@@ -142,6 +142,21 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
       toast({
         title: "Manual navigation needed",
         description: "Settings → Apps → FlowLight → Special access → Usage data access → enable.",
+      });
+    }
+  };
+
+  const openBatterySettings = async () => {
+    try {
+      await SystemMonitoring.openBatteryOptimizationSettings();
+      toast({
+        title: "Opening Battery Settings",
+        description: "Disable battery optimization for FlowLight to ensure monitoring works.",
+      });
+    } catch (error) {
+      toast({
+        title: "Manual navigation needed",
+        description: "Settings → Battery → Battery optimization → FlowLight → Don't optimize.",
       });
     }
   };
@@ -281,23 +296,36 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
               {isChecking ? 'Checking...' : 'Grant Permission'}
             </Button>
 
-            <div className="flex gap-2">
-              <Button 
-                onClick={openAppSettings}
-                disabled={isChecking}
-                variant="outline"
-                className="flex-1"
-                size="sm"
-              >
-                <Smartphone className="w-4 h-4 mr-2" />
-                Open App Settings
-              </Button>
-              
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Button 
+                  onClick={openAppSettings}
+                  disabled={isChecking}
+                  variant="outline"
+                  className="flex-1"
+                  size="sm"
+                >
+                  <Smartphone className="w-4 h-4 mr-2" />
+                  App Settings
+                </Button>
+                
+                <Button 
+                  onClick={openBatterySettings}
+                  disabled={isChecking}
+                  variant="outline"
+                  className="flex-1"
+                  size="sm"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Battery
+                </Button>
+              </div>
+
               <Button 
                 onClick={checkAgainNow}
                 disabled={isChecking}
                 variant="outline"
-                className="flex-1"
+                className="w-full"
                 size="sm"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />

@@ -29,6 +29,8 @@ const UserMenu = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const debugParam = urlParams.get('debug') === '1';
     const debugStorage = localStorage.getItem('debug-panel-enabled') === 'true';
+    
+    // Only show developer tools if explicitly enabled
     setIsDebugEnabled(debugParam || debugStorage);
 
     // Check usage access if on native Android
@@ -140,14 +142,21 @@ const UserMenu = () => {
           {user.email}
         </DropdownMenuItem>
         
-        {isNativeAndroid && (
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate('/account')}>
+          <Settings className="mr-2 h-4 w-4" />
+          Account Settings
+        </DropdownMenuItem>
+        
+        {/* Developer Tools - Only show if debug mode is enabled */}
+        {isNativeAndroid && isDebugEnabled && (
           <>
             <DropdownMenuSeparator />
             <div className="px-2 py-1 text-xs font-medium text-muted-foreground">
               Developer Tools
             </div>
             
-            <DropdownMenuItem onClick={() => navigate('/#/diagnostics')}>
+            <DropdownMenuItem onClick={() => navigate('/diagnostics')}>
               <BarChart3 className="mr-2 h-4 w-4" />
               Diagnostics
             </DropdownMenuItem>

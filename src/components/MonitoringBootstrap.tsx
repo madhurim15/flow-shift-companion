@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { SystemMonitoring } from '@/plugins/system-monitoring';
 import { useLocalNotifications } from '@/hooks/useLocalNotifications';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export const MonitoringBootstrap = () => {
   const [hasUsageAccess, setHasUsageAccess] = useState(false);
@@ -77,6 +78,28 @@ export const MonitoringBootstrap = () => {
       try {
         console.log('[MonitoringBootstrap] Starting lightweight bootstrap process');
         
+        // Fetch user's preferred name from profile
+        let userName = 'friend';
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('preferred_name, full_name')
+              .eq('id', user.id)
+              .single();
+            
+            if (profile?.preferred_name) {
+              userName = profile.preferred_name;
+            } else if (profile?.full_name) {
+              userName = profile.full_name.split(' ')[0];
+            }
+            console.log('[MonitoringBootstrap] Using userName:', userName);
+          }
+        } catch (error) {
+          console.log('[MonitoringBootstrap] Could not fetch user name, using default:', error);
+        }
+        
         // Request notification permission before starting monitoring
         try {
           await requestNotificationPermissions();
@@ -93,8 +116,11 @@ export const MonitoringBootstrap = () => {
 
         if (permissionStatus.usageAccess) {
           // Auto-start monitoring if permission is already granted
-          await SystemMonitoring.startMonitoring({ debug: isDebugMode });
-          console.log(`[MonitoringBootstrap] Monitoring auto-started ${isDebugMode ? '(Debug Mode)' : '(Production Mode)'}`);
+          await SystemMonitoring.startMonitoring({ 
+            debug: isDebugMode,
+            userName: userName
+          });
+          console.log(`[MonitoringBootstrap] Monitoring auto-started ${isDebugMode ? '(Debug Mode)' : '(Production Mode)'} for ${userName}`);
 
           setIsBootstrapped(true);
 
@@ -109,7 +135,6 @@ export const MonitoringBootstrap = () => {
           }, 1000);
         } else {
           console.log('[MonitoringBootstrap] No usage access - waiting for onboarding to complete');
-          // DON'T mark as bootstrapped if we don't have permission - this was the bug!
           setIsBootstrapped(false);
         }
 
@@ -147,12 +172,36 @@ export const MonitoringBootstrap = () => {
           bootstrapInProgressRef.current = true;
           
           try {
+            // Fetch user's preferred name
+            let userName = 'friend';
+            try {
+              const { data: { user } } = await supabase.auth.getUser();
+              if (user) {
+                const { data: profile } = await supabase
+                  .from('profiles')
+                  .select('preferred_name, full_name')
+                  .eq('id', user.id)
+                  .single();
+                
+                if (profile?.preferred_name) {
+                  userName = profile.preferred_name;
+                } else if (profile?.full_name) {
+                  userName = profile.full_name.split(' ')[0];
+                }
+              }
+            } catch (error) {
+              console.log('[MonitoringBootstrap] Could not fetch user name on resume:', error);
+            }
+            
             // Request notification permission before starting
             await requestNotificationPermissions();
-            await SystemMonitoring.startMonitoring({ debug: isDebugMode });
+            await SystemMonitoring.startMonitoring({ 
+              debug: isDebugMode,
+              userName: userName
+            });
             setIsBootstrapped(true);
             
-            console.log('[MonitoringBootstrap] Monitoring started after resume');
+            console.log('[MonitoringBootstrap] Monitoring started after resume for:', userName);
             
             // Show success toast after resume (with deduplication)
             setTimeout(() => {

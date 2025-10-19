@@ -16,8 +16,10 @@ export interface SystemMonitoringPlugin {
   requestPermissions(): Promise<{ granted: boolean }>;
   checkPermissions(): Promise<{ usageAccess: boolean }>;
   hasUsageStatsPermission(): Promise<{ granted: boolean }>;
-  startMonitoring(options?: { debug?: boolean }): Promise<void>;
+  startMonitoring(options?: { debug?: boolean; userName?: string }): Promise<void>;
   stopMonitoring(): Promise<void>;
+  openBatteryOptimizationSettings(): Promise<void>;
+  openAppSettings(): Promise<void>;
   addListener(
     eventName: 'appChanged',
     listenerFunc: (event: AppChangedEvent) => void
