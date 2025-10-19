@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
 import { SystemMonitoring } from '@/plugins/system-monitoring';
 import { useLocalNotifications } from '@/hooks/useLocalNotifications';
 import { useToast } from '@/hooks/use-toast';
@@ -115,12 +116,22 @@ export const MonitoringBootstrap = () => {
         }
 
         if (permissionStatus.usageAccess) {
-          // Auto-start monitoring if permission is already granted
-          await SystemMonitoring.startMonitoring({ 
-            debug: isDebugMode,
-            userName: userName
-          });
-          console.log(`[MonitoringBootstrap] Monitoring auto-started ${isDebugMode ? '(Debug Mode)' : '(Production Mode)'} for ${userName}`);
+          // Auto-start monitoring if permission is already granted with retry
+          try {
+            await SystemMonitoring.startMonitoring({ 
+              debug: isDebugMode,
+              userName: userName
+            });
+            console.log(`[MonitoringBootstrap] Monitoring auto-started ${isDebugMode ? '(Debug Mode)' : '(Production Mode)'} for ${userName}`);
+          } catch (startError) {
+            console.warn('[MonitoringBootstrap] First start attempt failed, retrying...', startError);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await SystemMonitoring.startMonitoring({ 
+              debug: isDebugMode,
+              userName: userName
+            });
+            console.log('[MonitoringBootstrap] Monitoring started on retry');
+          }
 
           setIsBootstrapped(true);
 
@@ -154,7 +165,7 @@ export const MonitoringBootstrap = () => {
     bootstrapMonitoring();
   }, [isBootstrapped, initLocalNotifications, requestNotificationPermissions, showToast, checkPermissionsWithDebounce, isDebugMode]);
 
-  // Re-check permissions when app resumes with debouncing
+  // Re-check permissions when app resumes with debouncing and native resume listener
   useEffect(() => {
     if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
       return;
@@ -195,10 +206,22 @@ export const MonitoringBootstrap = () => {
             
             // Request notification permission before starting
             await requestNotificationPermissions();
-            await SystemMonitoring.startMonitoring({ 
-              debug: isDebugMode,
-              userName: userName
-            });
+            
+            // Start monitoring with retry for Samsung
+            try {
+              await SystemMonitoring.startMonitoring({ 
+                debug: isDebugMode,
+                userName: userName
+              });
+            } catch (startError) {
+              console.warn('[MonitoringBootstrap] Resume start failed, retrying...', startError);
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              await SystemMonitoring.startMonitoring({ 
+                debug: isDebugMode,
+                userName: userName
+              });
+            }
+            
             setIsBootstrapped(true);
             
             console.log('[MonitoringBootstrap] Monitoring started after resume for:', userName);
@@ -230,7 +253,7 @@ export const MonitoringBootstrap = () => {
       }
     };
 
-    // Use document events for app resume detection with debouncing
+    // Use both document events and native app resume listener
     let resumeTimeout: NodeJS.Timeout;
     const debouncedHandleAppResume = () => {
       clearTimeout(resumeTimeout);
@@ -238,15 +261,23 @@ export const MonitoringBootstrap = () => {
     };
 
     document.addEventListener('visibilitychange', debouncedHandleAppResume);
+    
+    // Add native Capacitor resume listener for Samsung reliability
+    const resumeListener = App.addListener('resume', () => {
+      console.log('[MonitoringBootstrap] Native app resume detected');
+      debouncedHandleAppResume();
+    });
+    
     return () => {
       document.removeEventListener('visibilitychange', debouncedHandleAppResume);
+      resumeListener.then(handle => handle.remove());
       clearTimeout(resumeTimeout);
       
       // Cleanup any active toasts on unmount
       toastIds.forEach(id => dismiss(id));
       activeToastTypesRef.current.clear();
     };
-  }, [hasUsageAccess, isBootstrapped, showToast, checkPermissionsWithDebounce, toastIds, dismiss, isDebugMode]);
+  }, [hasUsageAccess, isBootstrapped, showToast, checkPermissionsWithDebounce, toastIds, dismiss, isDebugMode, requestNotificationPermissions]);
 
   // This component renders nothing - it's just for side effects
   return null;
