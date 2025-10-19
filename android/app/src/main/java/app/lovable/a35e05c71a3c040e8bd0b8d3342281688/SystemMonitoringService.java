@@ -19,12 +19,27 @@ import android.content.IntentFilter;
 import android.os.PowerManager;
 import android.net.Uri;
 import android.util.Log;
+import android.content.SharedPreferences;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+
+// Daily usage tracking class
+class DailyAppUsage {
+  int totalSeconds = 0;
+  int lastNudgeLevel = 0;
+  long lastSessionStart = 0;
+  String date = "";
+  
+  DailyAppUsage(String date) {
+    this.date = date;
+  }
+}
 
 public class SystemMonitoringService extends Service {
   // Excluded launcher and system UI packages
@@ -57,10 +72,22 @@ public class SystemMonitoringService extends Service {
   private PowerManager powerManager;
   private boolean isScreenOn = true;
   
+  // Daily cumulative usage tracking
+  private Map<String, DailyAppUsage> dailyUsageMap = new HashMap<>();
+  private String currentDate = getTodayDate();
+  
   // Per-session nudge state
   private int lastNudgeLevel = 0;
   private long nextAllowedNudgeTime = 0;
   private int dismissalCount = 0;
+  
+  private static String getTodayDate() {
+    Calendar cal = Calendar.getInstance();
+    return String.format("%04d-%02d-%02d", 
+      cal.get(Calendar.YEAR), 
+      cal.get(Calendar.MONTH) + 1, 
+      cal.get(Calendar.DAY_OF_MONTH));
+  }
   
   private BroadcastReceiver nudgeActionReceiver = new BroadcastReceiver() {
     @Override
@@ -82,6 +109,14 @@ public class SystemMonitoringService extends Service {
       String action = intent.getAction();
       if (Intent.ACTION_SCREEN_OFF.equals(action)) {
         isScreenOn = false;
+        
+        // Save current session before terminating
+        if (lastPackage != null && sessionStartTime > 0) {
+          long sessionDuration = (System.currentTimeMillis() - sessionStartTime) / 1000;
+          saveDailyUsage(lastPackage, (int) sessionDuration, lastNudgeLevel);
+          Log.d("FlowLight", "Screen OFF - saved session: " + sessionDuration + "s");
+        }
+        
         // Terminate active session when screen goes off
         lastPackage = null;
         sessionStartTime = 0;
@@ -129,18 +164,41 @@ public class SystemMonitoringService extends Service {
       @Override
       public void run() {
         try {
+          // Check if date changed (midnight reset)
+          String today = getTodayDate();
+          if (!today.equals(currentDate)) {
+            Log.d("FlowLight", "Date changed - clearing daily usage map");
+            dailyUsageMap.clear();
+            currentDate = today;
+          }
+          
           String current = getForegroundAppPackage();
           // Skip if launcher/system UI or null
           if (current != null && !current.equals(lastPackage)) {
+            // Save previous app's session time to daily map
+            if (lastPackage != null && sessionStartTime > 0) {
+              long sessionDuration = (System.currentTimeMillis() - sessionStartTime) / 1000;
+              saveDailyUsage(lastPackage, (int) sessionDuration, lastNudgeLevel);
+              Log.d("FlowLight", "Saved " + lastPackage + " session: " + sessionDuration + "s, level: " + lastNudgeLevel);
+            }
+            
             lastPackage = current;
             String appName = getAppName(current);
             currentAppName = appName;
             sessionStartTime = System.currentTimeMillis();
             
-            // Reset nudge state for new app
-            lastNudgeLevel = 0;
+            // Restore nudge state from daily map
+            DailyAppUsage usage = dailyUsageMap.get(current);
+            if (usage != null) {
+              lastNudgeLevel = usage.lastNudgeLevel;
+              Log.d("FlowLight", "Restored nudge level " + lastNudgeLevel + " for " + current + " (total: " + usage.totalSeconds + "s)");
+            } else {
+              lastNudgeLevel = 0;
+            }
             nextAllowedNudgeTime = 0;
             dismissalCount = 0;
+            
+            Log.d("FlowLight", "App changed to: " + current + " -> " + appName);
             
             Intent i = new Intent("FLOWLIGHT_APP_CHANGED");
             i.putExtra("package", current);
@@ -280,10 +338,25 @@ public class SystemMonitoringService extends Service {
     return lastPkg;
   }
 
+  // Helper to save daily usage
+  private void saveDailyUsage(String packageName, int sessionSeconds, int nudgeLevel) {
+    DailyAppUsage usage = dailyUsageMap.get(packageName);
+    if (usage == null) {
+      usage = new DailyAppUsage(currentDate);
+      dailyUsageMap.put(packageName, usage);
+    }
+    usage.totalSeconds += sessionSeconds;
+    usage.lastNudgeLevel = nudgeLevel;
+  }
+
   private String getAppName(String pkg) {
+    Log.d("FlowLight", "Getting app name for package: " + pkg);
+    
     // 1. Check hardcoded map first for common apps
     java.util.Map<String, String> knownApps = new java.util.HashMap<>();
     knownApps.put("com.google.android.youtube", "YouTube");
+    knownApps.put("com.google.android.apps.youtube.music", "YouTube Music");
+    knownApps.put("com.google.android.youtube.tv", "YouTube TV");
     knownApps.put("com.android.youtube", "YouTube");
     knownApps.put("com.android.youtube.com", "YouTube");
     knownApps.put("com.instagram.android", "Instagram");
@@ -369,10 +442,19 @@ public class SystemMonitoringService extends Service {
     AppThresholds.AppConfig config = AppThresholds.getAppConfig(packageName);
     int[] thresholds = debugMode ? config.debugThresholds : config.thresholds;
     
-    // Find current level based on duration
+    // Calculate cumulative duration (daily total + current session)
+    DailyAppUsage usage = dailyUsageMap.get(packageName);
+    int cumulativeDuration = durationSeconds;
+    if (usage != null) {
+      cumulativeDuration = usage.totalSeconds + durationSeconds;
+    }
+    
+    Log.d("FlowLight", "Nudge check for " + appName + " - session: " + durationSeconds + "s, cumulative: " + cumulativeDuration + "s, lastLevel: " + lastNudgeLevel);
+    
+    // Find current level based on CUMULATIVE duration
     int newLevel = 0;
     for (int i = 0; i < thresholds.length; i++) {
-      if (durationSeconds >= thresholds[i]) {
+      if (cumulativeDuration >= thresholds[i]) {
         newLevel = i + 1;
       }
     }
@@ -380,7 +462,8 @@ public class SystemMonitoringService extends Service {
     long now = System.currentTimeMillis();
     
     if (newLevel > lastNudgeLevel && now >= nextAllowedNudgeTime) {
-      showNudgeNotification(packageName, appName, newLevel, durationSeconds, config.psychState);
+      Log.d("FlowLight", "Showing level " + newLevel + " nudge (cumulative: " + cumulativeDuration + "s)");
+      showNudgeNotification(packageName, appName, newLevel, cumulativeDuration, config.psychState);
       lastNudgeLevel = newLevel;
       
       // Set next allowed nudge time based on dismissal count

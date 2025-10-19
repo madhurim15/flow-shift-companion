@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 export const MonitoringBootstrap = () => {
   const [hasUsageAccess, setHasUsageAccess] = useState(false);
   const [isBootstrapped, setIsBootstrapped] = useState(false);
+  const [monitoringActive, setMonitoringActive] = useState(false);
   const [toastIds, setToastIds] = useState<string[]>([]);
   const { initLocalNotifications, requestPermissions: requestNotificationPermissions } = useLocalNotifications();
   const { toast, dismiss } = useToast();
@@ -17,6 +18,7 @@ export const MonitoringBootstrap = () => {
   const bootstrapInProgressRef = useRef(false);
   const lastPermissionCheckRef = useRef(0);
   const activeToastTypesRef = useRef(new Set<string>());
+  const monitoringCheckTimeoutRef = useRef<NodeJS.Timeout>();
 
   const isDebugMode = typeof window !== 'undefined' && (
     new URLSearchParams(window.location.search).get('debug') === '1' ||
@@ -135,6 +137,20 @@ export const MonitoringBootstrap = () => {
               });
               console.log(`[MonitoringBootstrap] Monitoring started on attempt ${attempt + 1}`);
               started = true;
+              setMonitoringActive(true);
+              
+              // Set timeout to check if monitoring is still active after 10 seconds
+              monitoringCheckTimeoutRef.current = setTimeout(() => {
+                if (!monitoringActive) {
+                  console.error('[MonitoringBootstrap] Monitoring failed to stay active');
+                  showToast(
+                    'monitoring-inactive',
+                    "⚠️ Monitoring Issue",
+                    "Service stopped unexpectedly. Please restart the app.",
+                    8000
+                  );
+                }
+              }, 10000);
             } catch (startError) {
               attempt++;
               console.warn(`[MonitoringBootstrap] Attempt ${attempt} failed:`, startError);
@@ -241,6 +257,7 @@ export const MonitoringBootstrap = () => {
                   userName: userName
                 });
                 started = true;
+                setMonitoringActive(true);
                 console.log(`[MonitoringBootstrap] Resume monitoring started on attempt ${attempt + 1}`);
               } catch (startError) {
                 attempt++;
@@ -305,8 +322,13 @@ export const MonitoringBootstrap = () => {
       // Cleanup any active toasts on unmount
       toastIds.forEach(id => dismiss(id));
       activeToastTypesRef.current.clear();
+      
+      // Clear monitoring check timeout
+      if (monitoringCheckTimeoutRef.current) {
+        clearTimeout(monitoringCheckTimeoutRef.current);
+      }
     };
-  }, [hasUsageAccess, isBootstrapped, showToast, checkPermissionsWithDebounce, toastIds, dismiss, isDebugMode, requestNotificationPermissions]);
+  }, [hasUsageAccess, isBootstrapped, showToast, checkPermissionsWithDebounce, toastIds, dismiss, isDebugMode, requestNotificationPermissions, monitoringActive]);
 
   // This component renders nothing - it's just for side effects
   return null;

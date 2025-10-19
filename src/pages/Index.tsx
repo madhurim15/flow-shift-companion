@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
+import { App } from "@capacitor/app";
 import WelcomeScreen from "@/components/WelcomeScreen";
 import MoodSelector from "@/components/MoodSelector";
 import Dice3D from "@/components/Dice3D";
@@ -77,6 +79,34 @@ const Index = () => {
       navigate("/auth");
     }
   }, [user, loading, navigate]);
+
+  // Android back button handling
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    const backButtonListener = App.addListener('backButton', ({ canGoBack }) => {
+      if (appState === 'welcome') {
+        // On home screen, exit app
+        App.exitApp();
+      } else if (appState === 'mood-selection') {
+        // Go back to welcome
+        setAppState('welcome');
+      } else if (appState === 'dice-roll') {
+        // Go back to mood selection
+        setAppState('mood-selection');
+      } else if (appState === 'action-timer') {
+        // Go back to dice roll
+        setAppState('dice-roll');
+      } else if (appState === 'completion-celebration') {
+        // Go back to mood selection
+        setAppState('mood-selection');
+      }
+    });
+
+    return () => {
+      backButtonListener.then(handle => handle.remove());
+    };
+  }, [appState]);
   const handleStart = () => {
     setAppState("mood-selection");
   };
