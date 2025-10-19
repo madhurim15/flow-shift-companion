@@ -1,17 +1,15 @@
 
-import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createHashRouter, RouterProvider, Navigate, useNavigate } from "react-router-dom";
+import { createHashRouter, RouterProvider, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { TrialProvider } from "@/contexts/TrialContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { EnhancedInterventionModal } from "@/components/EnhancedInterventionModal";
 import { MonitoringBootstrap } from "@/components/MonitoringBootstrap";
+import { DeepLinkHandler } from "@/components/DeepLinkHandler";
 import { Capacitor } from "@capacitor/core";
-import { App as CapApp } from '@capacitor/app';
-import type { URLOpenListenerEvent } from '@capacitor/app';
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -132,48 +130,6 @@ const router = createHashRouter([
   }
 ]);
 
-// Deep-link handler component
-const DeepLinkHandler = () => {
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return;
-    
-    const handleDeepLink = (data: URLOpenListenerEvent) => {
-      const url = data.url;
-      console.log('Deep link opened:', url);
-      
-      // Parse: flowlight://action/breathing
-      if (url.includes('flowlight://action/')) {
-        const action = url.split('flowlight://action/')[1];
-        
-        // Navigate to appropriate route
-        const routeMap: Record<string, string> = {
-          'breathing': '/breathing',
-          'journal': '/journal',
-          'voice': '/voice',
-          'walk': '/walk',
-          'stretch': '/stretch',
-          'gratitude': '/gratitude'
-        };
-        
-        if (routeMap[action]) {
-          console.log('Navigating to:', routeMap[action]);
-          navigate(routeMap[action]);
-        }
-      }
-    };
-    
-    const listener = CapApp.addListener('appUrlOpen', handleDeepLink);
-    
-    return () => {
-      listener.then(handle => handle.remove());
-    };
-  }, [navigate]);
-  
-  return null;
-};
-
 const App = () => {
   const isNativeAndroid = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
   
@@ -184,9 +140,8 @@ const App = () => {
           <TrialProvider>
             <TooltipProvider>
               <Toaster />
-              <RouterProvider router={router}>
-                <DeepLinkHandler />
-              </RouterProvider>
+              <RouterProvider router={router} />
+              <DeepLinkHandler />
               <EnhancedInterventionModal />
               {isNativeAndroid && <MonitoringBootstrap />}
             </TooltipProvider>
