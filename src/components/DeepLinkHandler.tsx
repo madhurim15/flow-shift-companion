@@ -1,12 +1,9 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import type { URLOpenListenerEvent } from '@capacitor/app';
 
 export const DeepLinkHandler = () => {
-  const navigate = useNavigate();
-  
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
     
@@ -18,7 +15,7 @@ export const DeepLinkHandler = () => {
       if (url.includes('flowlight://action/')) {
         const action = url.split('flowlight://action/')[1];
         
-        // Navigate to appropriate route
+        // Navigate to appropriate route using hash router
         const routeMap: Record<string, string> = {
           'breathing': '/breathing',
           'journal': '/journal',
@@ -30,7 +27,7 @@ export const DeepLinkHandler = () => {
         
         if (routeMap[action]) {
           console.log('Navigating to:', routeMap[action]);
-          navigate(routeMap[action]);
+          window.location.hash = routeMap[action];
         }
       }
     };
@@ -40,7 +37,7 @@ export const DeepLinkHandler = () => {
     return () => {
       listener.then(handle => handle.remove());
     };
-  }, [navigate]);
+  }, []);
   
   return null;
 };
