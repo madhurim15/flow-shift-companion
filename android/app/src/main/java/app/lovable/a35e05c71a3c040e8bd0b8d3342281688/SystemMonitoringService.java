@@ -249,20 +249,70 @@ public class SystemMonitoringService extends Service {
   }
 
   private String getAppName(String pkg) {
+    // 1. Check hardcoded map first for common apps
+    java.util.Map<String, String> knownApps = new java.util.HashMap<>();
+    knownApps.put("com.google.android.youtube", "YouTube");
+    knownApps.put("com.android.youtube", "YouTube");
+    knownApps.put("com.android.youtube.com", "YouTube");
+    knownApps.put("com.instagram.android", "Instagram");
+    knownApps.put("com.zhiliaoapp.musically", "TikTok");
+    knownApps.put("com.facebook.katana", "Facebook");
+    knownApps.put("com.facebook.orca", "Messenger");
+    knownApps.put("com.twitter.android", "Twitter");
+    knownApps.put("com.snapchat.android", "Snapchat");
+    knownApps.put("com.reddit.frontpage", "Reddit");
+    knownApps.put("com.pinterest", "Pinterest");
+    knownApps.put("com.linkedin.android", "LinkedIn");
+    knownApps.put("com.whatsapp", "WhatsApp");
+    knownApps.put("com.telegram.messenger", "Telegram");
+    knownApps.put("com.netflix.mediaclient", "Netflix");
+    knownApps.put("com.spotify.music", "Spotify");
+    knownApps.put("com.amazon.mShop.android.shopping", "Amazon");
+    knownApps.put("com.android.chrome", "Chrome");
+    knownApps.put("com.discord", "Discord");
+    knownApps.put("com.twitch.android.app", "Twitch");
+    
+    if (knownApps.containsKey(pkg)) {
+      String name = knownApps.get(pkg);
+      Log.d("FlowLight", "Got app name from map: " + name + " for package: " + pkg);
+      return name;
+    }
+    
+    // 2. Try PackageManager
     try {
       PackageManager pm = getPackageManager();
       ApplicationInfo ai = pm.getApplicationInfo(pkg, 0);
       CharSequence label = pm.getApplicationLabel(ai);
       String name = label != null ? label.toString() : null;
       if (name != null && !name.isEmpty()) {
-        Log.d("FlowLight", "Got app name: " + name + " for package: " + pkg);
+        Log.d("FlowLight", "Got app name from PM: " + name + " for package: " + pkg);
         return name;
       }
     } catch (Exception e) {
-      Log.e("FlowLight", "Failed to get app name for: " + pkg, e);
+      Log.e("FlowLight", "Failed to get app name from PM for: " + pkg, e);
     }
     
-    // Fallback: extract simple name from package
+    // 3. Smart fallback: search for keywords in package name
+    String lower = pkg.toLowerCase();
+    if (lower.contains("youtube")) return "YouTube";
+    if (lower.contains("instagram")) return "Instagram";
+    if (lower.contains("tiktok") || lower.contains("musically")) return "TikTok";
+    if (lower.contains("facebook")) return "Facebook";
+    if (lower.contains("twitter")) return "Twitter";
+    if (lower.contains("snapchat")) return "Snapchat";
+    if (lower.contains("reddit")) return "Reddit";
+    if (lower.contains("pinterest")) return "Pinterest";
+    if (lower.contains("linkedin")) return "LinkedIn";
+    if (lower.contains("whatsapp")) return "WhatsApp";
+    if (lower.contains("telegram")) return "Telegram";
+    if (lower.contains("netflix")) return "Netflix";
+    if (lower.contains("spotify")) return "Spotify";
+    if (lower.contains("amazon")) return "Amazon";
+    if (lower.contains("chrome")) return "Chrome";
+    if (lower.contains("discord")) return "Discord";
+    if (lower.contains("twitch")) return "Twitch";
+    
+    // 4. Last resort: capitalize middle part
     return extractSimpleName(pkg);
   }
   
@@ -308,8 +358,8 @@ public class SystemMonitoringService extends Service {
   }
 
   private void showNudgeNotification(String packageName, String appName, int level, int durationSeconds, String psychState) {
-    // Get message with rotation
-    String[] messageData = AppThresholds.getNudgeMessage(level);
+    // Get message with rotation (pass context for SharedPreferences)
+    String[] messageData = AppThresholds.getNudgeMessage(this, level);
     String title = messageData[0];
     String messageTemplate = messageData[1];
     

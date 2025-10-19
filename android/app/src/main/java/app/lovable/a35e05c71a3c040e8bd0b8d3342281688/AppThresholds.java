@@ -55,8 +55,6 @@ public class AppThresholds {
         }
     }
     
-    private static int lastMessageIndex = 0;
-    
     public static String[][] getNudgeMessageVariants(int level) {
         String[][][] allMessages = {
             // Level 1 - Gentle curiosity (5 variants)
@@ -99,12 +97,19 @@ public class AppThresholds {
         return allMessages[0];
     }
     
-    public static String[] getNudgeMessage(int level) {
-        String[][] variants = getNudgeMessageVariants(level);
+    public static String[] getNudgeMessage(android.content.Context context, int level) {
+        android.content.SharedPreferences prefs = context.getSharedPreferences("FlowLightNudges", android.content.Context.MODE_PRIVATE);
+        String key = "nudge_message_index_level_" + level;
         
-        // Rotate through messages to avoid repetition
-        int index = lastMessageIndex % variants.length;
-        lastMessageIndex++;
+        // Get current index for this level
+        int currentIndex = prefs.getInt(key, 0);
+        
+        // Get variants
+        String[][] variants = getNudgeMessageVariants(level);
+        int index = currentIndex % variants.length;
+        
+        // Save next index for this level
+        prefs.edit().putInt(key, currentIndex + 1).apply();
         
         return variants[index];
     }

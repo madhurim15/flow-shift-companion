@@ -1,19 +1,13 @@
-
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { useEffect } from 'react';
 import PomodoroTimer from '@/components/PomodoroTimer';
-import ReminderSystem from '@/components/ReminderSystem';
 import UserMenu from '@/components/UserMenu';
 import DoomScrollingIntervention from '@/components/DoomScrollingIntervention';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDoomScrollingDetection } from '@/hooks/useDoomScrollingDetection';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Timer, Bell } from 'lucide-react';
-
-type FocusView = 'pomodoro' | 'reminders';
+import { ArrowLeft } from 'lucide-react';
 
 const Focus = () => {
-  const [currentView, setCurrentView] = useState<FocusView>('pomodoro');
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -46,39 +40,16 @@ const Focus = () => {
           
           <div className="flex items-center space-x-4">
             <div className="text-sm text-muted-foreground">
-              Focus & Flow
+              Pomodoro Timer
             </div>
             <UserMenu />
           </div>
         </div>
       </div>
 
-      {/* View Selector */}
+      {/* Content */}
       <div className="max-w-2xl mx-auto p-6">
-        <div className="flex gap-2 p-1 bg-muted rounded-lg mb-6">
-          <Button
-            variant={currentView === 'pomodoro' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setCurrentView('pomodoro')}
-            className="flex-1 flex items-center gap-2"
-          >
-            <Timer className="h-4 w-4" />
-            Pomodoro Timer
-          </Button>
-          <Button
-            variant={currentView === 'reminders' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setCurrentView('reminders')}
-            className="flex-1 flex items-center gap-2"
-          >
-            <Bell className="h-4 w-4" />
-            Gentle Reminders
-          </Button>
-        </div>
-
-        {/* Content */}
-        {currentView === 'pomodoro' && <PomodoroTimer />}
-        {currentView === 'reminders' && <ReminderSystem />}
+        <PomodoroTimer />
       </div>
 
       {/* Doom Scrolling Intervention */}

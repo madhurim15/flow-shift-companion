@@ -23,6 +23,7 @@ import MicroStretch from "./pages/MicroStretch";
 import WalkTimer from "./pages/WalkTimer";
 import VoiceReflection from "./pages/VoiceReflection";
 import QuickGratitude from "./pages/QuickGratitude";
+import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
 
 // Protected route wrapper
@@ -125,13 +126,165 @@ const router = createHashRouter([
     element: <ProtectedRoute><QuickGratitude /></ProtectedRoute>
   },
   {
+    path: "/account",
+    element: <ProtectedRoute><Account /></ProtectedRoute>
+  },
+  {
     path: "*",
     element: <NotFound />
   }
 ]);
 
+// Wrapper component to provide router context to DeepLinkHandler
+const AppContent = () => {
+  return (
+    <>
+      <DeepLinkHandler />
+    </>
+  );
+};
+
 const App = () => {
   const isNativeAndroid = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
+  
+  // Create router with AppContent included in layout
+  const routerWithDeepLink = createHashRouter([
+    {
+      path: "/",
+      element: (
+        <>
+          <AppContent />
+          <LandingRoute />
+        </>
+      )
+    },
+    {
+      path: "/auth",
+      element: (
+        <>
+          <AppContent />
+          <Auth />
+        </>
+      )
+    },
+    {
+      path: "/app",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><Index /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/focus",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><Focus /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/diagnostics",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><Diagnostics /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/permission-helper",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><PermissionHelper /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/monitoring",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><SystemWideMonitoring /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/journal",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><QuickJournal /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/breathing",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><BreathingExercise /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/stretch",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><MicroStretch /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/walk",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><WalkTimer /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/voice",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><VoiceReflection /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/gratitude",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><QuickGratitude /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/account",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><Account /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "*",
+      element: (
+        <>
+          <AppContent />
+          <NotFound />
+        </>
+      )
+    }
+  ]);
   
   return (
     <ErrorBoundary>
@@ -140,8 +293,7 @@ const App = () => {
           <TrialProvider>
             <TooltipProvider>
               <Toaster />
-              <RouterProvider router={router} />
-              <DeepLinkHandler />
+              <RouterProvider router={routerWithDeepLink} />
               <EnhancedInterventionModal />
               {isNativeAndroid && <MonitoringBootstrap />}
             </TooltipProvider>
