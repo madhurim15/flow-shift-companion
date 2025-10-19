@@ -22,7 +22,13 @@ const Account = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div 
+      className="min-h-screen bg-background"
+      style={{
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 120px)'
+      }}
+    >
       {/* Header */}
       <div className="bg-white border-b border-border">
         <div className="max-w-2xl mx-auto p-4 flex items-center justify-between">

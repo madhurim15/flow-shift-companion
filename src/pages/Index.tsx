@@ -253,7 +253,13 @@ const Index = () => {
     );
   }
   
-  return <div className={`min-h-screen ${getDailyBackground()}`}>
+  return <div 
+    className={`min-h-screen ${getDailyBackground()}`}
+    style={{
+      paddingTop: 'env(safe-area-inset-top, 0px)',
+      paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)'
+    }}
+  >
       {/* Doom scrolling intervention temporarily disabled */}
       
       {appState === "welcome" && <WelcomeScreen onStart={handleStart} />}

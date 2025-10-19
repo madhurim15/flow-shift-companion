@@ -13,7 +13,7 @@ const ReminderToggle = ({ notificationsEnabled, onToggle }: ReminderToggleProps)
       <div>
         <h3 className="text-lg font-medium">Gentle Check-ins</h3>
         <p className="text-sm text-muted-foreground">
-          4 gentle reminders throughout your day to pause and reflect
+          4 daily reminders to pause and reflect
         </p>
       </div>
       <Button

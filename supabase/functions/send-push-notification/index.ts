@@ -74,7 +74,7 @@ async function generateJWT(serviceAccount: any): Promise<string> {
     return `${message}.${signatureBase64}`;
   } catch (error) {
     console.error('Error generating JWT:', error);
-    throw new Error(`Failed to generate JWT: ${error.message}`);
+    throw new Error(`Failed to generate JWT: ${(error as Error).message}`);
   }
 }
 
@@ -108,7 +108,7 @@ async function getAccessToken(serviceAccount: any): Promise<string> {
     cachedAccessToken = tokenData.access_token;
     tokenExpiresAt = Date.now() + (tokenData.expires_in * 1000) - 60000; // Subtract 1 minute for safety
     
-    return cachedAccessToken;
+    return cachedAccessToken as string;
   } catch (error) {
     console.error('Error getting access token:', error);
     throw error;
@@ -272,7 +272,7 @@ serve(async (req) => {
           return {
             token: fcmToken.substring(0, 10) + '...',
             success: false,
-            error: error.message
+            error: (error as Error).message
           };
         }
       })
@@ -299,7 +299,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in send-push-notification function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: (error as Error).message }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

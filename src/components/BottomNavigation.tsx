@@ -75,7 +75,10 @@ export const BottomNavigation = () => {
 
       {/* Bottom Navigation Bar - Hide when modal is open */}
       {!activeTab && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/98 backdrop-blur-md border-t border-border/50 shadow-lg">
+        <div 
+          className="fixed bottom-0 left-0 right-0 z-50 bg-background/98 backdrop-blur-md border-t border-border/50 shadow-lg"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+        >
           <div className="flex items-center justify-around px-2 py-3 max-w-md mx-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;

@@ -263,15 +263,6 @@ const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetu
           </Button>
         )}
       </div>
-
-      <div className="pt-2 border-t border-current border-opacity-20">
-        <div className="text-xs space-y-1 opacity-70">
-          <div>Status: {permissionStatus}</div>
-          <div>Service Worker: {isNative ? 'Native App' : (isServiceWorkerReady ? 'Ready' : 'Loading...')}</div>
-          <div>Device: {isMobile ? 'Mobile' : 'Desktop'}</div>
-          <div>Platform: {isNative ? 'Native' : 'Web'}</div>
-        </div>
-      </div>
     </Card>
   );
 };

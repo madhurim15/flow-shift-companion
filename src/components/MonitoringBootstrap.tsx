@@ -116,21 +116,38 @@ export const MonitoringBootstrap = () => {
         }
 
         if (permissionStatus.usageAccess) {
-          // Auto-start monitoring if permission is already granted with retry
-          try {
-            await SystemMonitoring.startMonitoring({ 
-              debug: isDebugMode,
-              userName: userName
-            });
-            console.log(`[MonitoringBootstrap] Monitoring auto-started ${isDebugMode ? '(Debug Mode)' : '(Production Mode)'} for ${userName}`);
-          } catch (startError) {
-            console.warn('[MonitoringBootstrap] First start attempt failed, retrying...', startError);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            await SystemMonitoring.startMonitoring({ 
-              debug: isDebugMode,
-              userName: userName
-            });
-            console.log('[MonitoringBootstrap] Monitoring started on retry');
+          // Auto-start monitoring with robust retry (3 attempts, exponential backoff)
+          let attempt = 0;
+          const maxAttempts = 3;
+          let started = false;
+          
+          while (attempt < maxAttempts && !started) {
+            try {
+              const delay = attempt * 1000; // 0ms, 1s, 2s
+              if (delay > 0) {
+                console.log(`[MonitoringBootstrap] Waiting ${delay}ms before attempt ${attempt + 1}...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+              }
+              
+              await SystemMonitoring.startMonitoring({ 
+                debug: isDebugMode,
+                userName: userName
+              });
+              console.log(`[MonitoringBootstrap] Monitoring started on attempt ${attempt + 1}`);
+              started = true;
+            } catch (startError) {
+              attempt++;
+              console.warn(`[MonitoringBootstrap] Attempt ${attempt} failed:`, startError);
+              if (attempt >= maxAttempts) {
+                console.error('[MonitoringBootstrap] All start attempts failed');
+                showToast(
+                  'start-failed',
+                  "Startup Issue",
+                  "Unable to start monitoring. Please restart the app.",
+                  6000
+                );
+              }
+            }
           }
 
           setIsBootstrapped(true);
@@ -207,19 +224,31 @@ export const MonitoringBootstrap = () => {
             // Request notification permission before starting
             await requestNotificationPermissions();
             
-            // Start monitoring with retry for Samsung
-            try {
-              await SystemMonitoring.startMonitoring({ 
-                debug: isDebugMode,
-                userName: userName
-              });
-            } catch (startError) {
-              console.warn('[MonitoringBootstrap] Resume start failed, retrying...', startError);
-              await new Promise(resolve => setTimeout(resolve, 1000));
-              await SystemMonitoring.startMonitoring({ 
-                debug: isDebugMode,
-                userName: userName
-              });
+            // Start monitoring with robust retry (3 attempts)
+            let attempt = 0;
+            const maxAttempts = 3;
+            let started = false;
+            
+            while (attempt < maxAttempts && !started) {
+              try {
+                const delay = attempt * 1000; // 0ms, 1s, 2s
+                if (delay > 0) {
+                  await new Promise(resolve => setTimeout(resolve, delay));
+                }
+                
+                await SystemMonitoring.startMonitoring({ 
+                  debug: isDebugMode,
+                  userName: userName
+                });
+                started = true;
+                console.log(`[MonitoringBootstrap] Resume monitoring started on attempt ${attempt + 1}`);
+              } catch (startError) {
+                attempt++;
+                console.warn(`[MonitoringBootstrap] Resume attempt ${attempt} failed:`, startError);
+                if (attempt >= maxAttempts) {
+                  throw startError; // Will be caught by outer catch
+                }
+              }
             }
             
             setIsBootstrapped(true);
