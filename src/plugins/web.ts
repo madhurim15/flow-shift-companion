@@ -1,24 +1,36 @@
 // src/plugins/web.ts
 import { WebPlugin } from '@capacitor/core';
-import type { SystemMonitoringPlugin, TodayUsage } from './SystemMonitoringPlugin';
+import type { SystemMonitoringPlugin } from './system-monitoring';
 
 export class SystemMonitoringWeb extends WebPlugin implements SystemMonitoringPlugin {
-  async checkPermission(): Promise<{ granted: boolean }> {
+  async requestPermissions(): Promise<{ granted: boolean }> {
     console.warn('SystemMonitoring is not supported on web.');
     return { granted: false };
   }
 
-  async openUsageAccessSettings(): Promise<void> {
+  async checkPermissions(): Promise<{ usageAccess: boolean }> {
+    console.warn('SystemMonitoring is not supported on web.');
+    return { usageAccess: false };
+  }
+
+  async hasUsageStatsPermission(): Promise<{ granted: boolean }> {
+    console.warn('SystemMonitoring is not supported on web.');
+    return { granted: false };
+  }
+
+  async startMonitoring(): Promise<void> {
     console.warn('SystemMonitoring is not supported on web.');
   }
 
-  async getTodayUsage(): Promise<TodayUsage> {
+  async stopMonitoring(): Promise<void> {
     console.warn('SystemMonitoring is not supported on web.');
-    return { totalScreenTime: 0, apps: [] };
   }
 
-  async getCurrentApp(): Promise<{ appName: string; packageName: string }> {
+  async openBatteryOptimizationSettings(): Promise<void> {
     console.warn('SystemMonitoring is not supported on web.');
-    return { appName: 'N/A', packageName: 'N/A' };
+  }
+
+  async openAppSettings(): Promise<void> {
+    console.warn('SystemMonitoring is not supported on web.');
   }
 }

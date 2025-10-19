@@ -20,11 +20,27 @@ import android.os.PowerManager;
 import android.net.Uri;
 import android.util.Log;
 import java.util.Calendar;
+import java.util.HashSet;
+import java.util.Set;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 public class SystemMonitoringService extends Service {
+  // Excluded launcher and system UI packages
+  private static final Set<String> EXCLUDED_PACKAGES = new HashSet<String>() {{
+    add("com.oneplus.launcher");
+    add("com.sec.android.app.launcher");
+    add("com.samsung.android.oneui.home");
+    add("com.miui.home");
+    add("com.huawei.android.launcher");
+    add("com.oppo.launcher");
+    add("com.google.android.apps.nexuslauncher");
+    add("com.teslacoilsw.launcher");
+    add("com.android.systemui");
+    add("com.android.launcher");
+    add("com.android.launcher3");
+  }};
   private static final String CHANNEL_ID = "flowlight_monitor";
   private static final String NUDGE_CHANNEL_ID = "flowlight_nudge";
   private static final int NOTIF_ID = 98765;
@@ -66,7 +82,11 @@ public class SystemMonitoringService extends Service {
       String action = intent.getAction();
       if (Intent.ACTION_SCREEN_OFF.equals(action)) {
         isScreenOn = false;
-        Log.d("FlowLight", "Screen OFF - pausing tracking");
+        // Terminate active session when screen goes off
+        lastPackage = null;
+        sessionStartTime = 0;
+        currentAppName = null;
+        Log.d("FlowLight", "Screen OFF - session terminated");
       } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
         isScreenOn = true;
         Log.d("FlowLight", "Screen ON - resuming tracking");
@@ -110,6 +130,7 @@ public class SystemMonitoringService extends Service {
       public void run() {
         try {
           String current = getForegroundAppPackage();
+          // Skip if launcher/system UI or null
           if (current != null && !current.equals(lastPackage)) {
             lastPackage = current;
             String appName = getAppName(current);
@@ -245,6 +266,17 @@ public class SystemMonitoringService extends Service {
         }
       }
     }
+    
+    // Exclude launcher and system UI packages
+    if (lastPkg != null) {
+      if (EXCLUDED_PACKAGES.contains(lastPkg) || 
+          lastPkg.toLowerCase().contains("launcher") ||
+          lastPkg.equals(getPackageName())) {
+        Log.d("FlowLight", "Excluding package from tracking: " + lastPkg);
+        return null;
+      }
+    }
+    
     return lastPkg;
   }
 
