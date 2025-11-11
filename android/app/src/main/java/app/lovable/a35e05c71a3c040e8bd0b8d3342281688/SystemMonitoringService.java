@@ -175,35 +175,48 @@ public class SystemMonitoringService extends Service {
           String current = getForegroundAppPackage();
           // Skip if launcher/system UI or null
           if (current != null && !current.equals(lastPackage)) {
-            // Save previous app's session time to daily map
-            if (lastPackage != null && sessionStartTime > 0) {
-              long sessionDuration = (System.currentTimeMillis() - sessionStartTime) / 1000;
-              saveDailyUsage(lastPackage, (int) sessionDuration, lastNudgeLevel);
-              Log.d("FlowLight", "Saved " + lastPackage + " session: " + sessionDuration + "s, level: " + lastNudgeLevel);
-            }
-            
-            lastPackage = current;
-            String appName = getAppName(current);
-            currentAppName = appName;
-            sessionStartTime = System.currentTimeMillis();
-            
-            // Restore nudge state from daily map
-            DailyAppUsage usage = dailyUsageMap.get(current);
-            if (usage != null) {
-              lastNudgeLevel = usage.lastNudgeLevel;
-              Log.d("FlowLight", "Restored nudge level " + lastNudgeLevel + " for " + current + " (total: " + usage.totalSeconds + "s)");
-            } else {
-              lastNudgeLevel = 0;
-            }
-            nextAllowedNudgeTime = 0;
-            dismissalCount = 0;
-            
-            Log.d("FlowLight", "App changed to: " + current + " -> " + appName);
-            
-            Intent i = new Intent("FLOWLIGHT_APP_CHANGED");
-            i.putExtra("package", current);
-            i.putExtra("appName", appName);
-            sendBroadcast(i);
+            // Stabilization: wait 750ms and re-check to ensure app is truly in foreground
+            final String detectedPackage = current;
+            handler.postDelayed(new Runnable() {
+              @Override
+              public void run() {
+                String recheck = getForegroundAppPackage();
+                if (recheck != null && recheck.equals(detectedPackage)) {
+                  // App is stable, commit the change
+                  // Save previous app's session time to daily map
+                  if (lastPackage != null && sessionStartTime > 0) {
+                    long sessionDuration = (System.currentTimeMillis() - sessionStartTime) / 1000;
+                    saveDailyUsage(lastPackage, (int) sessionDuration, lastNudgeLevel);
+                    Log.d("FlowLight", "Saved " + lastPackage + " session: " + sessionDuration + "s, level: " + lastNudgeLevel);
+                  }
+                  
+                  lastPackage = detectedPackage;
+                  String appName = getAppName(detectedPackage);
+                  currentAppName = appName;
+                  sessionStartTime = System.currentTimeMillis();
+                  
+                  // Restore nudge state from daily map
+                  DailyAppUsage usage = dailyUsageMap.get(detectedPackage);
+                  if (usage != null) {
+                    lastNudgeLevel = usage.lastNudgeLevel;
+                    Log.d("FlowLight", "Restored nudge level " + lastNudgeLevel + " for " + detectedPackage + " (total: " + usage.totalSeconds + "s)");
+                  } else {
+                    lastNudgeLevel = 0;
+                  }
+                  nextAllowedNudgeTime = 0;
+                  dismissalCount = 0;
+                  
+                  Log.d("FlowLight", "App changed to (verified): " + detectedPackage + " -> " + appName);
+                  
+                  Intent i = new Intent("FLOWLIGHT_APP_CHANGED");
+                  i.putExtra("package", detectedPackage);
+                  i.putExtra("appName", appName);
+                  sendBroadcast(i);
+                } else {
+                  Log.d("FlowLight", "App change from " + detectedPackage + " to " + recheck + " - unstable, ignoring");
+                }
+              }
+            }, 750);
           }
         } catch (Exception ignored) {}
         handler.postDelayed(this, 5000); // poll every 5s

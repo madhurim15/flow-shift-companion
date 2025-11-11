@@ -43,8 +43,7 @@ public class MainActivity extends BridgeActivity {
             ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
             android.util.Log.i("FlowLight", "Auto-started SystemMonitoringService from MainActivity");
         } else {
-            android.util.Log.i("FlowLight", "Usage Access not granted, opening settings");
-            UsageStatsHelper.openUsageAccessSettings(this, getApplicationContext());
+            android.util.Log.i("FlowLight", "Usage Access not granted - will be requested by onboarding");
         }
     }
     
