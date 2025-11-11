@@ -85,6 +85,51 @@ export type Database = {
         }
         Relationships: []
       }
+      adaptive_thresholds: {
+        Row: {
+          acceptance_rate: number
+          accepted_interventions: number
+          app_package_name: string
+          confidence_score: number
+          created_at: string
+          id: string
+          initial_nudge_threshold: number
+          last_updated: string
+          moderate_nudge_threshold: number
+          total_interventions: number
+          urgent_nudge_threshold: number
+          user_id: string
+        }
+        Insert: {
+          acceptance_rate?: number
+          accepted_interventions?: number
+          app_package_name: string
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          initial_nudge_threshold?: number
+          last_updated?: string
+          moderate_nudge_threshold?: number
+          total_interventions?: number
+          urgent_nudge_threshold?: number
+          user_id: string
+        }
+        Update: {
+          acceptance_rate?: number
+          accepted_interventions?: number
+          app_package_name?: string
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          initial_nudge_threshold?: number
+          last_updated?: string
+          moderate_nudge_threshold?: number
+          total_interventions?: number
+          urgent_nudge_threshold?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       app_categories: {
         Row: {
           app_name: string | null
