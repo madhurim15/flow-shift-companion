@@ -43,8 +43,6 @@ class DailyAppUsage {
 
 public class SystemMonitoringService extends Service {
   // Excluded launcher and system UI packages
-public class SystemMonitoringService extends Service {
-  // Excluded launcher and system UI packages
   private static final Set<String> EXCLUDED_PACKAGES = new HashSet<String>() {{
     add("com.oneplus.launcher");
     add("com.sec.android.app.launcher");
