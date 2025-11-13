@@ -107,6 +107,13 @@ public class SystemMonitoringPlugin extends Plugin {
       return;
     }
 
+    // Check if service is already running (idempotent start)
+    if (SystemMonitoringService.isRunning) {
+      android.util.Log.d("FlowLight", "Service already running, skipping duplicate start");
+      call.resolve();
+      return;
+    }
+
     Intent serviceIntent = new Intent(getContext(), SystemMonitoringService.class);
 
     // Pass debug flag and userName if provided

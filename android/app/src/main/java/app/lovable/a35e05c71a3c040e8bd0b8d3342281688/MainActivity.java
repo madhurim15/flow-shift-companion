@@ -25,26 +25,8 @@ public class MainActivity extends BridgeActivity {
         // Configure window for proper display cutout handling and heads-up notifications
         configureWindow();
         
-        // Auto-start monitoring service if Usage Access is granted
-        autoStartMonitoring();
-    }
-    
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Re-check and start service when returning from settings
-        autoStartMonitoring();
-    }
-    
-    private void autoStartMonitoring() {
-        if (UsageStatsHelper.hasUsageStatsPermission(getApplicationContext())) {
-            Intent serviceIntent = new Intent(getApplicationContext(), SystemMonitoringService.class);
-            serviceIntent.putExtra("debug", false);
-            ContextCompat.startForegroundService(getApplicationContext(), serviceIntent);
-            android.util.Log.i("FlowLight", "Auto-started SystemMonitoringService from MainActivity");
-        } else {
-            android.util.Log.i("FlowLight", "Usage Access not granted - will be requested by onboarding");
-        }
+        // DO NOT auto-start here - let onboarding flow handle it with proper Samsung delay
+        android.util.Log.i("FlowLight", "MainActivity ready - service will be started by onboarding");
     }
     
     private void configureWindow() {

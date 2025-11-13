@@ -118,56 +118,44 @@ export const MonitoringBootstrap = () => {
         }
 
         if (permissionStatus.usageAccess) {
-          // Samsung-specific delay + robust retry logic
+          // Samsung-specific delay + simple retry logic
           const isSamsung = /samsung/i.test(navigator.userAgent) || /SM-[A-Z]\d+/i.test(navigator.userAgent);
-          const baseDelay = isSamsung ? 1500 : 500;
+          const delayMs = isSamsung ? 1500 : 500;
           
-          let attempt = 0;
-          const maxAttempts = 3;
-          let started = false;
+          console.log(`[MonitoringBootstrap] Starting with ${delayMs}ms delay (Samsung: ${isSamsung})`);
           
-          while (attempt < maxAttempts && !started) {
+          setTimeout(async () => {
             try {
-              const delay = attempt === 0 ? baseDelay : baseDelay + (attempt * 1000);
-              if (delay > 0) {
-                console.log(`[MonitoringBootstrap] Waiting ${delay}ms before attempt ${attempt + 1} (Samsung: ${isSamsung})...`);
-                await new Promise(resolve => setTimeout(resolve, delay));
-              }
-              
               await SystemMonitoring.startMonitoring({ 
                 debug: isDebugMode,
-                userName: userName
+                userName: userName 
               });
-              console.log(`[MonitoringBootstrap] Monitoring started on attempt ${attempt + 1}`);
-              started = true;
+              console.log('[MonitoringBootstrap] Monitoring started successfully');
+              setIsBootstrapped(true);
               setMonitoringActive(true);
+              showToast('success', 'Welcome!', 'Monitoring active 🎉');
+            } catch (error) {
+              console.error('[MonitoringBootstrap] Failed to start monitoring:', error);
               
-              // Set timeout to check if monitoring is still active after 10 seconds
-              monitoringCheckTimeoutRef.current = setTimeout(() => {
-                if (!monitoringActive) {
-                  console.error('[MonitoringBootstrap] Monitoring failed to stay active');
-                  showToast(
-                    'monitoring-inactive',
-                    "⚠️ Monitoring Issue",
-                    "Service stopped unexpectedly. Please restart the app.",
-                    8000
-                  );
+              // Single retry after 2 seconds
+              setTimeout(async () => {
+                try {
+                  await SystemMonitoring.startMonitoring({ 
+                    debug: isDebugMode,
+                    userName 
+                  });
+                  console.log('[MonitoringBootstrap] Retry successful');
+                  setIsBootstrapped(true);
+                  setMonitoringActive(true);
+                  showToast('success', 'Ready!', 'Monitoring started');
+                } catch (retryError) {
+                  console.error('[MonitoringBootstrap] Retry failed - limited mode:', retryError);
+                  setIsBootstrapped(true);
+                  showToast('warning', 'Limited Mode', 'Please restart if issues persist', 6000);
                 }
-              }, 10000);
-            } catch (startError) {
-              attempt++;
-              console.warn(`[MonitoringBootstrap] Attempt ${attempt} failed:`, startError);
-              if (attempt >= maxAttempts) {
-                console.error('[MonitoringBootstrap] All start attempts failed');
-                showToast(
-                  'start-failed',
-                  "Startup Issue",
-                  "Unable to start monitoring. Please restart the app.",
-                  6000
-                );
-              }
+              }, 2000);
             }
-          }
+          }, delayMs);
 
           setIsBootstrapped(true);
 
