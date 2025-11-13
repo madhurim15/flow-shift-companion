@@ -92,59 +92,78 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
   const requestUsageAccess = async () => {
     try {
       await SystemMonitoring.requestPermissions();
-      toast({
-        title: "Opening Settings",
-        description: "Find Special access → Usage data access, then enable FlowLight.",
-      });
-
-      // Poll for up to 30s to detect grant when user returns
+  const checkAgainNow = async () => {
+    try {
       setIsChecking(true);
-      const startedAt = Date.now();
-      const poll = async (): Promise<void> => {
-        try {
-          const res = await SystemMonitoring.checkPermissions();
-          if (res.usageAccess) {
-            setHasUsageAccess(true);
-            toast({ title: "Permission Granted!", description: "Starting FlowLight monitoring..." });
-            try {
-              await requestNotificationPermissions();
-            } catch (e) {
-              console.log('[UsageAccessSetup] Notification permission request failed (continuing):', e);
-            }
-            const isSamsung = /samsung/i.test(navigator.userAgent) || /SM-[A-Z]\d+/i.test(navigator.userAgent);
-            const delayMs = isSamsung ? 1500 : 500;
+      console.log('[UsageAccessSetup] Manual check triggered');
+      
+      const status = await SystemMonitoring.checkPermissions();
+      console.log('[UsageAccessSetup] Manual check result:', status);
+      
+      if (status.usageAccess) {
+        setHasUsageAccess(true);
+        
+        // Samsung-specific delay before starting monitoring
+        const isSamsung = /samsung/i.test(navigator.userAgent) || 
+                          /SM-[A-Z]\d+/i.test(navigator.userAgent);
+        const delayMs = isSamsung ? 1500 : 500;
+        
+        console.log(`[UsageAccessSetup] Starting monitoring with ${delayMs}ms delay (Samsung: ${isSamsung})`);
+        
+        setTimeout(async () => {
+          try {
+            await SystemMonitoring.startMonitoring({ 
+              debug: false 
+            });
+            console.log('[UsageAccessSetup] Monitoring started successfully');
+            toast({
+              title: "Success!",
+              description: "System monitoring activated 🎉",
+            });
+            onPermissionGranted();
+          } catch (error) {
+            console.error('[UsageAccessSetup] Failed to start monitoring:', error);
+            
+            // Single retry after 2 seconds
             setTimeout(async () => {
               try {
-                await SystemMonitoring.startMonitoring();
+                await SystemMonitoring.startMonitoring({ debug: false });
+                console.log('[UsageAccessSetup] Retry successful');
+                toast({
+                  title: "Success!",
+                  description: "Monitoring started!",
+                });
                 onPermissionGranted();
-              } catch (e) {
-                console.error('[UsageAccessSetup] Failed to start monitoring after grant:', e);
-                setTimeout(() => {
-                  SystemMonitoring.startMonitoring()
-                    .then(() => onPermissionGranted())
-                    .catch(err => console.error('[UsageAccessSetup] Second retry failed:', err));
-                }, 2000);
+              } catch (retryError) {
+                console.error('[UsageAccessSetup] Retry failed - entering limited mode:', retryError);
+                toast({
+                  title: "Limited Mode",
+                  description: "Some features may not work. Try restarting the app.",
+                  variant: "destructive",
+                });
+                // Still proceed to let user use the app
+                onPermissionGranted();
               }
-            }, delayMs);
-            setIsChecking(false);
-            return;
+            }, 2000);
           }
-          if (Date.now() - startedAt < 60000) {
-            setTimeout(poll, 1000);
-          } else {
-            setIsChecking(false);
-            toast({
-              title: "Still need permission",
-              description: "Try 'Open App Settings' below, then Special access → Usage data access → enable FlowLight.",
-            });
-          }
-        } catch (e) {
-          console.error('[UsageAccessSetup] Poll check failed:', e);
-          setIsChecking(false);
-        }
-      };
-      // kick off polling
-      setTimeout(poll, 1200);
+        }, delayMs);
+      } else {
+        toast({
+          title: "Permission Needed",
+          description: "Please enable Usage Access in the next screen",
+        });
+      }
+    } catch (error) {
+      console.error('[UsageAccessSetup] Check failed:', error);
+      toast({
+        title: "Error",
+        description: "Could not check permissions",
+        variant: "destructive",
+      });
+    } finally {
+      setTimeout(() => setIsChecking(false), 1000);
+    }
+  };
     } catch (error) {
       console.error('Error requesting usage access:', error);
       toast({

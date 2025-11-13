@@ -43,6 +43,8 @@ class DailyAppUsage {
 
 public class SystemMonitoringService extends Service {
   // Excluded launcher and system UI packages
+public class SystemMonitoringService extends Service {
+  // Excluded launcher and system UI packages
   private static final Set<String> EXCLUDED_PACKAGES = new HashSet<String>() {{
     add("com.oneplus.launcher");
     add("com.sec.android.app.launcher");
@@ -61,6 +63,9 @@ public class SystemMonitoringService extends Service {
   private static final int NOTIF_ID = 98765;
   private static final int NUDGE_NOTIF_ID = 98766;
   private static final int META_NUDGE_NOTIF_ID = 98767;
+  
+  // Guard against double-start (Samsung stability fix)
+  public static volatile boolean isRunning = false;
 
   private Handler handler;
   private Runnable pollTask;
@@ -143,6 +148,8 @@ public class SystemMonitoringService extends Service {
   @Override
   public void onCreate() {
     super.onCreate();
+    isRunning = true;
+    Log.i("FlowLight", "SystemMonitoringService.onCreate called (isRunning=true)");
     createNotificationChannel();
     createNudgeNotificationChannel();
     
@@ -286,6 +293,8 @@ public class SystemMonitoringService extends Service {
   @Override
   public void onDestroy() {
     super.onDestroy();
+    isRunning = false;
+    Log.i("FlowLight", "SystemMonitoringService.onDestroy called (isRunning=false)");
     if (handler != null) {
       if (pollTask != null) {
         handler.removeCallbacks(pollTask);

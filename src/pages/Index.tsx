@@ -311,25 +311,38 @@ const Index = () => {
     );
   }
   
-  return <div 
-    className="min-h-screen relative"
-    style={{
-      paddingTop: 'max(env(safe-area-inset-top, 0px), 16px)',
-      paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 120px)',
-      backgroundImage: `url(${getDailyBackground()})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundAttachment: 'fixed'
-    }}
-  >
+  return (
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+      {/* Background Image with Scrim */}
+      <div 
+        className="fixed inset-0 -z-10"
+        style={{
+          backgroundImage: `url(${getDailyBackground()})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.88) saturate(1.05)'
+        }}
+      />
+      <div 
+        className="fixed inset-0 -z-10"
+        style={{
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.15), rgba(0,0,0,0.25))'
+        }}
+      />
+      
       {/* Doom scrolling intervention temporarily disabled */}
       
       {appState === "welcome" && <WelcomeScreen onStart={handleStart} />}
       
       {appState !== "welcome" && <>
           
-          <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <header 
+            className="flex-shrink-0 sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+            style={{
+              paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)'
+            }}
+          >
             <div className="container flex h-16 items-center justify-between">
               <div className="flex items-center gap-3">
                 <Button variant="ghost" size="sm" onClick={handleBackToWelcome} className="text-muted-foreground hover:text-foreground">
@@ -358,13 +371,15 @@ const Index = () => {
             </div>
           </header>
           
-          <main className="container py-4 pb-20 px-4">
+          <main className="flex-1 overflow-y-auto">
+            <div className="container py-4 pb-24 px-4">
             {appState === "mood-selection" && <div className="space-y-4">
                 <TrialBanner />
                 <DailyMantra />
                 <MoodSelector onMoodSelect={handleMoodSelect} firstName={user?.user_metadata?.full_name?.split(' ')[0]} selectedMoodId={selectedMoodId} />
                 <MainGoalInput />
               </div>}
+            </div>
           </main>
           
           {/* Bottom Navigation */}
@@ -394,6 +409,7 @@ const Index = () => {
 
       {/* Dice Rolls Remaining Display */}
       <DiceRollsRemaining show={appState === "completion-celebration"} />
-    </div>;
+    </div>
+  );
 };
 export default Index;
