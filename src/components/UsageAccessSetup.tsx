@@ -43,15 +43,29 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
           console.log('[UsageAccessSetup] Notification permission request failed (continuing):', e);
         }
 
-        // Immediately start monitoring after permission is granted
-        try {
-          await SystemMonitoring.startMonitoring();
-          console.log('[UsageAccessSetup] Monitoring started immediately after permission grant');
-        } catch (error) {
-          console.error('[UsageAccessSetup] Failed to start monitoring:', error);
-        }
-
-        onPermissionGranted();
+        // Samsung-specific delay before starting monitoring
+        const isSamsung = /samsung/i.test(navigator.userAgent) || /SM-[A-Z]\d+/i.test(navigator.userAgent);
+        const delayMs = isSamsung ? 1500 : 500;
+        console.log(`[UsageAccessSetup] Starting monitoring with ${delayMs}ms delay (Samsung: ${isSamsung})`);
+        
+        setTimeout(async () => {
+          try {
+            await SystemMonitoring.startMonitoring();
+            console.log('[UsageAccessSetup] Monitoring started successfully');
+            onPermissionGranted();
+          } catch (error) {
+            console.error('[UsageAccessSetup] Failed to start monitoring:', error);
+            // Retry logic
+            setTimeout(() => {
+              SystemMonitoring.startMonitoring()
+                .then(() => {
+                  console.log('[UsageAccessSetup] Monitoring started on retry');
+                  onPermissionGranted();
+                })
+                .catch(err => console.error('[UsageAccessSetup] Retry failed:', err));
+            }, 2000);
+          }
+        }, delayMs);
       }
     } catch (error) {
       console.error('Error checking usage access:', error);
@@ -97,12 +111,21 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
             } catch (e) {
               console.log('[UsageAccessSetup] Notification permission request failed (continuing):', e);
             }
-            try {
-              await SystemMonitoring.startMonitoring();
-            } catch (e) {
-              console.error('[UsageAccessSetup] Failed to start monitoring after grant:', e);
-            }
-            onPermissionGranted();
+            const isSamsung = /samsung/i.test(navigator.userAgent) || /SM-[A-Z]\d+/i.test(navigator.userAgent);
+            const delayMs = isSamsung ? 1500 : 500;
+            setTimeout(async () => {
+              try {
+                await SystemMonitoring.startMonitoring();
+                onPermissionGranted();
+              } catch (e) {
+                console.error('[UsageAccessSetup] Failed to start monitoring after grant:', e);
+                setTimeout(() => {
+                  SystemMonitoring.startMonitoring()
+                    .then(() => onPermissionGranted())
+                    .catch(err => console.error('[UsageAccessSetup] Second retry failed:', err));
+                }, 2000);
+              }
+            }, delayMs);
             setIsChecking(false);
             return;
           }

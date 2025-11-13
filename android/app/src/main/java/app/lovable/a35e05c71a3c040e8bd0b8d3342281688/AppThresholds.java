@@ -18,7 +18,7 @@ public class AppThresholds {
         switch (packageName) {
             case "com.google.android.youtube":
                 return new AppConfig(
-                    new int[]{15 * 60, 25 * 60, 35 * 60, 45 * 60}, // 15, 25, 35, 45 minutes
+                    new int[]{12 * 60, 22 * 60, 32 * 60, 42 * 60}, // 12, 22, 32, 42 minutes (lowered from 15)
                     new int[]{30, 60, 120, 180}, // 30s, 1min, 2min, 3min for testing
                     "avoidance"
                 );
@@ -60,18 +60,18 @@ public class AppThresholds {
             // Level 1 - Gentle curiosity (5 variants)
             {
                 {"Just Checking In 👋", "Hey {name}, just checking in... You've been on {app} for a bit. How about a quick 2-min walk? 🚶‍♀️✨"},
-                {"Thumb Break Time 😊", "{name}, your thumbs deserve a break! Try 3 deep breaths or jot down what you're feeling? 📝💭"},
+                {"Thumb Break Time 😊", "Hey {name}, your thumbs deserve a break! Try 3 deep breaths or jot down what you're feeling? 📝💭"},
                 {"Stretch Time 🙆‍♂️", "Psst {name}... stretch time! {app} will still be here after a 60-second stretch 💪"},
                 {"Better Alternative? 💭", "Hey {name}! Quick question: Would a 5-min journal check-in feel better than scrolling right now? ✍️"},
-                {"Mindful Pause ⏸️", "{name}, pause for a sec 🌟 What if you took 3 deep breaths instead of that next scroll? 🧘‍♀️"}
+                {"Mindful Pause ⏸️", "Hey {name}, pause for a sec 🌟 What if you took 3 deep breaths instead of that next scroll? 🧘‍♀️"}
             },
             // Level 2 - Concern check-in (5 variants)
             {
-                {"Real Talk Time 🤔", "{name}, real talk - you've been on {app} for {duration}. How about capturing your thoughts in a voice note? 🎙️💜"},
+                {"Real Talk Time 🤔", "Hey {name}, real talk - you've been on {app} for {duration}. How about capturing your thoughts in a voice note? 🎙️💜"},
                 {"Movement Break 🌳", "Hey {name} 💜 Still scrolling? Maybe your body needs movement more than your eyes need content. Take a walk? 🚶‍♀️"},
-                {"Pattern Alert 🧘‍♀️", "{name}, I'm seeing a pattern here... Let's try something different. 3 deep breaths? 🌸"},
+                {"Pattern Alert 🧘‍♀️", "Hey {name}, I'm seeing a pattern here... Let's try something different. 3 deep breaths? 🌸"},
                 {"What Are You Looking For? ✍️", "Okay {name}, this is getting long 📱 What if you wrote down what you're actually looking for? 💭"},
-                {"Energy Check ⚡", "{name}, how's your energy? 🔋 Maybe a quick stretch or walk would help more than scrolling? 🌤️"}
+                {"Energy Check ⚡", "Hey {name}, how's your energy? 🔋 Maybe a quick stretch or walk would help more than scrolling? 🌤️"}
             },
             // Level 3 - Stronger alternative (5 variants)
             {

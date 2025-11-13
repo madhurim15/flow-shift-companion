@@ -26,15 +26,17 @@ export const DeepLinkHandler = () => {
             'voice': '/voice',
             'walk': '/walk',
             'stretch': '/stretch',
-            'gratitude': '/gratitude'
+            'gratitude': '/gratitude',
+            'meditation': '/breathing', // Alias for breathing
+            'movement': '/walk'         // Alias for walk
           };
           
           if (routeMap[action]) {
             console.log('Navigating to:', routeMap[action]);
-            // Add 100ms delay for Samsung initialization
+            // Add 150ms delay for Samsung initialization
             setTimeout(() => {
               navigate(routeMap[action]);
-            }, 100);
+            }, 150);
           }
         }
       } catch (error) {

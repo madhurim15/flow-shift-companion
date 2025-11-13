@@ -60,6 +60,7 @@ public class SystemMonitoringService extends Service {
   private static final String NUDGE_CHANNEL_ID = "flowlight_nudge";
   private static final int NOTIF_ID = 98765;
   private static final int NUDGE_NOTIF_ID = 98766;
+  private static final int META_NUDGE_NOTIF_ID = 98767;
 
   private Handler handler;
   private Runnable pollTask;
@@ -80,6 +81,16 @@ public class SystemMonitoringService extends Service {
   private int lastNudgeLevel = 0;
   private long nextAllowedNudgeTime = 0;
   private int dismissalCount = 0;
+  
+  // Total daily screen time tracking for meta-nudges
+  private int totalDailyScreenTimeSeconds = 0;
+  private int lastMetaNudgeLevel = 0;
+  private long lastMetaNudgeTime = 0;
+  private static final int[] META_THRESHOLDS = {
+    60 * 60,      // 1 hour total
+    2 * 60 * 60,  // 2 hours total
+    3 * 60 * 60   // 3 hours total
+  };
   
   private static String getTodayDate() {
     Calendar cal = Calendar.getInstance();
@@ -167,8 +178,11 @@ public class SystemMonitoringService extends Service {
           // Check if date changed (midnight reset)
           String today = getTodayDate();
           if (!today.equals(currentDate)) {
-            Log.d("FlowLight", "Date changed - clearing daily usage map");
+            Log.d("FlowLight", "Date changed - clearing daily usage map and resetting meta-nudge tracking");
             dailyUsageMap.clear();
+            totalDailyScreenTimeSeconds = 0;
+            lastMetaNudgeLevel = 0;
+            lastMetaNudgeTime = 0;
             currentDate = today;
           }
           
@@ -238,7 +252,13 @@ public class SystemMonitoringService extends Service {
             i.putExtra("durationSeconds", durationSeconds);
             sendBroadcast(i);
             
-            // Check for nudge intervention
+            // Track total daily screen time
+            totalDailyScreenTimeSeconds += 30; // Add 30 seconds for each interval
+            
+            // Check for meta-nudges based on overall usage
+            checkForMetaNudge();
+            
+            // Check for per-app nudge intervention
             checkForNudge(lastPackage, currentAppName, durationSeconds);
           }
         } catch (Exception ignored) {}
@@ -516,7 +536,7 @@ public class SystemMonitoringService extends Service {
       PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
     );
     
-    // Build notification without action buttons
+    // Build notification with extended timeout
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NUDGE_CHANNEL_ID)
       .setContentTitle(title)
       .setContentText(personalizedMessage)
@@ -525,11 +545,79 @@ public class SystemMonitoringService extends Service {
       .setPriority(NotificationCompat.PRIORITY_HIGH)
       .setCategory(NotificationCompat.CATEGORY_REMINDER)
       .setAutoCancel(true)
+      .setOngoing(false)
+      .setTimeoutAfter(60000)  // Stay for 60 seconds minimum
       .setContentIntent(pendingIntent);
     
     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(NUDGE_NOTIF_ID, builder.build());
     
     Log.d("FlowLight", "Showed nudge: " + title + " | Action: " + suggestedAction + " | User: " + userName);
+  }
+  
+  private void checkForMetaNudge() {
+    long now = System.currentTimeMillis();
+    
+    // Don't spam meta-nudges (minimum 30 min between)
+    if (now - lastMetaNudgeTime < 30 * 60 * 1000) {
+      return;
+    }
+    
+    // Check which meta-threshold we've crossed
+    int newMetaLevel = 0;
+    for (int i = 0; i < META_THRESHOLDS.length; i++) {
+      if (totalDailyScreenTimeSeconds >= META_THRESHOLDS[i]) {
+        newMetaLevel = i + 1;
+      }
+    }
+    
+    // Show meta-nudge if we've reached a new level
+    if (newMetaLevel > lastMetaNudgeLevel) {
+      showMetaNudgeNotification(newMetaLevel, totalDailyScreenTimeSeconds);
+      lastMetaNudgeLevel = newMetaLevel;
+      lastMetaNudgeTime = now;
+    }
+  }
+  
+  private void showMetaNudgeNotification(int level, int totalSeconds) {
+    String[] metaMessages = {
+      "You've been on your phone for 1 hour today. Time for a real-world check-in? 🌍",
+      "2 hours of screen time today, " + userName + ". Your eyes and mind might need a longer break 👀💭",
+      "3 hours on your phone today. Let's talk about what you're really avoiding... 💜"
+    };
+    
+    String message = metaMessages[Math.min(level - 1, metaMessages.length - 1)];
+    int hours = totalSeconds / 3600;
+    int minutes = (totalSeconds % 3600) / 60;
+    
+    // Create intent for opening the app
+    Intent openIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+    if (openIntent != null) {
+      openIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+      openIntent.setData(Uri.parse("flowlight://action/journal"));
+    }
+    
+    PendingIntent pendingIntent = PendingIntent.getActivity(
+      this, 0, openIntent,
+      PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+    );
+    
+    // Build meta-nudge notification
+    String detailMessage = message + "\n\nTotal today: " + hours + "h " + minutes + "m";
+    NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NUDGE_CHANNEL_ID)
+      .setContentTitle("Daily Screen Time Alert 📱")
+      .setContentText(message)
+      .setStyle(new NotificationCompat.BigTextStyle().bigText(detailMessage))
+      .setSmallIcon(getApplicationInfo().icon)
+      .setPriority(NotificationCompat.PRIORITY_MAX)
+      .setCategory(NotificationCompat.CATEGORY_REMINDER)
+      .setAutoCancel(true)
+      .setTimeoutAfter(60000)
+      .setContentIntent(pendingIntent);
+    
+    NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+    nm.notify(META_NUDGE_NOTIF_ID, builder.build());
+    
+    Log.d("FlowLight", "Showed meta-nudge level " + level + " - Total screen time: " + hours + "h " + minutes + "m");
   }
 }

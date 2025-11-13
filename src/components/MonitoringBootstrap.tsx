@@ -118,16 +118,19 @@ export const MonitoringBootstrap = () => {
         }
 
         if (permissionStatus.usageAccess) {
-          // Auto-start monitoring with robust retry (3 attempts, exponential backoff)
+          // Samsung-specific delay + robust retry logic
+          const isSamsung = /samsung/i.test(navigator.userAgent) || /SM-[A-Z]\d+/i.test(navigator.userAgent);
+          const baseDelay = isSamsung ? 1500 : 500;
+          
           let attempt = 0;
           const maxAttempts = 3;
           let started = false;
           
           while (attempt < maxAttempts && !started) {
             try {
-              const delay = attempt * 1000; // 0ms, 1s, 2s
+              const delay = attempt === 0 ? baseDelay : baseDelay + (attempt * 1000);
               if (delay > 0) {
-                console.log(`[MonitoringBootstrap] Waiting ${delay}ms before attempt ${attempt + 1}...`);
+                console.log(`[MonitoringBootstrap] Waiting ${delay}ms before attempt ${attempt + 1} (Samsung: ${isSamsung})...`);
                 await new Promise(resolve => setTimeout(resolve, delay));
               }
               

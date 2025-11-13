@@ -40,7 +40,10 @@ const Index = () => {
     user,
     loading
   } = useAuth();
-  const [appState, setAppState] = useState<AppState>("welcome");
+  const [appState, setAppState] = useState<AppState>(() => {
+    const hasCompleted = localStorage.getItem('flowlight-onboarding-completed');
+    return hasCompleted === 'true' ? 'mood-selection' : 'welcome';
+  });
   
   // Debug mode detection - URL param only
   const [isDebugMode, setIsDebugMode] = useState(false);
@@ -85,12 +88,20 @@ const Index = () => {
     if (!Capacitor.isNativePlatform()) return;
 
     const backButtonListener = App.addListener('backButton', ({ canGoBack }) => {
+      const hasCompletedOnboarding = localStorage.getItem('flowlight-onboarding-completed') === 'true';
+      
       if (appState === 'welcome') {
-        // On home screen, exit app
+        // On welcome/onboarding screen, exit app
         App.exitApp();
       } else if (appState === 'mood-selection') {
-        // Go back to welcome
-        setAppState('welcome');
+        // On home screen
+        if (hasCompletedOnboarding) {
+          // User has completed onboarding - exit app
+          App.exitApp();
+        } else {
+          // User is in first session - go back to welcome
+          setAppState('welcome');
+        }
       } else if (appState === 'dice-roll') {
         // Go back to mood selection
         setAppState('mood-selection');
@@ -108,6 +119,7 @@ const Index = () => {
     };
   }, [appState]);
   const handleStart = () => {
+    localStorage.setItem('flowlight-onboarding-completed', 'true');
     setAppState("mood-selection");
   };
   const handleMoodSelect = async (mood: Mood) => {
@@ -190,10 +202,26 @@ const Index = () => {
     closeNudgeModal();
   };
 
-  // Daily nature background
+  // Daily nature background with expanded collection
   const getDailyBackground = () => {
-    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-    const backgrounds = ['nature-sunrise', 'nature-forest', 'nature-ocean', 'nature-mountain', 'nature-meadow', 'nature-sunset'];
+    const backgrounds = [
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4", // Mountain sunrise
+      "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d", // Wildflowers
+      "https://images.unsplash.com/photo-1501594907352-04cda38ebc29", // Lake sunset
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e", // Forest path
+      "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8", // Trees
+      "https://images.unsplash.com/photo-1426604966848-d7adac402bff", // Mountain lake
+      "https://images.unsplash.com/photo-1472214103451-9374bd1c798e", // Foggy hills
+      "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1", // Desert sunset
+      "https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5", // Meadow
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d", // Ocean sunset
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e", // Mountain valley
+      "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07", // Beach morning
+      "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1", // Lake dock
+      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05", // Misty forest
+      "https://images.unsplash.com/photo-1502082553048-f009c37129b9", // Night sky
+    ];
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
     return backgrounds[dayOfYear % backgrounds.length];
   };
   const handleBackToWelcome = () => {
@@ -284,10 +312,15 @@ const Index = () => {
   }
   
   return <div 
-    className={`min-h-screen ${getDailyBackground()}`}
+    className="min-h-screen relative"
     style={{
-      paddingTop: 'env(safe-area-inset-top, 0px)',
-      paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 96px)'
+      paddingTop: 'max(env(safe-area-inset-top, 0px), 16px)',
+      paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 120px)',
+      backgroundImage: `url(${getDailyBackground()})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed'
     }}
   >
       {/* Doom scrolling intervention temporarily disabled */}
