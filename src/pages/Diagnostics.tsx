@@ -17,7 +17,8 @@ import {
   ArrowLeft,
   PlayCircle,
   Square,
-  Settings
+  Settings,
+  RefreshCw
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SystemMonitoring } from '@/plugins/system-monitoring';
@@ -437,6 +438,24 @@ const Diagnostics = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Capacitor Platform Detection */}
+              <div className="p-3 bg-muted/50 rounded-md space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="font-medium">Capacitor Platform:</span>
+                  <Badge variant="outline">{Capacitor.getPlatform()}</Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Is Native Platform:</span>
+                  {getStatusBadge(Capacitor.isNativePlatform(), 'Yes', 'No')}
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-medium">Plugin Bridge:</span>
+                  {getStatusBadge(diagnosticsData.pluginDetected, 'Connected', 'Missing')}
+                </div>
+              </div>
+
+              <Separator />
+              
               <div className="flex justify-between items-center">
                 <span>Usage Access Permission:</span>
                 {getStatusBadge(hasUsageAccess, "Granted", "Required")}
@@ -489,44 +508,44 @@ const Diagnostics = () => {
                     </div>
                     
                     <Button onClick={handleRestartMonitoring} variant="secondary" size="sm" className="w-full">
-                      <PlayCircle className="h-4 w-4 mr-2" />
-                      Restart Monitoring Service
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Restart Service
                     </Button>
                   </>
                 )}
-                
-                {pluginStatus && (
-                  <div className="p-3 bg-muted rounded-md space-y-2">
-                    <div className="font-medium text-sm">Service Status:</div>
-                    <div className="text-sm space-y-1">
-                      <div className="flex justify-between">
-                        <span>Plugin Bridge:</span>
-                        <Badge variant={diagnosticsData.pluginDetected ? "default" : "destructive"}>
-                          {diagnosticsData.pluginDetected ? "Connected" : "Missing"}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Usage Access:</span>
-                        <Badge variant={pluginStatus.usageAccess ? "default" : "destructive"}>
-                          {pluginStatus.usageAccess ? "Granted" : "Denied"}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Notifications:</span>
-                        <Badge variant={pluginStatus.notificationsEnabled ? "default" : "destructive"}>
-                          {pluginStatus.notificationsEnabled ? "Enabled" : "Disabled"}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Service Running:</span>
-                        <Badge variant={pluginStatus.serviceRunning ? "default" : "destructive"}>
-                          {pluginStatus.serviceRunning ? "Active" : "Stopped"}
-                        </Badge>
-                      </div>
+              </div>
+
+              {pluginStatus && (
+                <div className="p-3 bg-muted/30 rounded-md space-y-2">
+                  <div className="font-medium text-sm">Service Status:</div>
+                  <div className="text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span>Plugin Bridge:</span>
+                      <Badge variant={diagnosticsData.pluginDetected ? "default" : "destructive"}>
+                        {diagnosticsData.pluginDetected ? "Connected" : "Missing"}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Usage Access:</span>
+                      <Badge variant={pluginStatus.usageAccess ? "default" : "destructive"}>
+                        {pluginStatus.usageAccess ? "Granted" : "Denied"}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Notifications:</span>
+                      <Badge variant={pluginStatus.notificationsEnabled ? "default" : "destructive"}>
+                        {pluginStatus.notificationsEnabled ? "Enabled" : "Disabled"}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Service Running:</span>
+                      <Badge variant={pluginStatus.serviceRunning ? "default" : "destructive"}>
+                        {pluginStatus.serviceRunning ? "Active" : "Stopped"}
+                      </Badge>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
               <div className="text-xs text-muted-foreground p-3 bg-green-50 dark:bg-green-950/20 rounded">
                 <div className="font-medium text-green-800 dark:text-green-200 mb-1">
