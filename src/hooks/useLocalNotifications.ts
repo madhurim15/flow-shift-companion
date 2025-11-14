@@ -8,6 +8,12 @@ export interface LocalNotificationState {
   hasPermission: boolean;
 }
 
+// Global throttle to prevent LocalNotifications.requestPermissions spam
+let lastPermissionRequestTs = 0;
+let permissionRequestInFlight = false;
+let cachedPermissionResult: boolean | null = null;
+const PERMISSION_THROTTLE_MS = 10000; // 10 seconds
+
 export const useLocalNotifications = () => {
   const [state, setState] = useState<LocalNotificationState>({
     isEnabled: false,
@@ -95,9 +101,26 @@ export const useLocalNotifications = () => {
       return false;
     }
 
+    // Global throttle check
+    const now = Date.now();
+    if (permissionRequestInFlight) {
+      console.log('[useLocalNotifications] Permission request already in flight, returning cached result');
+      return cachedPermissionResult ?? false;
+    }
+    
+    if (now - lastPermissionRequestTs < PERMISSION_THROTTLE_MS) {
+      console.log('[useLocalNotifications] Throttled (within 10s), returning cached result');
+      return cachedPermissionResult ?? false;
+    }
+
     try {
+      permissionRequestInFlight = true;
+      lastPermissionRequestTs = now;
+      console.log('[useLocalNotifications] Requesting permissions (throttle cleared)');
+      
       const result = await LocalNotifications.requestPermissions();
       const granted = result.display === 'granted';
+      cachedPermissionResult = granted;
       
       setState(prev => ({
         ...prev,
@@ -108,7 +131,10 @@ export const useLocalNotifications = () => {
       return granted;
     } catch (error) {
       console.error('Failed to request local notification permissions:', error);
+      cachedPermissionResult = false;
       return false;
+    } finally {
+      permissionRequestInFlight = false;
     }
   };
 

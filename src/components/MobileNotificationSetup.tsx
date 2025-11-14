@@ -55,6 +55,8 @@ const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetu
     try {
       if (Capacitor.isNativePlatform()) {
         // For native platforms, use local notifications only (safer)
+        // Only call init once, then request
+        console.log('[MobileNotificationSetup] User clicked request - initializing and requesting');
         await localNotifications.initLocalNotifications();
         const granted = await localNotifications.requestPermissions();
         if (granted) {

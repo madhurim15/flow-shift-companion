@@ -44,9 +44,10 @@ export const useReminderSystem = () => {
 
   const initializeNotificationSystem = async () => {
     try {
-      // Initialize local notifications on mobile
+      // Initialize local notifications on mobile (but don't auto-request permissions)
       if (Capacitor.isNativePlatform()) {
         await localNotifications.initLocalNotifications();
+        // Do NOT auto-request permissions here - let user explicitly opt-in
       }
 
       let settings = await getUserReminderSettings();

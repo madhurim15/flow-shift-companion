@@ -13,10 +13,13 @@ import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+    // Build stamp to verify correct APK is running
+    private static final long BUILD_STAMP = 1731601200000L; // 2024-11-14 15:00 UTC
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Register custom plugin BEFORE bridge initialization
+        android.util.Log.i("FlowLight", "=== BUILD_STAMP: " + BUILD_STAMP + " ===");
         android.util.Log.i("FlowLight", "Registering SystemMonitoringPlugin (pre-bridge)");
         registerPlugin(SystemMonitoringPlugin.class);
 
