@@ -37,7 +37,7 @@ const MoodSelector = ({ onMoodSelect, firstName, selectedMoodId }: MoodSelectorP
     <div className="space-y-6 animate-fade-in-up">
       <div className="text-center space-y-4">
         <div className="space-y-2">
-          <h2 className="text-2xl font-medium text-foreground">
+          <h2 className="text-2xl font-medium text-white/90 drop-shadow-lg">
             How are you feeling{firstName ? `, ${firstName}` : ""}?
           </h2>
         </div>
@@ -47,16 +47,16 @@ const MoodSelector = ({ onMoodSelect, firstName, selectedMoodId }: MoodSelectorP
         {moods.map((mood) => (
           <Card
             key={mood.id}
-            className={`p-3 cursor-pointer gentle-hover border-2 transition-all duration-300 ${
+            className={`p-3 cursor-pointer gentle-hover border-2 transition-all duration-300 bg-white/95 backdrop-blur-sm shadow-lg ${
               selectedMoodId === mood.id
-                ? 'border-primary bg-primary/5 scale-95'
-                : 'border-border hover:border-primary/50'
+                ? 'border-primary bg-primary/10 scale-95'
+                : 'border-border hover:border-primary/50 hover:shadow-xl'
             }`}
             onClick={() => handleMoodClick(mood)}
           >
             <div className="text-center space-y-1">
               <div className="text-lg">{mood.emoji}</div>
-              <div className="font-medium text-xs">{mood.label}</div>
+              <div className="font-medium text-xs text-foreground">{mood.label}</div>
               <div className="text-[10px] text-muted-foreground leading-tight">{mood.description}</div>
             </div>
           </Card>

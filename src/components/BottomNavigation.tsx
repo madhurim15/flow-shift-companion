@@ -76,13 +76,13 @@ export const BottomNavigation = () => {
       {/* Bottom Navigation Bar - Hide when modal is open */}
       {!activeTab && (
         <nav 
-          className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-lg"
+          className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border shadow-lg"
           style={{ 
             paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-            minHeight: '72px'
+            minHeight: '56px'
           }}
         >
-          <div className="flex items-center justify-around px-2 py-4 max-w-md mx-auto">
+          <div className="flex items-center justify-around px-2 py-2 max-w-md mx-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -92,13 +92,13 @@ export const BottomNavigation = () => {
                   key={tab.id}
                   variant="ghost"
                   size="sm"
-                  className={`flex flex-col items-center gap-1 h-auto py-2 px-3 rounded-xl transition-all duration-200 hover:bg-muted hover:scale-105 active:scale-95 ${
+                  className={`flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 rounded-lg transition-all duration-200 hover:bg-muted hover:scale-105 active:scale-95 ${
                     isActive ? 'bg-primary/10 scale-105' : ''
                   }`}
                   onClick={() => handleTabClick(tab.id)}
                 >
-                  <Icon className={`w-6 h-6 ${isActive ? tab.color : 'text-muted-foreground'}`} />
-                  <span className={`text-xs font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
+                  <Icon className={`w-5 h-5 ${isActive ? tab.color : 'text-muted-foreground'}`} />
+                  <span className={`text-[10px] font-medium ${isActive ? 'text-foreground' : 'text-muted-foreground'}`}>
                     {tab.label}
                   </span>
                 </Button>
@@ -111,11 +111,11 @@ export const BottomNavigation = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex flex-col items-center gap-1 h-auto py-3 px-4 rounded-2xl transition-all duration-200 min-h-[60px] min-w-[60px] hover:bg-muted/50 hover:scale-105 active:scale-95 opacity-60"
+                  className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-2 rounded-lg transition-all duration-200 hover:bg-muted hover:scale-105 active:scale-95 opacity-60"
                   onClick={handleAdvancedSettings}
                 >
                   <Settings className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Advanced Features</span>
+                  <span className="text-[10px] text-muted-foreground">More</span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
