@@ -313,7 +313,7 @@ const Index = () => {
   
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
-      {/* Background Image with Scrim */}
+      {/* Background Image with Stronger Scrim for Better Contrast */}
       <div 
         className="fixed inset-0 -z-10"
         style={{
@@ -321,13 +321,13 @@ const Index = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.88) saturate(1.05)'
+          filter: 'brightness(0.75) saturate(1.1)'
         }}
       />
       <div 
         className="fixed inset-0 -z-10"
         style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.15), rgba(0,0,0,0.25))'
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.35), rgba(0,0,0,0.5))'
         }}
       />
       
@@ -338,22 +338,22 @@ const Index = () => {
       {appState !== "welcome" && <>
           
           <header 
-            className="flex-shrink-0 sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+            className="flex-shrink-0 sticky top-0 z-40 w-full border-b border-white/10 bg-black/20 backdrop-blur-md"
             style={{
-              paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)'
+              paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)'
             }}
           >
-            <div className="container flex h-16 items-center justify-between">
+            <div className="container flex h-14 items-center justify-between">
               <div className="flex items-center gap-3">
-                <Button variant="ghost" size="sm" onClick={handleBackToWelcome} className="text-muted-foreground hover:text-foreground">
+                <Button variant="ghost" size="sm" onClick={handleBackToWelcome} className="text-white/70 hover:text-white hover:bg-white/10">
                   <Home size={18} />
                 </Button>
                 
                 <CalendarModal />
                 
-                {selectedMood && <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+                {selectedMood && <div className="hidden sm:flex items-center gap-2 text-sm text-white/60">
                     <span>Currently:</span>
-                    <span className="font-medium text-foreground">
+                    <span className="font-medium text-white/90">
                       {selectedMood.emoji} {selectedMood.label}
                     </span>
                   </div>}
@@ -361,7 +361,7 @@ const Index = () => {
               
               {/* Centered Logo */}
               <div className="absolute left-1/2 transform -translate-x-1/2">
-                <h1 className="text-lg text-violet-500 font-bold">FlowFocus</h1>
+                <h1 className="text-lg text-white font-bold drop-shadow-lg">FlowFocus</h1>
               </div>
               
               <div className="flex items-center gap-2">
@@ -372,7 +372,7 @@ const Index = () => {
           </header>
           
           <main className="flex-1 overflow-y-auto">
-            <div className="container py-4 pb-24 px-4">
+            <div className="container py-4 pb-32 px-4">
             {appState === "mood-selection" && <div className="space-y-4">
                 <TrialBanner />
                 <DailyMantra />

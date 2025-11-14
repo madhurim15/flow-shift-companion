@@ -16,10 +16,10 @@ export const MainGoalInput = ({ onGoalSet }: MainGoalInputProps) => {
   };
 
   return (
-    <div className="space-y-3 animate-fade-in">
+    <div className="space-y-3 animate-fade-in mt-6">
       <div className="flex items-center gap-2 text-center justify-center">
-        <Target className="w-5 h-5 text-primary" />
-        <Label htmlFor="main-goal" className="text-lg font-semibold text-foreground">
+        <Target className="w-5 h-5 text-white/80 drop-shadow-md" />
+        <Label htmlFor="main-goal" className="text-lg font-semibold text-white/90 drop-shadow-lg">
           Main goal for today?
         </Label>
       </div>
@@ -27,10 +27,10 @@ export const MainGoalInput = ({ onGoalSet }: MainGoalInputProps) => {
         <Input
           id="main-goal"
           type="text"
-          placeholder=""
+          placeholder="Enter your main focus..."
           value={goal}
           onChange={(e) => handleGoalChange(e.target.value)}
-          className="text-center border-primary/30 focus:border-primary bg-background/50 placeholder:text-muted-foreground/60 w-48 text-sm"
+          className="text-center border-white/30 focus:border-white/60 bg-white/10 backdrop-blur-sm placeholder:text-white/50 text-white/90 w-64 text-sm shadow-lg"
         />
       </div>
     </div>

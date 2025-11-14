@@ -41,10 +41,10 @@ export const DailyMantra = () => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border-b border-border/50">
-      <div className="container py-4">
+    <div className="bg-white/10 backdrop-blur-sm border-b border-white/20">
+      <div className="container py-3">
         <div className="flex items-center justify-center text-center">
-          <p className="text-sm font-medium text-foreground leading-relaxed max-w-2xl">
+          <p className="text-sm font-medium text-white/90 drop-shadow-md leading-relaxed max-w-2xl">
             {getDailyMantra()}
           </p>
         </div>
