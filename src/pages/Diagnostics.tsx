@@ -28,6 +28,7 @@ const Diagnostics = () => {
   const localNotifications = useLocalNotifications();
   const [diagnosticsData, setDiagnosticsData] = useState<any>({});
   const [hasUsageAccess, setHasUsageAccess] = useState(false);
+  const [pluginStatus, setPluginStatus] = useState<any>(null);
   
   const isNativeAndroid = Capacitor.getPlatform() === 'android' && Capacitor.isNativePlatform();
 
@@ -55,13 +56,22 @@ const Diagnostics = () => {
 
       // Check usage access on native Android
       let usageAccess = false;
+      let pluginDetected = false;
+      let serviceStatus = null;
       if (isNativeAndroid) {
         try {
           const permissions = await SystemMonitoring.checkPermissions();
           usageAccess = permissions.usageAccess;
           setHasUsageAccess(usageAccess);
+          pluginDetected = true;
+          
+          // Get detailed status
+          const status = await SystemMonitoring.getStatus();
+          setPluginStatus(status);
+          serviceStatus = status;
         } catch (error) {
-          console.error('Failed to check usage access:', error);
+          console.error('Failed to check status:', error);
+          pluginDetected = false;
         }
       }
 
@@ -74,6 +84,8 @@ const Diagnostics = () => {
         serviceWorkerStatus,
         localNotificationsState: localNotifications,
         usageAccess,
+        pluginDetected,
+        serviceStatus,
         timestamp: new Date().toISOString(),
         capacitorVersion: '7.4.2', // From package.json
         environment: import.meta.env.MODE
@@ -245,54 +257,108 @@ const Diagnostics = () => {
 
   const handleRunSelfCheck = async () => {
     try {
-      const permissions = await SystemMonitoring.checkPermissions();
+      // First, get current status
+      const status = await SystemMonitoring.getStatus();
+      setPluginStatus(status);
       
-      if (!permissions.usageAccess) {
+      if (!status.usageAccess) {
         toast({
-          title: "Missing Permission",
-          description: "Usage Access is required. Opening settings...",
-          variant: "destructive"
+          title: "Usage Access Required",
+          description: "Opening settings...",
+          duration: 3000
         });
-        await SystemMonitoring.requestPermissions();
-        setTimeout(async () => {
-          const recheckPerms = await SystemMonitoring.checkPermissions();
-          if (recheckPerms.usageAccess) {
-            await SystemMonitoring.startMonitoring({ debug: true });
-            toast({
-              title: "✅ Self-Check Passed",
-              description: "Monitoring started successfully!",
-            });
-            window.location.reload();
-          } else {
-            toast({
-              title: "Permission Still Missing",
-              description: "Please enable Usage Access manually",
-              variant: "destructive"
-            });
-          }
-        }, 3000);
+        await handleOpenUsageSettings();
+        return;
+      }
+      
+      if (!status.notificationsEnabled) {
+        toast({
+          title: "Notifications Required",
+          description: "Opening app settings to enable notifications...",
+          duration: 3000
+        });
+        await handleOpenAppSettings();
         return;
       }
 
-      // Permission granted, try to start monitoring
-      try {
-        await SystemMonitoring.startMonitoring({ debug: true });
+      if (!status.serviceRunning) {
         toast({
-          title: "✅ Self-Check Passed",
-          description: "All systems operational!",
+          title: "Starting Monitoring",
+          description: "Attempting to start the monitoring service...",
+          duration: 3000
         });
-        window.location.reload();
-      } catch (startError: any) {
+        
+        await SystemMonitoring.startMonitoring({ debug: true });
+        
+        // Re-check status
+        setTimeout(async () => {
+          const newStatus = await SystemMonitoring.getStatus();
+          setPluginStatus(newStatus);
+          
+          if (newStatus.serviceRunning) {
+            toast({
+              title: "✅ All Systems Go",
+              description: "Monitoring is now active",
+              variant: "default"
+            });
+          } else {
+            toast({
+              title: "Service Start Failed",
+              description: "Check Android Studio logs for details",
+              variant: "destructive"
+            });
+          }
+        }, 2000);
+      } else {
         toast({
-          title: "Failed to Start Monitoring",
-          description: startError?.message || "Unknown error. Check battery optimization settings.",
-          variant: "destructive"
+          title: "✅ All Systems Operational",
+          description: "Monitoring service is running",
+          variant: "default"
         });
       }
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Self-check failed:', error);
       toast({
         title: "Self-Check Failed",
-        description: error?.message || "Could not complete self-check",
+        description: String(error),
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRestartMonitoring = async () => {
+    try {
+      toast({
+        title: "Restarting Service",
+        description: "Stopping and restarting monitoring...",
+        duration: 2000
+      });
+      
+      await SystemMonitoring.restartMonitoring({ debug: true });
+      
+      setTimeout(async () => {
+        const status = await SystemMonitoring.getStatus();
+        setPluginStatus(status);
+        
+        if (status.serviceRunning) {
+          toast({
+            title: "✅ Restart Successful",
+            description: "Monitoring service is now running",
+            variant: "default"
+          });
+        } else {
+          toast({
+            title: "Restart Issue",
+            description: "Service may not have started. Check logs.",
+            variant: "destructive"
+          });
+        }
+      }, 2000);
+    } catch (error) {
+      console.error('Restart failed:', error);
+      toast({
+        title: "Restart Failed",
+        description: String(error),
         variant: "destructive"
       });
     }
@@ -399,16 +465,55 @@ const Diagnostics = () => {
                 </Button>
                 
                 {hasUsageAccess && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button onClick={handleStartMonitoring} variant="default" size="sm">
-                      <PlayCircle className="h-4 w-4 mr-2" />
-                      Start Monitoring
-                    </Button>
+                  <>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button onClick={handleStartMonitoring} variant="default" size="sm">
+                        <PlayCircle className="h-4 w-4 mr-2" />
+                        Start Monitoring
+                      </Button>
+                      
+                      <Button onClick={handleStopMonitoring} variant="outline" size="sm">
+                        <Square className="h-4 w-4 mr-2" />
+                        Stop Monitoring  
+                      </Button>
+                    </div>
                     
-                    <Button onClick={handleStopMonitoring} variant="outline" size="sm">
-                      <Square className="h-4 w-4 mr-2" />
-                      Stop Monitoring  
+                    <Button onClick={handleRestartMonitoring} variant="secondary" size="sm" className="w-full">
+                      <PlayCircle className="h-4 w-4 mr-2" />
+                      Restart Monitoring Service
                     </Button>
+                  </>
+                )}
+                
+                {pluginStatus && (
+                  <div className="p-3 bg-muted rounded-md space-y-2">
+                    <div className="font-medium text-sm">Service Status:</div>
+                    <div className="text-sm space-y-1">
+                      <div className="flex justify-between">
+                        <span>Plugin Bridge:</span>
+                        <Badge variant={diagnosticsData.pluginDetected ? "default" : "destructive"}>
+                          {diagnosticsData.pluginDetected ? "Connected" : "Missing"}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Usage Access:</span>
+                        <Badge variant={pluginStatus.usageAccess ? "default" : "destructive"}>
+                          {pluginStatus.usageAccess ? "Granted" : "Denied"}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Notifications:</span>
+                        <Badge variant={pluginStatus.notificationsEnabled ? "default" : "destructive"}>
+                          {pluginStatus.notificationsEnabled ? "Enabled" : "Disabled"}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Service Running:</span>
+                        <Badge variant={pluginStatus.serviceRunning ? "default" : "destructive"}>
+                          {pluginStatus.serviceRunning ? "Active" : "Stopped"}
+                        </Badge>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

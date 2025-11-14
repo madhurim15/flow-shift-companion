@@ -33,4 +33,14 @@ export class SystemMonitoringWeb extends WebPlugin implements SystemMonitoringPl
   async openAppSettings(): Promise<void> {
     console.warn('SystemMonitoring is not supported on web.');
   }
+
+  async getStatus(): Promise<{ usageAccess: boolean; notificationsEnabled: boolean; serviceRunning: boolean }> {
+    console.warn('SystemMonitoring is not supported on web.');
+    return { usageAccess: false, notificationsEnabled: false, serviceRunning: false };
+  }
+
+  async restartMonitoring(): Promise<{ restarted: boolean }> {
+    console.warn('SystemMonitoring is not supported on web.');
+    return { restarted: false };
+  }
 }

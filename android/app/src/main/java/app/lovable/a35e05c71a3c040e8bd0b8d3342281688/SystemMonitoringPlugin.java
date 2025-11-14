@@ -101,10 +101,27 @@ public class SystemMonitoringPlugin extends Plugin {
 
   @PluginMethod
   public void startMonitoring(PluginCall call) {
+    android.util.Log.i("FlowLight", "Plugin.startMonitoring called");
+    
     // Ensure Usage Access is granted before starting service
     if (!UsageStatsHelper.hasUsageStatsPermission(getContext())) {
-      call.reject("Usage access permission not granted");
+      android.util.Log.e("FlowLight", "startMonitoring: usage_access_denied");
+      call.reject("usage_access_denied");
       return;
+    }
+
+    // Check notification permission on API 33+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      boolean notificationsEnabled = ContextCompat.checkSelfPermission(
+        getContext(),
+        android.Manifest.permission.POST_NOTIFICATIONS
+      ) == android.content.pm.PackageManager.PERMISSION_GRANTED;
+      
+      if (!notificationsEnabled) {
+        android.util.Log.e("FlowLight", "startMonitoring: notifications_denied");
+        call.reject("notifications_denied");
+        return;
+      }
     }
 
     // Check if service is already running (idempotent start)
@@ -127,6 +144,7 @@ public class SystemMonitoringPlugin extends Plugin {
       android.util.Log.d("FlowLight", "Started monitoring with userName: " + userName + ", debug: " + debug);
       call.resolve();
     } catch (Exception e) {
+      android.util.Log.e("FlowLight", "startMonitoring exception", e);
       call.reject("Failed to start monitoring: " + e.getMessage());
     }
   }
@@ -174,6 +192,85 @@ public class SystemMonitoringPlugin extends Plugin {
     } catch (Exception e) {
       android.util.Log.e("FlowLight", "Failed to open app settings", e);
       call.reject("Failed to open app settings: " + e.getMessage());
+    }
+  }
+
+  @PluginMethod
+  public void getStatus(PluginCall call) {
+    android.util.Log.i("FlowLight", "Plugin.getStatus called");
+    
+    JSObject ret = new JSObject();
+    
+    // Check usage access
+    boolean usageAccess = UsageStatsHelper.hasUsageStatsPermission(getContext());
+    ret.put("usageAccess", usageAccess);
+    
+    // Check notification permission (API 33+)
+    boolean notificationsEnabled = true;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      try {
+        notificationsEnabled = ContextCompat.checkSelfPermission(
+          getContext(),
+          android.Manifest.permission.POST_NOTIFICATIONS
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED;
+      } catch (Exception e) {
+        android.util.Log.e("FlowLight", "Failed to check notification permission", e);
+      }
+    }
+    ret.put("notificationsEnabled", notificationsEnabled);
+    
+    // Check if service is running
+    boolean serviceRunning = SystemMonitoringService.isRunning;
+    ret.put("serviceRunning", serviceRunning);
+    
+    android.util.Log.i("FlowLight", "Plugin.getStatus -> usageAccess=" + usageAccess + 
+                       ", notifications=" + notificationsEnabled + ", serviceRunning=" + serviceRunning);
+    call.resolve(ret);
+  }
+
+  @PluginMethod
+  public void restartMonitoring(PluginCall call) {
+    android.util.Log.i("FlowLight", "Plugin.restartMonitoring called");
+    
+    // Stop service first
+    try {
+      Intent stopIntent = new Intent(getContext(), SystemMonitoringService.class);
+      getContext().stopService(stopIntent);
+      android.util.Log.d("FlowLight", "Service stop initiated");
+    } catch (Exception e) {
+      android.util.Log.e("FlowLight", "Failed to stop service", e);
+    }
+    
+    // Small delay to ensure clean shutdown
+    try {
+      Thread.sleep(500);
+    } catch (InterruptedException e) {
+      android.util.Log.e("FlowLight", "Sleep interrupted", e);
+    }
+    
+    // Start service again
+    if (!UsageStatsHelper.hasUsageStatsPermission(getContext())) {
+      call.reject("Usage access permission not granted");
+      return;
+    }
+    
+    Intent startIntent = new Intent(getContext(), SystemMonitoringService.class);
+    boolean debug = call.getBoolean("debug", false);
+    String userName = call.getString("userName", "friend");
+    startIntent.putExtra("debug", debug);
+    startIntent.putExtra("userName", userName);
+    
+    try {
+      ContextCompat.startForegroundService(getContext(), startIntent);
+      android.util.Log.d("FlowLight", "Service restart initiated");
+      
+      // Return status after restart
+      JSObject ret = new JSObject();
+      ret.put("restarted", true);
+      call.resolve(ret);
+    } catch (Exception e) {
+      android.util.Log.e("FlowLight", "Failed to restart service", e);
+      call.reject("Failed to restart monitoring: " + e.getMessage());
     }
   }
 
