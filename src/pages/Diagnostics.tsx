@@ -543,6 +543,63 @@ const Diagnostics = () => {
           </Card>
         )}
 
+        {/* Bootstrap Status Section */}
+        {bootstrapStatus && isNativeAndroid && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                Bootstrap Status
+              </CardTitle>
+              <CardDescription>
+                Monitoring initialization and permission request tracking
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="flex justify-between">
+                  <span>Component Mounted:</span>
+                  {getStatusBadge(bootstrapStatus.componentMounted, 'Yes', 'No')}
+                </div>
+                
+                <div className="flex justify-between">
+                  <span>Bootstrap Attempted:</span>
+                  {getStatusBadge(bootstrapStatus.bootstrapAttempted, 'Yes', 'No')}
+                </div>
+                
+                <div className="flex justify-between col-span-2">
+                  <span>Notification Permission Requests:</span>
+                  <Badge variant="outline">{bootstrapStatus.notificationRequestCount || 0}</Badge>
+                </div>
+                
+                {bootstrapStatus.lastNotificationRequest > 0 && (
+                  <div className="flex justify-between col-span-2 text-xs text-muted-foreground">
+                    <span>Last Request:</span>
+                    <span>{new Date(bootstrapStatus.lastNotificationRequest).toLocaleTimeString()}</span>
+                  </div>
+                )}
+              </div>
+              
+              {bootstrapStatus.lastError && (
+                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                  <div className="font-medium text-sm text-destructive mb-1">Last Error:</div>
+                  <div className="text-xs text-destructive/80 break-all font-mono">
+                    {bootstrapStatus.lastError}
+                  </div>
+                </div>
+              )}
+              
+              {!bootstrapStatus.lastError && bootstrapStatus.bootstrapAttempted && (
+                <div className="p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-md">
+                  <div className="text-sm text-green-800 dark:text-green-200">
+                    ✓ Bootstrap completed successfully
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Notification Status */}
         <Card>
           <CardHeader>
