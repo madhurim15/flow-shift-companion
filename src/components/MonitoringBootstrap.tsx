@@ -11,6 +11,13 @@ export const MonitoringBootstrap = () => {
   const [isBootstrapped, setIsBootstrapped] = useState(false);
   const [monitoringActive, setMonitoringActive] = useState(false);
   const [toastIds, setToastIds] = useState<string[]>([]);
+  const [bootstrapStatus, setBootstrapStatus] = useState({
+    componentMounted: false,
+    bootstrapAttempted: false,
+    lastError: null as string | null,
+    notificationRequestCount: 0,
+    lastNotificationRequest: 0,
+  });
   const { initLocalNotifications, requestPermissions: requestNotificationPermissions } = useLocalNotifications();
   const { toast, dismiss } = useToast();
   
@@ -19,6 +26,19 @@ export const MonitoringBootstrap = () => {
   const lastPermissionCheckRef = useRef(0);
   const activeToastTypesRef = useRef(new Set<string>());
   const monitoringCheckTimeoutRef = useRef<NodeJS.Timeout>();
+  const notificationRequestCountRef = useRef(0);
+  const notificationRequestTimesRef = useRef<number[]>([]);
+
+  // Expose bootstrap status to window for diagnostics
+  useEffect(() => {
+    console.log('[MonitoringBootstrap] Component mounted');
+    setBootstrapStatus(prev => ({ ...prev, componentMounted: true }));
+    (window as any).__monitoringBootstrapStatus = bootstrapStatus;
+  }, []);
+
+  useEffect(() => {
+    (window as any).__monitoringBootstrapStatus = bootstrapStatus;
+  }, [bootstrapStatus]);
 
   const isDebugMode = typeof window !== 'undefined' && (
     new URLSearchParams(window.location.search).get('debug') === '1' ||
@@ -50,6 +70,33 @@ export const MonitoringBootstrap = () => {
     return toastResult;
   }, [toast]);
 
+  // Circuit breaker for notification requests
+  const canRequestNotifications = useCallback(() => {
+    const now = Date.now();
+    // Remove requests older than 10 seconds
+    notificationRequestTimesRef.current = notificationRequestTimesRef.current.filter(
+      time => now - time < 10000
+    );
+    
+    if (notificationRequestTimesRef.current.length >= 3) {
+      console.error('[MonitoringBootstrap] CIRCUIT BREAKER: Too many notification requests (3 in 10s), stopping');
+      setBootstrapStatus(prev => ({ 
+        ...prev, 
+        lastError: 'Circuit breaker triggered: Too many notification permission requests'
+      }));
+      return false;
+    }
+    
+    notificationRequestTimesRef.current.push(now);
+    notificationRequestCountRef.current++;
+    setBootstrapStatus(prev => ({ 
+      ...prev, 
+      notificationRequestCount: notificationRequestCountRef.current,
+      lastNotificationRequest: now
+    }));
+    return true;
+  }, []);
+
   // Debounced permission check to prevent rapid UI updates
   const checkPermissionsWithDebounce = useCallback(async () => {
     const now = Date.now();
@@ -60,23 +107,38 @@ export const MonitoringBootstrap = () => {
     lastPermissionCheckRef.current = now;
     
     try {
+      console.log('[MonitoringBootstrap] About to call SystemMonitoring.checkPermissions');
       const permissionStatus = await SystemMonitoring.checkPermissions();
+      console.log('[MonitoringBootstrap] checkPermissions result:', permissionStatus);
       setHasUsageAccess(permissionStatus.usageAccess);
       return permissionStatus;
     } catch (error) {
-      console.error('[MonitoringBootstrap] Permission check failed:', error);
+      console.error('[MonitoringBootstrap] Permission check FAILED:', error);
+      setBootstrapStatus(prev => ({ 
+        ...prev, 
+        lastError: `checkPermissions failed: ${error}`
+      }));
       return null;
     }
   }, []);
 
   useEffect(() => {
+    console.log('[MonitoringBootstrap] useEffect triggered', {
+      isNative: Capacitor.isNativePlatform(),
+      platform: Capacitor.getPlatform(),
+      isBootstrapped,
+      bootstrapInProgress: bootstrapInProgressRef.current
+    });
+
     if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android' || isBootstrapped || bootstrapInProgressRef.current) {
+      console.log('[MonitoringBootstrap] useEffect early return - conditions not met');
       return;
     }
 
     const bootstrapMonitoring = async () => {
       if (bootstrapInProgressRef.current) return;
       bootstrapInProgressRef.current = true;
+      setBootstrapStatus(prev => ({ ...prev, bootstrapAttempted: true }));
       
       try {
         console.log('[MonitoringBootstrap] Starting lightweight bootstrap process');
@@ -103,17 +165,33 @@ export const MonitoringBootstrap = () => {
           console.log('[MonitoringBootstrap] Could not fetch user name, using default:', error);
         }
         
-        // Request notification permission before starting monitoring
+        // Request notification permission before starting monitoring (with circuit breaker)
         try {
-          await requestNotificationPermissions();
+          if (!canRequestNotifications()) {
+            console.error('[MonitoringBootstrap] Skipping notification request due to circuit breaker');
+          } else {
+            console.log('[MonitoringBootstrap] Requesting notification permissions');
+            await requestNotificationPermissions();
+            console.log('[MonitoringBootstrap] Notification permissions handled');
+          }
         } catch (error) {
           console.log('[MonitoringBootstrap] Notification permission request failed, but continuing:', error);
+          setBootstrapStatus(prev => ({ 
+            ...prev, 
+            lastError: `Notification permission error: ${error}`
+          }));
         }
 
-        // Check if we already have usage access permission
+        // Check if we already have usage access permission (with explicit error handling)
+        console.log('[MonitoringBootstrap] About to check permissions via SystemMonitoring');
         const permissionStatus = await checkPermissionsWithDebounce();
         if (!permissionStatus) {
+          console.log('[MonitoringBootstrap] Permission check returned null, aborting');
           bootstrapInProgressRef.current = false;
+          setBootstrapStatus(prev => ({ 
+            ...prev, 
+            lastError: 'Permission check returned null'
+          }));
           return;
         }
 
@@ -126,6 +204,7 @@ export const MonitoringBootstrap = () => {
           
           setTimeout(async () => {
             try {
+              console.log('[MonitoringBootstrap] About to call SystemMonitoring.startMonitoring');
               await SystemMonitoring.startMonitoring({ 
                 debug: isDebugMode,
                 userName: userName 
@@ -135,13 +214,42 @@ export const MonitoringBootstrap = () => {
               // Verify service actually started by checking status
               setTimeout(async () => {
                 try {
+                  console.log('[MonitoringBootstrap] About to call SystemMonitoring.getStatus');
                   const status = await SystemMonitoring.getStatus();
                   console.log('[MonitoringBootstrap] Status check:', status);
                   
                   if (!status.serviceRunning && status.usageAccess) {
                     console.warn('[MonitoringBootstrap] Service not running, attempting restart');
-                    await SystemMonitoring.restartMonitoring({ debug: isDebugMode, userName });
-                    showToast('info', 'Restarting...', 'Monitoring service restarted', 3000);
+                    showToast('restart-monitoring', 'Restarting service', 'Attempting to restart monitoring...', 3000);
+                    
+                    try {
+                      console.log('[MonitoringBootstrap] About to call SystemMonitoring.restartMonitoring');
+                      const restartResult = await SystemMonitoring.restartMonitoring({ 
+                        debug: isDebugMode,
+                        userName: userName 
+                      });
+                      console.log('[MonitoringBootstrap] Restart result:', restartResult);
+                      
+                      if (restartResult.restarted) {
+                        setMonitoringActive(true);
+                        showToast('monitoring-started', 'Monitoring active', 'Successfully restarted monitoring service', 3000);
+                      } else {
+                        showToast('restart-failed', 'Service not running', 'Could not restart monitoring. Check settings.', 5000);
+                        setBootstrapStatus(prev => ({ 
+                          ...prev, 
+                          lastError: 'Service restart failed after initial start'
+                        }));
+                      }
+                    } catch (restartError) {
+                      console.error('[MonitoringBootstrap] Restart error:', restartError);
+                      setBootstrapStatus(prev => ({ 
+                        ...prev, 
+                        lastError: `Restart error: ${restartError}`
+                      }));
+                    }
+                  } else {
+                    setMonitoringActive(true);
+                    showToast('monitoring-started', 'Monitoring active', 'System monitoring started', 3000);
                   }
                   
                   // Check for notification permission on API 33+
@@ -150,27 +258,55 @@ export const MonitoringBootstrap = () => {
                       'Please enable notifications for FlowLight in App Settings', 8000);
                   }
                 } catch (statusError) {
-                  console.error('[MonitoringBootstrap] Status check failed:', statusError);
+                  console.error('[MonitoringBootstrap] Status check error:', statusError);
+                  setBootstrapStatus(prev => ({ 
+                    ...prev, 
+                    lastError: `Status check error: ${statusError}`
+                  }));
                 }
               }, 2000);
               
               setIsBootstrapped(true);
-              setMonitoringActive(true);
               showToast('success', 'Welcome!', 'Monitoring active 🎉');
             } catch (error: any) {
-              console.error('[MonitoringBootstrap] Failed to start monitoring:', error);
+              console.error('[MonitoringBootstrap] CRITICAL: startMonitoring failed:', error);
+              const errorMessage = error?.message || String(error);
               
-              // Check for specific error types
-              if (error?.message === 'notifications_denied') {
+              setBootstrapStatus(prev => ({ 
+                ...prev, 
+                lastError: `startMonitoring failed: ${errorMessage}`
+              }));
+              
+              if (errorMessage.includes('not implemented')) {
+                showToast(
+                  'plugin-missing',
+                  'Plugin not found',
+                  'SystemMonitoring plugin is not available in this build',
+                  10000
+                );
+                setIsBootstrapped(true);
+                return;
+              } else if (errorMessage.includes('notifications_denied')) {
                 showToast('warning', 'Notifications Required', 
                   'Please enable notifications in App Settings', 8000);
+                setIsBootstrapped(true);
+                return;
+              } else if (errorMessage.includes('usage_access_denied')) {
+                showToast(
+                  'usage-access-denied',
+                  'Usage access required',
+                  'Please grant usage access permission',
+                  8000
+                );
                 setIsBootstrapped(true);
                 return;
               }
               
               // Single retry after 2 seconds
+              console.log('[MonitoringBootstrap] Attempting retry in 2 seconds');
               setTimeout(async () => {
                 try {
+                  console.log('[MonitoringBootstrap] About to call SystemMonitoring.startMonitoring (retry)');
                   await SystemMonitoring.startMonitoring({ 
                     debug: isDebugMode,
                     userName 
@@ -181,6 +317,10 @@ export const MonitoringBootstrap = () => {
                   showToast('success', 'Ready!', 'Monitoring started');
                 } catch (retryError) {
                   console.error('[MonitoringBootstrap] Retry failed - limited mode:', retryError);
+                  setBootstrapStatus(prev => ({ 
+                    ...prev, 
+                    lastError: `Retry failed: ${retryError}`
+                  }));
                   setIsBootstrapped(true);
                   showToast('warning', 'Limited Mode', 'Please restart if issues persist', 6000);
                 }

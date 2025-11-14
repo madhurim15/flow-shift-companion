@@ -29,6 +29,7 @@ const Diagnostics = () => {
   const [diagnosticsData, setDiagnosticsData] = useState<any>({});
   const [hasUsageAccess, setHasUsageAccess] = useState(false);
   const [pluginStatus, setPluginStatus] = useState<any>(null);
+  const [bootstrapStatus, setBootstrapStatus] = useState<any>(null);
   
   const isNativeAndroid = Capacitor.getPlatform() === 'android' && Capacitor.isNativePlatform();
 
@@ -75,6 +76,10 @@ const Diagnostics = () => {
         }
       }
 
+      // Get bootstrap status if available
+      const bootstrapStatusFromWindow = (window as any).__monitoringBootstrapStatus;
+      setBootstrapStatus(bootstrapStatusFromWindow);
+
       setDiagnosticsData({
         platform,
         isNative,
@@ -86,6 +91,7 @@ const Diagnostics = () => {
         usageAccess,
         pluginDetected,
         serviceStatus,
+        bootstrapStatus: bootstrapStatusFromWindow,
         timestamp: new Date().toISOString(),
         capacitorVersion: '7.4.2', // From package.json
         environment: import.meta.env.MODE
@@ -93,6 +99,10 @@ const Diagnostics = () => {
     };
 
     gatherDiagnostics();
+    
+    // Refresh every 2 seconds to get live bootstrap status
+    const interval = setInterval(gatherDiagnostics, 2000);
+    return () => clearInterval(interval);
   }, [localNotifications, isNativeAndroid]);
 
   const handleRequestPermissions = async () => {
