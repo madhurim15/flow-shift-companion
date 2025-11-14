@@ -131,11 +131,42 @@ export const MonitoringBootstrap = () => {
                 userName: userName 
               });
               console.log('[MonitoringBootstrap] Monitoring started successfully');
+              
+              // Verify service actually started by checking status
+              setTimeout(async () => {
+                try {
+                  const status = await SystemMonitoring.getStatus();
+                  console.log('[MonitoringBootstrap] Status check:', status);
+                  
+                  if (!status.serviceRunning && status.usageAccess) {
+                    console.warn('[MonitoringBootstrap] Service not running, attempting restart');
+                    await SystemMonitoring.restartMonitoring({ debug: isDebugMode, userName });
+                    showToast('info', 'Restarting...', 'Monitoring service restarted', 3000);
+                  }
+                  
+                  // Check for notification permission on API 33+
+                  if (!status.notificationsEnabled) {
+                    showToast('warning', 'Enable Notifications', 
+                      'Please enable notifications for FlowLight in App Settings', 8000);
+                  }
+                } catch (statusError) {
+                  console.error('[MonitoringBootstrap] Status check failed:', statusError);
+                }
+              }, 2000);
+              
               setIsBootstrapped(true);
               setMonitoringActive(true);
               showToast('success', 'Welcome!', 'Monitoring active 🎉');
-            } catch (error) {
+            } catch (error: any) {
               console.error('[MonitoringBootstrap] Failed to start monitoring:', error);
+              
+              // Check for specific error types
+              if (error?.message === 'notifications_denied') {
+                showToast('warning', 'Notifications Required', 
+                  'Please enable notifications in App Settings', 8000);
+                setIsBootstrapped(true);
+                return;
+              }
               
               // Single retry after 2 seconds
               setTimeout(async () => {

@@ -171,7 +171,13 @@ public class SystemMonitoringService extends Service {
       .setSmallIcon(getApplicationInfo().icon)
       .setOngoing(true)
       .build();
-    startForeground(NOTIF_ID, notification);
+    
+    try {
+      startForeground(NOTIF_ID, notification);
+      Log.i("FlowLight", "startForeground SUCCESS - notification should be visible");
+    } catch (Exception e) {
+      Log.e("FlowLight", "startForeground FAILED", e);
+    }
 
     handler = new Handler();
     

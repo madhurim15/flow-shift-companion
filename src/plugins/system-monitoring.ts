@@ -20,6 +20,12 @@ export interface SystemMonitoringPlugin {
   stopMonitoring(): Promise<void>;
   openBatteryOptimizationSettings(): Promise<void>;
   openAppSettings(): Promise<void>;
+  getStatus(): Promise<{ 
+    usageAccess: boolean; 
+    notificationsEnabled: boolean; 
+    serviceRunning: boolean;
+  }>;
+  restartMonitoring(options?: { debug?: boolean; userName?: string }): Promise<{ restarted: boolean }>;
   addListener(
     eventName: 'appChanged',
     listenerFunc: (event: AppChangedEvent) => void
