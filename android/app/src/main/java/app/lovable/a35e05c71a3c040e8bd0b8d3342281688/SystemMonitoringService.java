@@ -518,32 +518,23 @@ public class SystemMonitoringService extends Service {
     String title = messageData[0];
     String messageTemplate = messageData[1];
     
-    // Get time-aware suggested action
+    // Get contextual actions from ActionSelectionEngine
     Calendar cal = Calendar.getInstance();
     int hour = cal.get(Calendar.HOUR_OF_DAY);
-    String suggestedAction = AppThresholds.getSuggestedAction(level, hour);
+    int minutes = durationSeconds / 60;
+    
+    // Get balanced action suggestions based on context
+    java.util.List<ActionSelectionEngine.ActionButton> actions = 
+        ActionSelectionEngine.getContextualActions(level, psychState, minutes, hour, new String[]{});
     
     // Personalize message with placeholders
-    int minutes = durationSeconds / 60;
     String durationStr = minutes + " minute" + (minutes == 1 ? "" : "s");
     String personalizedMessage = messageTemplate
       .replace("{name}", userName)
       .replace("{app}", appName)
       .replace("{duration}", durationStr);
     
-    // Create deep link intent for suggested action
-    Intent openIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
-    if (openIntent != null) {
-      openIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-      openIntent.setData(Uri.parse("flowlight://action/" + suggestedAction));
-    }
-    
-    PendingIntent pendingIntent = PendingIntent.getActivity(
-      this, 0, openIntent,
-      PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-    );
-    
-    // Build notification with extended timeout
+    // Build notification with action buttons
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NUDGE_CHANNEL_ID)
       .setContentTitle(title)
       .setContentText(personalizedMessage)
@@ -553,13 +544,68 @@ public class SystemMonitoringService extends Service {
       .setCategory(NotificationCompat.CATEGORY_REMINDER)
       .setAutoCancel(true)
       .setOngoing(false)
-      .setTimeoutAfter(60000)  // Stay for 60 seconds minimum
-      .setContentIntent(pendingIntent);
+      .setTimeoutAfter(60000);
+    
+    // Add action buttons (up to 3)
+    int actionCount = Math.min(3, actions.size());
+    for (int i = 0; i < actionCount; i++) {
+      ActionSelectionEngine.ActionButton action = actions.get(i);
+      
+      // Create deep link intent for this action
+      Intent actionIntent = new Intent(this, NudgeActions.class);
+      
+      // Map deep link to action constant
+      if (action.deepLink.equals("mood")) {
+        actionIntent.setAction(NudgeActions.ACTION_MOOD);
+      } else if (action.deepLink.equals("hydration")) {
+        actionIntent.setAction(NudgeActions.ACTION_HYDRATION);
+      } else if (action.deepLink.equals("eye-rest")) {
+        actionIntent.setAction(NudgeActions.ACTION_EYE_REST);
+      } else if (action.deepLink.equals("breathing")) {
+        actionIntent.setAction(NudgeActions.ACTION_BREATHING);
+      } else if (action.deepLink.equals("stretch")) {
+        actionIntent.setAction(NudgeActions.ACTION_STRETCH);
+      } else if (action.deepLink.equals("walk")) {
+        actionIntent.setAction(NudgeActions.ACTION_WALK);
+      } else if (action.deepLink.equals("standing")) {
+        actionIntent.setAction(NudgeActions.ACTION_STANDING);
+      } else if (action.deepLink.equals("journal")) {
+        actionIntent.setAction(NudgeActions.ACTION_JOURNAL);
+      } else if (action.deepLink.equals("voice")) {
+        actionIntent.setAction(NudgeActions.ACTION_VOICE);
+      } else if (action.deepLink.equals("photo")) {
+        actionIntent.setAction(NudgeActions.ACTION_PHOTO);
+      } else if (action.deepLink.equals("win")) {
+        actionIntent.setAction(NudgeActions.ACTION_WIN);
+      } else if (action.deepLink.equals("intention")) {
+        actionIntent.setAction(NudgeActions.ACTION_INTENTION);
+      } else if (action.deepLink.equals("gratitude")) {
+        actionIntent.setAction(NudgeActions.ACTION_GRATITUDE);
+      }
+      
+      PendingIntent actionPendingIntent = PendingIntent.getBroadcast(
+        this, 100 + i, actionIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+      );
+      
+      builder.addAction(0, action.label, actionPendingIntent);
+    }
+    
+    // Add dismiss button for Level 1 & 2 only
+    if (level <= 2) {
+      Intent dismissIntent = new Intent(this, NudgeActions.class);
+      dismissIntent.setAction(NudgeActions.ACTION_DISMISS);
+      PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(
+        this, 200, dismissIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+      );
+      builder.addAction(0, "Not right now", dismissPendingIntent);
+    }
     
     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(NUDGE_NOTIF_ID, builder.build());
     
-    Log.d("FlowLight", "Showed nudge: " + title + " | Action: " + suggestedAction + " | User: " + userName);
+    Log.d("FlowLight", "Showed Level " + level + " nudge with " + actions.size() + " actions: " + title + " | User: " + userName);
   }
   
   private void checkForMetaNudge() {

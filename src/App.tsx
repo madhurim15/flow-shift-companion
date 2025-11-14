@@ -23,6 +23,12 @@ import MicroStretch from "./pages/MicroStretch";
 import WalkTimer from "./pages/WalkTimer";
 import VoiceReflection from "./pages/VoiceReflection";
 import QuickGratitude from "./pages/QuickGratitude";
+import Hydration from "./pages/Hydration";
+import EyeRest from "./pages/EyeRest";
+import StandingBreak from "./pages/StandingBreak";
+import PhotoCapture from "./pages/PhotoCapture";
+import WinLog from "./pages/WinLog";
+import IntentionReset from "./pages/IntentionReset";
 import Account from "./pages/Account";
 import NotFound from "./pages/NotFound";
 
@@ -124,6 +130,30 @@ const router = createHashRouter([
   {
     path: "/gratitude",
     element: <ProtectedRoute><QuickGratitude /></ProtectedRoute>
+  },
+  {
+    path: "/hydration",
+    element: <ProtectedRoute><Hydration /></ProtectedRoute>
+  },
+  {
+    path: "/eye-rest",
+    element: <ProtectedRoute><EyeRest /></ProtectedRoute>
+  },
+  {
+    path: "/standing",
+    element: <ProtectedRoute><StandingBreak /></ProtectedRoute>
+  },
+  {
+    path: "/photo",
+    element: <ProtectedRoute><PhotoCapture /></ProtectedRoute>
+  },
+  {
+    path: "/win",
+    element: <ProtectedRoute><WinLog /></ProtectedRoute>
+  },
+  {
+    path: "/intention",
+    element: <ProtectedRoute><IntentionReset /></ProtectedRoute>
   },
   {
     path: "/account",

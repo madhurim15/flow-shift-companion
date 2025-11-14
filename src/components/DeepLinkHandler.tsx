@@ -27,8 +27,16 @@ export const DeepLinkHandler = () => {
             'walk': '/walk',
             'stretch': '/stretch',
             'gratitude': '/gratitude',
-            'meditation': '/breathing', // Alias for breathing
-            'movement': '/walk'         // Alias for walk
+            'meditation': '/breathing',
+            'movement': '/walk',
+            // New balanced action routes
+            'mood': '/app',
+            'hydration': '/hydration',
+            'eye-rest': '/eye-rest',
+            'standing': '/standing',
+            'photo': '/photo',
+            'win': '/win',
+            'intention': '/intention'
           };
           
           if (routeMap[action]) {

@@ -46,6 +46,25 @@ public class AppThresholds {
                     new int[]{40, 70, 120, 180},
                     "seeking_stimulation"
                 );
+            // Masked productivity apps
+            case "com.linkedin.android":
+                return new AppConfig(
+                    new int[]{10 * 60, 18 * 60, 28 * 60, 40 * 60}, // 10, 18, 28, 40 minutes
+                    new int[]{25, 45, 75, 120},
+                    "masked_productivity"
+                );
+            case "com.google.android.gm": // Gmail
+                return new AppConfig(
+                    new int[]{10 * 60, 20 * 60, 30 * 60, 45 * 60},
+                    new int[]{20, 40, 70, 110},
+                    "masked_productivity"
+                );
+            case "com.amazon.mShop.android.shopping": // Amazon
+                return new AppConfig(
+                    new int[]{12 * 60, 20 * 60, 30 * 60, 42 * 60},
+                    new int[]{30, 50, 80, 120},
+                    "impulse_shopping"
+                );
             default:
                 return new AppConfig(
                     new int[]{15 * 60, 30 * 60, 45 * 60, 60 * 60},
@@ -65,13 +84,15 @@ public class AppThresholds {
                 {"Better Alternative? 💭", "Hey {name}! Quick question: Would a 5-min journal check-in feel better than scrolling right now? ✍️"},
                 {"Mindful Pause ⏸️", "Hey {name}, pause for a sec 🌟 What if you took 3 deep breaths instead of that next scroll? 🧘‍♀️"}
             },
-            // Level 2 - Concern check-in (5 variants)
+            // Level 2 - Concern check-in (7 variants - added masked productivity messages)
             {
                 {"Real Talk Time 🤔", "Hey {name}, real talk - you've been on {app} for {duration}. How about capturing your thoughts in a voice note? 🎙️💜"},
                 {"Movement Break 🌳", "Hey {name} 💜 Still scrolling? Maybe your body needs movement more than your eyes need content. Take a walk? 🚶‍♀️"},
                 {"Pattern Alert 🧘‍♀️", "Hey {name}, I'm seeing a pattern here... Let's try something different. 3 deep breaths? 🌸"},
                 {"What Are You Looking For? ✍️", "Okay {name}, this is getting long 📱 What if you wrote down what you're actually looking for? 💭"},
-                {"Energy Check ⚡", "Hey {name}, how's your energy? 🔋 Maybe a quick stretch or walk would help more than scrolling? 🌤️"}
+                {"Energy Check ⚡", "Hey {name}, how's your energy? 🔋 Maybe a quick stretch or walk would help more than scrolling? 🌤️"},
+                {"Productivity or Procrastination? 🤔", "Hey {name}, honest check: Is {app} helping your goals or are you avoiding something? 💭"},
+                {"Real Work vs Busy Work 🎯", "{name}, real talk - {duration} on {app}. Is this moving you forward or just keeping you busy? ✍️"}
             },
             // Level 3 - Stronger alternative (5 variants)
             {
