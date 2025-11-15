@@ -148,6 +148,11 @@ const UserMenu = () => {
           Account Settings
         </DropdownMenuItem>
         
+        <DropdownMenuItem onClick={() => navigate('/diagnostics')}>
+          <BarChart3 className="mr-2 h-4 w-4" />
+          Diagnostics
+        </DropdownMenuItem>
+        
         {/* Developer Tools - Only show if debug mode is enabled */}
         {isNativeAndroid && isDebugEnabled && (
           <>
@@ -155,11 +160,6 @@ const UserMenu = () => {
             <div className="px-2 py-1 text-xs font-medium text-muted-foreground">
               Developer Tools
             </div>
-            
-            <DropdownMenuItem onClick={() => navigate('/diagnostics')}>
-              <BarChart3 className="mr-2 h-4 w-4" />
-              Diagnostics
-            </DropdownMenuItem>
             
             <DropdownMenuItem onClick={toggleDebugPanel}>
               <Bug className="mr-2 h-4 w-4" />
