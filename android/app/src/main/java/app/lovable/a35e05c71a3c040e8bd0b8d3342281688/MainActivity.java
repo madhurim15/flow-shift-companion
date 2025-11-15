@@ -33,13 +33,13 @@ public class MainActivity extends BridgeActivity {
     }
     
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         android.util.Log.w("FlowLight", "=== onStart() BUILD_STAMP: " + BUILD_STAMP + " ===");
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         android.util.Log.w("FlowLight", "=== onResume() BUILD_STAMP: " + BUILD_STAMP + " ===");
     }
