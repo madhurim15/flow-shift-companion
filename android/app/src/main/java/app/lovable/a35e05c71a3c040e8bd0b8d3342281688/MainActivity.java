@@ -32,6 +32,18 @@ public class MainActivity extends BridgeActivity {
         android.util.Log.i("FlowLight", "MainActivity ready - service will be started by onboarding");
     }
     
+    @Override
+    protected void onStart() {
+        super.onStart();
+        android.util.Log.w("FlowLight", "=== onStart() BUILD_STAMP: " + BUILD_STAMP + " ===");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        android.util.Log.w("FlowLight", "=== onResume() BUILD_STAMP: " + BUILD_STAMP + " ===");
+    }
+    
     private void configureWindow() {
         Window window = getWindow();
         
