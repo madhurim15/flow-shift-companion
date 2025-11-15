@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalNotifications } from '@/hooks/useLocalNotifications';
 import { MonitoringStatus } from '@/components/MonitoringStatus';
+import { BuildInfoBanner } from '@/components/BuildInfoBanner';
 import { Capacitor } from '@capacitor/core';
 import { 
   Smartphone, 
@@ -18,10 +19,12 @@ import {
   PlayCircle,
   Square,
   Settings,
-  RefreshCw
+  RefreshCw,
+  Code
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SystemMonitoring } from '@/plugins/system-monitoring';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const Diagnostics = () => {
   const navigate = useNavigate();
@@ -31,6 +34,8 @@ const Diagnostics = () => {
   const [hasUsageAccess, setHasUsageAccess] = useState(false);
   const [pluginStatus, setPluginStatus] = useState<any>(null);
   const [bootstrapStatus, setBootstrapStatus] = useState<any>(null);
+  const [pluginTestResult, setPluginTestResult] = useState<string>('');
+  const [buildInstructionsOpen, setBuildInstructionsOpen] = useState(false);
   
   const isNativeAndroid = Capacitor.getPlatform() === 'android' && Capacitor.isNativePlatform();
 
@@ -337,6 +342,26 @@ const Diagnostics = () => {
     }
   };
 
+  const handleTestPluginBridge = async () => {
+    try {
+      setPluginTestResult('Testing plugin bridge...');
+      const result = await SystemMonitoring.checkPermissions();
+      setPluginTestResult(JSON.stringify(result, null, 2));
+      toast({
+        title: "Plugin Test Success",
+        description: "Plugin bridge is working correctly",
+      });
+    } catch (error: any) {
+      const errorMsg = `ERROR: ${error.message || error}`;
+      setPluginTestResult(errorMsg);
+      toast({
+        title: "Plugin Test Failed",
+        description: "Check the result below for details",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleRestartMonitoring = async () => {
     try {
       toast({
@@ -392,6 +417,9 @@ const Diagnostics = () => {
           </Button>
           <h1 className="text-2xl font-bold">App Diagnostics</h1>
         </div>
+
+        {/* Build Info Banner */}
+        <BuildInfoBanner />
 
         {/* Platform Info */}
         <Card>
@@ -557,6 +585,68 @@ const Diagnostics = () => {
                   <li>Use for 25 seconds</li>
                   <li>Expect intervention nudge</li>
                 </ol>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Build & Install Instructions - Native Android */}
+        {isNativeAndroid && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5" />
+                Build & Install Instructions
+              </CardTitle>
+              <CardDescription>
+                Commands for rebuilding and installing the APK
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Collapsible open={buildInstructionsOpen} onOpenChange={setBuildInstructionsOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between">
+                    {buildInstructionsOpen ? 'Hide' : 'Show'} Full Rebuild Commands
+                    <Code className="h-4 w-4" />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-4">
+                  <div className="font-mono text-xs space-y-2 bg-muted p-4 rounded border">
+                    <div className="font-bold text-sm mb-2">Full Rebuild Procedure:</div>
+                    <div className="space-y-1">
+                      <div><span className="text-primary">1.</span> npm run build</div>
+                      <div><span className="text-primary">2.</span> npx cap copy android</div>
+                      <div><span className="text-primary">3.</span> npx cap sync android</div>
+                      <div><span className="text-primary">4.</span> cd android && ./gradlew clean :app:assembleDebug</div>
+                      <div><span className="text-primary">5.</span> adb uninstall app.lovable.a35e05c71a3c040e8bd0b8d3342281688</div>
+                      <div><span className="text-primary">6.</span> adb install -r app/build/outputs/apk/debug/app-debug.apk</div>
+                    </div>
+                    <Separator className="my-3" />
+                    <div className="font-bold text-sm mb-2">Verify Installation:</div>
+                    <div className="bg-background p-2 rounded">
+                      adb logcat -c && adb logcat -s FlowLight Capacitor
+                    </div>
+                    <div className="mt-2 text-yellow-600 dark:text-yellow-500 font-medium">
+                      📋 Look for BUILD_STAMP: 1731601200000 in logs
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+              
+              <div className="mt-4">
+                <Button onClick={handleTestPluginBridge} variant="secondary" className="w-full">
+                  <TestTube className="h-4 w-4 mr-2" />
+                  Test Plugin Bridge
+                </Button>
+                
+                {pluginTestResult && (
+                  <div className="mt-3">
+                    <div className="text-sm font-medium mb-2">Plugin Test Result:</div>
+                    <pre className="bg-muted p-3 rounded text-xs overflow-auto max-h-48 border">
+                      {pluginTestResult}
+                    </pre>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

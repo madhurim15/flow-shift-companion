@@ -24,6 +24,7 @@ export const MonitoringBootstrap = () => {
   // Refs to prevent unnecessary re-renders and stabilize callbacks
   const bootstrapInProgressRef = useRef(false);
   const lastPermissionCheckRef = useRef(0);
+  const lastPermissionResultRef = useRef<any>(null); // Cache last permission result
   const activeToastTypesRef = useRef(new Set<string>());
   const monitoringCheckTimeoutRef = useRef<NodeJS.Timeout>();
   const notificationRequestCountRef = useRef(0);
@@ -100,8 +101,9 @@ export const MonitoringBootstrap = () => {
   // Debounced permission check to prevent rapid UI updates
   const checkPermissionsWithDebounce = useCallback(async () => {
     const now = Date.now();
-    if (now - lastPermissionCheckRef.current < 2000) {
-      return null; // Skip if checked recently
+    if (now - lastPermissionCheckRef.current < 1000) {
+      console.warn('[MonitoringBootstrap] Debounce active, returning cached result');
+      return lastPermissionResultRef.current; // Return cached result instead of null
     }
     
     lastPermissionCheckRef.current = now;
@@ -110,6 +112,7 @@ export const MonitoringBootstrap = () => {
       console.log('[MonitoringBootstrap] About to call SystemMonitoring.checkPermissions');
       const permissionStatus = await SystemMonitoring.checkPermissions();
       console.log('[MonitoringBootstrap] checkPermissions result:', permissionStatus);
+      lastPermissionResultRef.current = permissionStatus; // Cache the result
       setHasUsageAccess(permissionStatus.usageAccess);
       return permissionStatus;
     } catch (error) {
