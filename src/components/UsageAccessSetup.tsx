@@ -188,6 +188,8 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
     }
   };
 
+  const isSamsung = /samsung/i.test(navigator.userAgent) || /SM-[A-Z]\d+/i.test(navigator.userAgent);
+
   const openBatterySettings = async () => {
     try {
       await SystemMonitoring.openBatteryOptimizationSettings();
@@ -327,6 +329,34 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
             <p className="text-muted-foreground">
               To send mindful nudges, FlowLight needs to monitor app usage
             </p>
+            
+            {/* Samsung-specific hint */}
+            {Capacitor.getPlatform() === 'android' && isSamsung && (
+              <div className="mt-4 p-3 bg-primary/5 border border-primary/20 rounded-lg text-sm">
+                <p className="font-semibold mb-1">📱 Samsung Device Detected</p>
+                <p className="text-muted-foreground text-xs mb-2">
+                  After granting permissions, disable battery optimization for best results
+                </p>
+                <div className="flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={openBatterySettings}
+                    className="text-xs"
+                  >
+                    Battery Settings
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={openAppSettings}
+                    className="text-xs"
+                  >
+                    App Settings
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="bg-muted/50 rounded-lg p-4 text-left space-y-2">

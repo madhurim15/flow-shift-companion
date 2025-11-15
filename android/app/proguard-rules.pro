@@ -19,3 +19,20 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Capacitor specific rules
+-keep class com.getcapacitor.** { *; }
+-keep class com.capacitorjs.plugins.** { *; }
+-keep @com.getcapacitor.annotation.CapacitorPlugin class * { *; }
+-keepclassmembers class * {
+    @com.getcapacitor.annotation.UsedByCapacitor *;
+}
+-keepclassmembers class * {
+    @com.getcapacitor.annotation.PermissionCallback *;
+}
+-keepclassmembers class * {
+    @com.getcapacitor.annotation.ActivityCallback *;
+}
+
+# Keep SystemMonitoring plugin
+-keep class app.lovable.a35e05c71a3c040e8bd0b8d3342281688.SystemMonitoringPlugin { *; }

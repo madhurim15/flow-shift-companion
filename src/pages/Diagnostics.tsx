@@ -420,6 +420,77 @@ const Diagnostics = () => {
 
         {/* Build Info Banner */}
         <BuildInfoBanner />
+        
+        {/* Native Bridge Check - Samsung Fix */}
+        {isNativeAndroid && (
+          <Card className="border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Code className="h-5 w-5" />
+                Native Bridge Status
+              </CardTitle>
+              <CardDescription>
+                Quick check for native component health
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Platform:</span>
+                  <Badge variant={diagnosticsData.isNative ? "default" : "secondary"}>
+                    {diagnosticsData.platform}
+                  </Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span>Plugin Detected:</span>
+                  <Badge variant={diagnosticsData.pluginDetected ? "default" : "destructive"}>
+                    {diagnosticsData.pluginDetected ? 'Yes' : 'No'}
+                  </Badge>
+                </div>
+                <div className="flex justify-between">
+                  <span>BUILD_STAMP:</span>
+                  <span className="font-mono text-xs">1731601200000</span>
+                </div>
+              </div>
+              
+              {!diagnosticsData.pluginDetected && (
+                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md text-sm">
+                  <strong>⚠️ Native component missing</strong>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Uninstall the app and reinstall a fresh APK after running: <code className="bg-background px-1 py-0.5 rounded">npx cap sync android</code>
+                  </p>
+                </div>
+              )}
+              
+              <div className="flex flex-wrap gap-2">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={handleOpenUsageSettings}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Usage Access
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={handleOpenBatterySettings}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Battery Settings
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={handleOpenAppSettings}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  App Settings
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Platform Info */}
         <Card>
