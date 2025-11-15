@@ -275,6 +275,26 @@ export const MonitoringBootstrap = () => {
               console.error('[MonitoringBootstrap] CRITICAL: startMonitoring failed:', error);
               const errorMessage = error?.message || String(error);
               
+              // Samsung fix: Detect "not implemented" error and stop retries
+              if (errorMessage.toLowerCase().includes('not implemented')) {
+                console.error('[MonitoringBootstrap] Plugin not implemented - stopping retries');
+                setBootstrapStatus(prev => ({ 
+                  ...prev, 
+                  bootstrapAttempted: true,
+                  lastError: 'Plugin not implemented. Native build mismatch - reinstall APK after npx cap sync android'
+                }));
+                
+                showToast(
+                  'native-mismatch',
+                  'Native Component Missing',
+                  'Please reinstall the app after running: npx cap sync android',
+                  0 // Don't auto-dismiss
+                );
+                
+                bootstrapInProgressRef.current = false;
+                return;
+              }
+              
               setBootstrapStatus(prev => ({ 
                 ...prev, 
                 lastError: `startMonitoring failed: ${errorMessage}`

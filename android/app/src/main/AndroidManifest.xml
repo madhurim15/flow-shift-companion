@@ -20,6 +20,9 @@
     
     <!-- System alert window permission for notifications over other apps -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    
+    <!-- Battery optimization exemption (Samsung-compatible) -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <application
         android:allowBackup="true"
