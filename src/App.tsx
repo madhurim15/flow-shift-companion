@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createHashRouter, RouterProvider, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { TrialProvider } from "@/contexts/TrialContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { EnhancedInterventionModal } from "@/components/EnhancedInterventionModal";
 import { MonitoringBootstrap } from "@/components/MonitoringBootstrap";
@@ -318,18 +319,20 @@ const App = () => {
   
   return (
     <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <TrialProvider>
-            <TooltipProvider>
-              <Toaster />
-              <RouterProvider router={routerWithDeepLink} />
-              <EnhancedInterventionModal />
-              {isNativeAndroid && <MonitoringBootstrap />}
-            </TooltipProvider>
-          </TrialProvider>
-        </AuthProvider>
-      </QueryClientProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <TrialProvider>
+              <TooltipProvider>
+                <Toaster />
+                <RouterProvider router={routerWithDeepLink} />
+                <EnhancedInterventionModal />
+                {isNativeAndroid && <MonitoringBootstrap />}
+              </TooltipProvider>
+            </TrialProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 };
