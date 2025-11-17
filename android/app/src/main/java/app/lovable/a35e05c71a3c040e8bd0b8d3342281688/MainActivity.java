@@ -20,8 +20,7 @@ public class MainActivity extends BridgeActivity {
     protected void onCreate(Bundle savedInstanceState) {
         // Register custom plugin BEFORE bridge initialization
         android.util.Log.i("FlowLight", "=== BUILD_STAMP: " + BUILD_STAMP + " ===");
-        android.util.Log.i("FlowLight", "Registering SystemMonitoringPlugin (pre-bridge)");
-        registerPlugin(SystemMonitoringPlugin.class);
+        android.util.Log.i("FlowLight", "Using Capacitor auto-registration for SystemMonitoringPlugin");
 
         super.onCreate(savedInstanceState);
         
