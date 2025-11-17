@@ -19,7 +19,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { MainGoalInput } from "@/components/MainGoalInput";
 import { DailyMantra } from "@/components/DailyMantra";
 import { Button } from "@/components/ui/button";
-import { Timer, Home, Brain, Settings } from "lucide-react";
+import { Timer, Home, Brain, Settings, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 // import { useDoomScrollingDetection } from "@/hooks/useDoomScrollingDetection";
 import { useReminderSystem } from "@/hooks/useReminderSystem";
@@ -345,8 +345,8 @@ const Index = () => {
           >
             <div className="container flex h-14 items-center justify-between">
               <div className="flex items-center gap-3">
-                <Button variant="ghost" size="sm" onClick={handleBackToWelcome} className="text-white/70 hover:text-white hover:bg-white/10">
-                  <Home size={18} />
+                <Button variant="ghost" size="sm" onClick={handleBackToWelcome} className="gentle-hover">
+                  <Home className="h-4 w-4" />
                 </Button>
                 
                 <CalendarModal />
@@ -360,8 +360,11 @@ const Index = () => {
               </div>
               
               {/* Centered Logo */}
-              <div className="absolute left-1/2 transform -translate-x-1/2">
-                <h1 className="text-lg font-bold bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]">FlowFocus</h1>
+              <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary logo-glow" />
+                <h1 className="text-lg font-bold bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent gradient-animate logo-glow">
+                  FlowFocus
+                </h1>
               </div>
               
               <div className="flex items-center gap-2">
