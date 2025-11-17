@@ -361,17 +361,17 @@ const Index = () => {
               </div>
               
               {/* Centered Logo */}
-              <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2 cursor-pointer logo-glow-hover group">
-                <Sparkles className="h-5 w-5 text-primary logo-glow float-animation group-hover:scale-110 transition-transform duration-300" />
-                <h1 className="text-lg font-bold bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent gradient-animate logo-glow">
+              <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <h1 className="text-lg font-bold bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent">
                   FlowFocus
                 </h1>
               </div>
               
-              <div className="flex items-center gap-2">
-                <ThemeSwitcher />
+              <div className="flex items-center gap-3">
                 <PomodoroModal />
                 <UserMenu />
+                <ThemeSwitcher />
               </div>
             </div>
           </header>

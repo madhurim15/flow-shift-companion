@@ -213,6 +213,7 @@ export const MonitoringBootstrap = () => {
                 userName: userName 
               });
               console.log('[MonitoringBootstrap] Monitoring started successfully');
+              setBootstrapStatus(prev => ({ ...prev, lastError: null }));
               
               // Verify service actually started by checking status
               setTimeout(async () => {
@@ -281,13 +282,13 @@ export const MonitoringBootstrap = () => {
                 setBootstrapStatus(prev => ({ 
                   ...prev, 
                   bootstrapAttempted: true,
-                  lastError: 'Plugin not implemented. Native build mismatch - reinstall APK after npx cap sync android'
+                  lastError: 'Native plugin missing - rebuild required'
                 }));
                 
                 showToast(
                   'native-mismatch',
-                  'Native Component Missing',
-                  'Please reinstall the app after running: npx cap sync android',
+                  'Native Plugin Missing',
+                  'The SystemMonitoring plugin is not in this build. Uninstall the app, then run: npm ci && npm run build && npx cap sync android. Rebuild in Android Studio and reinstall.',
                   0 // Don't auto-dismiss
                 );
                 
