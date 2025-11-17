@@ -361,7 +361,7 @@ const Index = () => {
               
               {/* Centered Logo */}
               <div className="absolute left-1/2 transform -translate-x-1/2">
-                <h1 className="text-lg text-white font-bold drop-shadow-lg">FlowFocus</h1>
+                <h1 className="text-lg font-bold bg-gradient-to-r from-primary via-purple-400 to-primary bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]">FlowFocus</h1>
               </div>
               
               <div className="flex items-center gap-2">
