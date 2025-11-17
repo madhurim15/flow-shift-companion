@@ -24,6 +24,12 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    
+    // Special handling for React internal errors
+    if (error.message.includes('Should have a queue')) {
+      console.error('⚠️ React state corruption detected. Recommend clearing cache and hard refresh.');
+    }
+    
     this.setState({ error, errorInfo });
   }
 
