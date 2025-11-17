@@ -43,4 +43,12 @@ export class SystemMonitoringWeb extends WebPlugin implements SystemMonitoringPl
     console.warn('SystemMonitoring is not supported on web.');
     return { restarted: false };
   }
+
+  async scheduleMidnightReschedule(): Promise<void> {
+    console.warn('SystemMonitoring is not supported on web.');
+  }
+
+  async cancelMidnightReschedule(): Promise<void> {
+    console.warn('SystemMonitoring is not supported on web.');
+  }
 }

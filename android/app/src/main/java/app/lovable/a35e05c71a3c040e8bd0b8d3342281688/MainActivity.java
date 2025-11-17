@@ -43,6 +43,20 @@ public class MainActivity extends BridgeActivity {
         android.util.Log.w("FlowLight", "=== onResume() BUILD_STAMP: " + BUILD_STAMP + " ===");
     }
     
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        
+        if (intent.getBooleanExtra("trigger_notification_reschedule", false)) {
+            android.util.Log.i("FlowLight", "MainActivity: Received midnight reschedule trigger");
+            
+            // Send event to JavaScript
+            com.getcapacitor.JSObject ret = new com.getcapacitor.JSObject();
+            ret.put("trigger", "midnight_reschedule");
+            getBridge().triggerWindowJSEvent("midnightReschedule", ret.toString());
+        }
+    }
+    
     private void configureWindow() {
         Window window = getWindow();
         

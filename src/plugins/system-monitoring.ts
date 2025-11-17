@@ -26,6 +26,8 @@ export interface SystemMonitoringPlugin {
     serviceRunning: boolean;
   }>;
   restartMonitoring(options?: { debug?: boolean; userName?: string }): Promise<{ restarted: boolean }>;
+  scheduleMidnightReschedule(): Promise<void>;
+  cancelMidnightReschedule(): Promise<void>;
   addListener(
     eventName: 'appChanged',
     listenerFunc: (event: AppChangedEvent) => void
@@ -33,6 +35,10 @@ export interface SystemMonitoringPlugin {
   addListener(
     eventName: 'durationUpdate', 
     listenerFunc: (event: DurationUpdateEvent) => void
+  ): Promise<PluginListenerHandle>;
+  addListener(
+    eventName: 'midnightReschedule',
+    listenerFunc: () => void
   ): Promise<PluginListenerHandle>;
 }
 

@@ -22,6 +22,10 @@ public class BootReceiver extends BroadcastReceiver {
                 serviceIntent.putExtra("debug", false);
                 ContextCompat.startForegroundService(context, serviceIntent);
                 android.util.Log.i("FlowLight", "BootReceiver started SystemMonitoringService after reboot");
+                
+                // Reschedule midnight alarm after reboot
+                MidnightScheduler.scheduleMidnightAlarm(context);
+                android.util.Log.i("FlowLight", "BootReceiver: Rescheduled midnight notification alarm");
             } else {
                 android.util.Log.i("FlowLight", "BootReceiver: Usage Access not granted, service not started");
             }
