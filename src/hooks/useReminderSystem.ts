@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
   getUserReminderSettings, 
@@ -95,7 +95,7 @@ export const useReminderSystem = () => {
     }
   };
 
-  const scheduleTodaysNotifications = async () => {
+  const scheduleTodaysNotifications = useCallback(async () => {
     if (!notificationsEnabled || !reminderSettings) return;
     
     // Only schedule if we haven't already scheduled today
@@ -106,172 +106,35 @@ export const useReminderSystem = () => {
 
     const schedule: DailySchedule = {
       morning: reminderSettings.morning_time?.slice(0, 5) || '09:00',
-      afternoon: reminderSettings.afternoon_time?.slice(0, 5) || '14:00',
-      evening: reminderSettings.evening_time?.slice(0, 5) || '19:00',
+      afternoon: reminderSettings.afternoon_time?.slice(0, 5) || '13:00',
+      evening: reminderSettings.evening_time?.slice(0, 5) || '18:00',
       night: reminderSettings.night_time?.slice(0, 5) || '21:00'
     };
 
-    const success = await scheduleDailyNotifications(schedule);
-    if (success) {
-      setLastScheduledDate(new Date().toDateString());
-      console.log('Successfully scheduled today\'s notifications');
-    }
-  };
+    console.log('Scheduling daily notifications:', schedule);
 
-  const sendReminder = async (type: ReminderType) => {
-    // Mobile-first approach: Try native notifications first
-    if (Capacitor.isNativePlatform() && localNotifications.isEnabled) {
-      const success = await localNotifications.scheduleHighPriorityReminder(
-        'FlowLight ✨',
-        reminderMessages[type],
-        0 // Send immediately
-      );
-      
-      if (success) {
-        console.log(`Sent native notification for ${type} reminder`);
-      }
-    } else {
-      // Fallback to browser notifications on web
-      const browserPermission = checkNotificationPermission();
-      
-      if (browserPermission === 'granted') {
-        showNotification(type);
-      } else if (!browserPermissionWarning) {
-        setBrowserPermissionWarning(true);
-      }
-    }
-    
-    // Always show the nudge modal for enhanced user experience
-    setCurrentReminderType(type);
-    setShowNudgeModal(true);
-  };
-
-  const handleNudgeResponse = async (responseType: NudgeResponseType, responseData?: any) => {
-    if (!currentReminderType) return;
-
-    try {
-      await logNudgeResponse({
-        reminder_type: currentReminderType,
-        response_type: responseType,
-        response_data: responseData
-      });
-
-      // Handle different response types
-      if (responseType === 'mood_check') {
-        // This will be handled by the parent component (Index page)
-        // which will trigger the mood selection flow
-      }
-
-      toast({
-        title: "Response logged ✨",
-        description: "Thank you for engaging with your wellness check-in",
-        duration: 3000,
-      });
-    } catch (error) {
-      console.error('Error logging nudge response:', error);
-    }
-  };
-
-  const closeNudgeModal = () => {
-    setShowNudgeModal(false);
-    setCurrentReminderType(null);
-  };
-
-  const toggleNotifications = async () => {
-    const newEnabled = !notificationsEnabled;
-    
-    try {
-      await createOrUpdateReminderSettings({
-        notifications_enabled: newEnabled
-      });
-      
-      setNotificationsEnabled(newEnabled);
-      
-      if (newEnabled) {
-        // Request native permissions on mobile
-        if (Capacitor.isNativePlatform()) {
-          await localNotifications.requestPermissions();
-          
-          // Enable midnight rescheduler
-          try {
-            await SystemMonitoring.scheduleMidnightReschedule();
-            console.log('Midnight notification rescheduler enabled');
-          } catch (error) {
-            console.error('Failed to schedule midnight rescheduler:', error);
-          }
-        } else {
-          // Handle browser permissions on web
-          const browserPermission = checkNotificationPermission();
-          if (browserPermission !== 'granted') {
-            setBrowserPermissionWarning(true);
-          }
-        }
-        
-        toast({
-          title: "Gentle reminders enabled ✨",
-          description: "We'll gently check in with you 4 times a day"
-        });
-      } else {
-        // Disable midnight rescheduler on mobile
-        if (Capacitor.isNativePlatform()) {
-          try {
-            await SystemMonitoring.cancelMidnightReschedule();
-            console.log('Midnight notification rescheduler cancelled');
-          } catch (error) {
-            console.error('Failed to cancel midnight rescheduler:', error);
-          }
-        }
-        
-        setBrowserPermissionWarning(false);
-        toast({
-          title: "Reminders turned off",
-          description: "You can always turn them back on when you're ready"
-        });
-      }
-    } catch (error) {
-      console.error('Error updating notification settings:', error);
-      toast({
-        title: "Couldn't update settings",
-        description: "Please try again in a moment",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const requestBrowserPermission = async () => {
     if (Capacitor.isNativePlatform()) {
-      // Request native permissions on mobile
-      const granted = await localNotifications.requestPermissions();
-      if (granted) {
-        toast({
-          title: "Notifications enabled! 🎉",
-          description: "You'll now receive gentle reminders"
-        });
-      } else {
-        toast({
-          title: "Notification permission needed",
-          description: "Please enable notifications in your device settings",
-          variant: "destructive"
-        });
+      try {
+        await localNotifications.scheduleLocalNotifications(schedule);
+        console.log('✅ Native notifications scheduled for today');
+        setLastScheduledDate();
+      } catch (error) {
+        console.error('Failed to schedule native notifications:', error);
       }
     } else {
-      // Handle browser permissions on web
-      const granted = await requestNotificationPermission();
-      if (granted) {
-        setBrowserPermissionWarning(false);
-        toast({
-          title: "Browser notifications enabled! 🎉",
-          description: "You'll now receive gentle reminders"
-        });
-      } else {
-        toast({
-          title: "Browser notifications blocked",
-          description: "You'll still get in-app reminders, but enabling browser notifications gives you the best experience",
-          variant: "destructive"
-        });
+      try {
+        await scheduleDailyNotifications(schedule);
+        console.log('✅ Browser notifications scheduled for today');
+        setLastScheduledDate();
+      } catch (error) {
+        console.error('Failed to schedule browser notifications:', error);
+        // Fallback to showing permission request
+        if (checkNotificationPermission() === 'default') {
+          setBrowserPermissionWarning(true);
+        }
       }
     }
-  };
+  }, [notificationsEnabled, reminderSettings, localNotifications]);
 
   const testNotification = async () => {
     await sendReminder('morning');
