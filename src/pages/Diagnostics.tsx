@@ -352,13 +352,24 @@ const Diagnostics = () => {
         description: "Plugin bridge is working correctly",
       });
     } catch (error: any) {
-      const errorMsg = `ERROR: ${error.message || error}`;
-      setPluginTestResult(errorMsg);
-      toast({
-        title: "Plugin Test Failed",
-        description: "Check the result below for details",
-        variant: "destructive"
-      });
+      const errorMsg = error.message || String(error);
+      setPluginTestResult(`ERROR: ${errorMsg}`);
+      
+      // Check if plugin is not implemented
+      if (errorMsg.includes('not implemented') || error?.code === 'UNIMPLEMENTED') {
+        toast({
+          title: "Native Plugin Missing",
+          description: "The SystemMonitoring plugin is not included in this build. See rebuild instructions below.",
+          variant: "destructive",
+          duration: 10000
+        });
+      } else {
+        toast({
+          title: "Plugin Test Failed",
+          description: "Check the result below for details",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -454,11 +465,54 @@ const Diagnostics = () => {
               </div>
               
               {!diagnosticsData.pluginDetected && (
-                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md text-sm">
-                  <strong>⚠️ Native component missing</strong>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Uninstall the app and reinstall a fresh APK after running: <code className="bg-background px-1 py-0.5 rounded">npx cap sync android</code>
-                  </p>
+                <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 space-y-3">
+                  <div className="flex items-start gap-2">
+                    <XCircle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+                    <div className="space-y-2 flex-1">
+                      <p className="font-semibold text-destructive">Native Plugin Not Found</p>
+                      <p className="text-sm text-muted-foreground">
+                        The SystemMonitoring plugin is not included in this APK. You need to rebuild and reinstall the app.
+                      </p>
+                      <div className="bg-background/50 rounded p-3 mt-2">
+                        <p className="text-xs font-semibold mb-2">Rebuild Steps:</p>
+                        <code className="text-xs block bg-muted p-2 rounded mb-1">
+                          npm ci && npm run build && npx cap sync android
+                        </code>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Then in Android Studio: Build → Clean Project → Rebuild Project → Run
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Uninstall the old APK from your device first!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {bootstrapStatus && (
+                <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                  <p className="text-sm font-semibold">Bootstrap Status</p>
+                  <div className="text-xs space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Component Mounted:</span>
+                      <span>{bootstrapStatus.componentMounted ? '✓' : '✗'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Bootstrap Attempted:</span>
+                      <span>{bootstrapStatus.bootstrapAttempted ? '✓' : '✗'}</span>
+                    </div>
+                    {bootstrapStatus.lastError && (
+                      <div className="flex flex-col gap-1 mt-2 p-2 bg-destructive/10 rounded">
+                        <span className="text-destructive font-semibold">Last Error:</span>
+                        <span className="font-mono text-destructive break-all">{bootstrapStatus.lastError}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Notification Requests:</span>
+                      <span>{bootstrapStatus.notificationRequestCount || 0}</span>
+                    </div>
+                  </div>
                 </div>
               )}
               
