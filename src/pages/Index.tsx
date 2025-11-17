@@ -338,7 +338,7 @@ const Index = () => {
       {appState !== "welcome" && <>
           
           <header 
-            className="flex-shrink-0 sticky top-0 z-40 w-full border-b border-white/10 bg-black/20 backdrop-blur-md"
+            className="flex-shrink-0 sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-md"
             style={{
               paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)'
             }}
@@ -372,7 +372,7 @@ const Index = () => {
           </header>
           
           <main className="flex-1 overflow-y-auto">
-            <div className="container py-4 pb-32 px-4">
+            <div className="container py-4 pb-40 px-4">
             {appState === "mood-selection" && <div className="space-y-4">
                 <TrialBanner />
                 <DailyMantra />

@@ -20,6 +20,7 @@ import {
   type DailySchedule 
 } from '@/utils/dailyNotificationScheduler';
 import { Capacitor } from '@capacitor/core';
+import { SystemMonitoring } from '@/plugins/system-monitoring';
 
 export const useReminderSystem = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -76,6 +77,16 @@ export const useReminderSystem = () => {
         dbEnabled: settings.notifications_enabled,
         isNative: Capacitor.isNativePlatform()
       });
+      
+      // Enable midnight rescheduler if notifications are enabled
+      if (settings.notifications_enabled && Capacitor.isNativePlatform()) {
+        try {
+          await SystemMonitoring.scheduleMidnightReschedule();
+          console.log('Midnight rescheduler activated on app init');
+        } catch (error) {
+          console.error('Failed to activate midnight rescheduler:', error);
+        }
+      }
     } catch (error) {
       console.error('Error initializing notification system:', error);
       setNotificationsEnabled(true);
@@ -180,6 +191,14 @@ export const useReminderSystem = () => {
         // Request native permissions on mobile
         if (Capacitor.isNativePlatform()) {
           await localNotifications.requestPermissions();
+          
+          // Enable midnight rescheduler
+          try {
+            await SystemMonitoring.scheduleMidnightReschedule();
+            console.log('Midnight notification rescheduler enabled');
+          } catch (error) {
+            console.error('Failed to schedule midnight rescheduler:', error);
+          }
         } else {
           // Handle browser permissions on web
           const browserPermission = checkNotificationPermission();
@@ -193,6 +212,16 @@ export const useReminderSystem = () => {
           description: "We'll gently check in with you 4 times a day"
         });
       } else {
+        // Disable midnight rescheduler on mobile
+        if (Capacitor.isNativePlatform()) {
+          try {
+            await SystemMonitoring.cancelMidnightReschedule();
+            console.log('Midnight notification rescheduler cancelled');
+          } catch (error) {
+            console.error('Failed to cancel midnight rescheduler:', error);
+          }
+        }
+        
         setBrowserPermissionWarning(false);
         toast({
           title: "Reminders turned off",
@@ -251,6 +280,32 @@ export const useReminderSystem = () => {
       description: "Check if you received it"
     });
   };
+
+  // Listen for midnight reschedule events on native platforms
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    
+    let listenerHandle: any;
+    
+    const setupListener = async () => {
+      try {
+        listenerHandle = await SystemMonitoring.addListener('midnightReschedule', () => {
+          console.log('Received midnight reschedule event');
+          scheduleTodaysNotifications();
+        });
+      } catch (error) {
+        console.error('Failed to setup midnight reschedule listener:', error);
+      }
+    };
+    
+    setupListener();
+    
+    return () => {
+      if (listenerHandle) {
+        listenerHandle.remove();
+      }
+    };
+  }, [reminderSettings, notificationsEnabled]);
 
   return {
     notificationsEnabled,

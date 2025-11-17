@@ -274,4 +274,18 @@ public class SystemMonitoringPlugin extends Plugin {
     }
   }
 
+  @PluginMethod
+  public void scheduleMidnightReschedule(PluginCall call) {
+    android.util.Log.i("FlowLight", "scheduleMidnightReschedule called from JS");
+    MidnightScheduler.scheduleMidnightAlarm(getContext());
+    call.resolve();
+  }
+
+  @PluginMethod
+  public void cancelMidnightReschedule(PluginCall call) {
+    android.util.Log.i("FlowLight", "cancelMidnightReschedule called from JS");
+    MidnightScheduler.cancelMidnightAlarm(getContext());
+    call.resolve();
+  }
+
 }
