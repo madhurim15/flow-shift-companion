@@ -113,62 +113,139 @@ export const useReminderSystem = () => {
 
     console.log('Scheduling daily notifications:', schedule);
 
-    if (Capacitor.isNativePlatform()) {
-      try {
-        await localNotifications.scheduleLocalNotifications(schedule);
-        console.log('✅ Native notifications scheduled for today');
-        setLastScheduledDate();
-      } catch (error) {
-        console.error('Failed to schedule native notifications:', error);
-      }
-    } else {
-      try {
-        await scheduleDailyNotifications(schedule);
-        console.log('✅ Browser notifications scheduled for today');
-        setLastScheduledDate();
-      } catch (error) {
-        console.error('Failed to schedule browser notifications:', error);
-        // Fallback to showing permission request
-        if (checkNotificationPermission() === 'default') {
-          setBrowserPermissionWarning(true);
-        }
+    try {
+      await scheduleDailyNotifications(schedule);
+      console.log('✅ Notifications scheduled for today');
+      setLastScheduledDate(new Date().toDateString());
+    } catch (error) {
+      console.error('Failed to schedule notifications:', error);
+      // Fallback to showing permission request on web
+      if (!Capacitor.isNativePlatform() && checkNotificationPermission() === 'default') {
+        setBrowserPermissionWarning(true);
       }
     }
   }, [notificationsEnabled, reminderSettings, localNotifications]);
 
-  const testNotification = async () => {
-    await sendReminder('morning');
-    toast({
-      title: "Test reminder sent!",
-      description: "Check if you received it"
-    });
+  const requestBrowserPermission = async () => {
+    if (Capacitor.isNativePlatform()) {
+      const granted = await localNotifications.requestPermissions();
+      setBrowserPermissionWarning(!granted);
+      return granted;
+    } else {
+      const granted = await requestNotificationPermission();
+      setBrowserPermissionWarning(!granted);
+      return granted;
+    }
   };
+
+  const toggleNotifications = async () => {
+    try {
+      const newState = !notificationsEnabled;
+      await createOrUpdateReminderSettings({ notifications_enabled: newState });
+      setNotificationsEnabled(newState);
+
+      if (newState) {
+        await requestBrowserPermission();
+        await scheduleTodaysNotifications();
+        if (Capacitor.isNativePlatform()) {
+          try {
+            await SystemMonitoring.scheduleMidnightReschedule();
+            console.log('Midnight notification rescheduler enabled');
+          } catch (err) {
+            console.error('Failed to schedule midnight rescheduler:', err);
+          }
+        }
+      } else {
+        if (Capacitor.isNativePlatform()) {
+          try {
+            await SystemMonitoring.cancelMidnightReschedule();
+            console.log('Midnight notification rescheduler cancelled');
+          } catch (err) {
+            console.error('Failed to cancel midnight rescheduler:', err);
+          }
+        }
+      }
+
+      toast({
+        title: newState ? '✅ Notifications enabled' : '🔕 Notifications disabled',
+        description: newState
+          ? "You'll receive gentle check-in reminders"
+          : 'No more check-in reminders',
+      });
+    } catch (error) {
+      console.error('Error toggling notifications:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update notification settings',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const testNotification = async () => {
+    if (Capacitor.isNativePlatform()) {
+      await localNotifications.scheduleHighPriorityReminder(
+        'FlowLight ✨',
+        reminderMessages.morning,
+        1
+      );
+    } else {
+      await showNotification('morning');
+    }
+    toast({ title: 'Test reminder sent!', description: 'Check if you received it' });
+  };
+
+  const handleNudgeResponse = async (responseType: NudgeResponseType, data?: any) => {
+    try {
+      if (currentReminderType) {
+        await logNudgeResponse({
+          reminder_type: currentReminderType,
+          response_type: responseType,
+          response_data: data
+        });
+      }
+      setShowNudgeModal(false);
+      toast({
+        title: 'Noted ✔️',
+        description: 'Thanks for checking in',
+      });
+    } catch (error) {
+      console.error('Failed to log nudge response:', error);
+    }
+  };
+
+  const closeNudgeModal = () => setShowNudgeModal(false);
 
   // Listen for midnight reschedule events on native platforms
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
     
-    let listenerHandle: any;
+    let isSubscribed = true;
+    let handlePromise: Promise<any> | null = null;
     
-    const setupListener = async () => {
+    const setup = async () => {
       try {
-        listenerHandle = await SystemMonitoring.addListener('midnightReschedule', () => {
-          console.log('Received midnight reschedule event');
-          scheduleTodaysNotifications();
+        const h = await SystemMonitoring.addListener('midnightReschedule', () => {
+          if (isSubscribed) {
+            console.log('Received midnight reschedule event');
+            scheduleTodaysNotifications();
+          }
         });
-      } catch (error) {
-        console.error('Failed to setup midnight reschedule listener:', error);
+        handlePromise = Promise.resolve(h);
+      } catch (e) {
+        console.error('Failed to setup midnight reschedule listener:', e);
       }
     };
     
-    setupListener();
+    setup();
     
     return () => {
-      if (listenerHandle) {
-        listenerHandle.remove();
+      isSubscribed = false;
+      if (handlePromise) {
+        handlePromise.then(h => h?.remove()).catch(err => console.error('Error removing listener:', err));
       }
     };
-  }, [reminderSettings, notificationsEnabled]);
+  }, [scheduleTodaysNotifications]);
 
   return {
     notificationsEnabled,
