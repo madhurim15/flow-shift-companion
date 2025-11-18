@@ -12,9 +12,9 @@ const config: CapacitorConfig = {
     },
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"]
-    }
-	SystemMonitoring: {
-    // Enable the plugin
+    },
+    SystemMonitoring: {
+      // Enable the plugin
     }
   }
 };
