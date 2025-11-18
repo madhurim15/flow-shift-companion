@@ -11,18 +11,23 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
+import app.lovable.a35e05c71a3c040e8bd0b8d3342281688.SystemMonitoringPlugin;
 
 public class MainActivity extends BridgeActivity {
     // Build stamp to verify correct APK is running
-    private static final long BUILD_STAMP = 1731601200000L; // 2024-11-14 15:00 UTC
+    private static final long BUILD_STAMP = 1731960000000L; // 2024-11-18 22:00 UTC
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Register custom plugin BEFORE bridge initialization
+        // Build stamp verification
         android.util.Log.i("FlowLight", "=== BUILD_STAMP: " + BUILD_STAMP + " ===");
-        android.util.Log.i("FlowLight", "Using Capacitor auto-registration for SystemMonitoringPlugin");
-
+        
+        // Call super FIRST to initialize Capacitor bridge
         super.onCreate(savedInstanceState);
+        
+        // MANUALLY REGISTER THE PLUGIN - Critical fix for plugin detection
+        registerPlugin(SystemMonitoringPlugin.class);
+        android.util.Log.i("FlowLight", "SystemMonitoringPlugin manually registered");
         
         // Configure window for proper display cutout handling and heads-up notifications
         configureWindow();
