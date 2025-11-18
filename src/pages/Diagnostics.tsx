@@ -752,7 +752,7 @@ const Diagnostics = () => {
                       adb logcat -c && adb logcat -s FlowLight Capacitor
                     </div>
                     <div className="mt-2 text-yellow-600 dark:text-yellow-500 font-medium">
-                      📋 Look for BUILD_STAMP: 1731601200000 in logs
+                      📋 Look for BUILD_STAMP: 1731960000000 in logs
                     </div>
                   </div>
                 </CollapsibleContent>
