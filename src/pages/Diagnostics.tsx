@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLocalNotifications } from '@/hooks/useLocalNotifications';
 import { MonitoringStatus } from '@/components/MonitoringStatus';
 import { BuildInfoBanner } from '@/components/BuildInfoBanner';
+import { BUILD_STAMP } from '@/buildInfo';
 import { Capacitor } from '@capacitor/core';
 import { 
   Smartphone, 
@@ -460,7 +461,7 @@ const Diagnostics = () => {
                 </div>
                 <div className="flex justify-between">
                   <span>BUILD_STAMP:</span>
-                  <span className="font-mono text-xs">1731601200000</span>
+                  <span className="font-mono text-xs">{BUILD_STAMP}</span>
                 </div>
               </div>
               
@@ -752,7 +753,7 @@ const Diagnostics = () => {
                       adb logcat -c && adb logcat -s FlowLight Capacitor
                     </div>
                     <div className="mt-2 text-yellow-600 dark:text-yellow-500 font-medium">
-                      📋 Look for BUILD_STAMP: 1731960000000 in logs
+                      📋 Look for BUILD_STAMP: {BUILD_STAMP} in logs
                     </div>
                   </div>
                 </CollapsibleContent>
