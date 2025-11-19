@@ -28,6 +28,7 @@ export interface SystemMonitoringPlugin {
   restartMonitoring(options?: { debug?: boolean; userName?: string }): Promise<{ restarted: boolean }>;
   scheduleMidnightReschedule(): Promise<void>;
   cancelMidnightReschedule(): Promise<void>;
+  getBuildStamp(): Promise<{ buildStamp: number }>;
   addListener(
     eventName: 'appChanged',
     listenerFunc: (event: AppChangedEvent) => void

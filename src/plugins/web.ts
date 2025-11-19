@@ -51,4 +51,9 @@ export class SystemMonitoringWeb extends WebPlugin implements SystemMonitoringPl
   async cancelMidnightReschedule(): Promise<void> {
     console.warn('SystemMonitoring is not supported on web.');
   }
+
+  async getBuildStamp(): Promise<{ buildStamp: number }> {
+    console.warn('SystemMonitoring is not supported on web.');
+    return { buildStamp: 0 };
+  }
 }
