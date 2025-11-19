@@ -13,9 +13,9 @@ export const ValueDemoSection = () => {
 
   return (
     <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-[hsl(50,80%,90%)] to-[hsl(30,70%,88%)]">
-      {/* Decorative blobs */}
-      <div className="absolute top-20 right-10 w-72 h-72 bg-[hsl(50,80%,75%)]/30 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-20 left-10 w-64 h-64 bg-[hsl(30,70%,75%)]/30 rounded-full blur-3xl"></div>
+      {/* Decorative blobs - Hidden on mobile */}
+      <div className="hidden md:block absolute top-20 right-10 w-72 h-72 bg-[hsl(50,80%,75%)]/30 rounded-full blur-3xl"></div>
+      <div className="hidden md:block absolute bottom-20 left-10 w-64 h-64 bg-[hsl(30,70%,75%)]/30 rounded-full blur-3xl"></div>
       
       <div className="relative max-w-7xl mx-auto">
         <ScrollReveal>
@@ -30,7 +30,7 @@ export const ValueDemoSection = () => {
         </ScrollReveal>
 
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <ScrollReveal delay={100}>
+          <ScrollReveal delay={0}>
             <div className="bg-[hsl(340,65%,88%)] p-10 rounded-3xl text-center shadow-lg hover:scale-105 hover:-translate-y-2 transition-all duration-300">
               <div className="text-6xl font-bold text-[hsl(340,65%,55%)] mb-3">
                 <AnimatedCounter end={4} duration={2000} suffix="+" />
@@ -39,7 +39,7 @@ export const ValueDemoSection = () => {
             </div>
           </ScrollReveal>
 
-          <ScrollReveal delay={200}>
+          <ScrollReveal delay={0}>
             <div className="bg-[hsl(210,65%,88%)] p-10 rounded-3xl text-center shadow-lg hover:scale-105 hover:-translate-y-2 transition-all duration-300">
               <div className="text-6xl font-bold text-[hsl(210,65%,55%)] mb-3">
                 <AnimatedCounter end={60} duration={2000} suffix="%" />
@@ -48,7 +48,7 @@ export const ValueDemoSection = () => {
             </div>
           </ScrollReveal>
 
-          <ScrollReveal delay={300}>
+          <ScrollReveal delay={0}>
             <div className="bg-[hsl(160,50%,88%)] p-10 rounded-3xl text-center shadow-lg hover:scale-105 hover:-translate-y-2 transition-all duration-300">
               <div className="text-6xl font-bold text-[hsl(160,50%,45%)] mb-3">
                 <AnimatedCounter end={12} duration={2000} suffix="+" />

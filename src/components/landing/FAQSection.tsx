@@ -33,9 +33,9 @@ export const FAQSection = () => {
 
   return (
     <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[hsl(160,50%,92%)] to-[hsl(140,45%,90%)]">
-      {/* Decorative blobs */}
-      <div className="absolute top-20 right-10 w-72 h-72 bg-[hsl(160,50%,75%)]/25 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-20 left-10 w-64 h-64 bg-[hsl(140,45%,75%)]/25 rounded-full blur-3xl"></div>
+      {/* Decorative blobs - Hidden on mobile */}
+      <div className="hidden md:block absolute top-20 right-10 w-72 h-72 bg-[hsl(160,50%,75%)]/25 rounded-full blur-3xl"></div>
+      <div className="hidden md:block absolute bottom-20 left-10 w-64 h-64 bg-[hsl(140,45%,75%)]/25 rounded-full blur-3xl"></div>
       
       <div className="max-w-4xl mx-auto">
         <ScrollReveal>

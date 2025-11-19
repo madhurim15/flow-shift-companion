@@ -61,11 +61,11 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flow-gradient flex items-center justify-center p-4">
-      <Card className="max-w-md mx-auto p-8 soft-shadow border-2 border-white/20 bg-white/90 backdrop-blur-sm">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
+      <Card className="max-w-md mx-auto p-8 shadow-lg border border-border/50 bg-background/95">
         <div className="text-center space-y-6">
           <div className="space-y-2">
-            <div className="animate-gentle-float">
+            <div>
               <Sparkles className="h-10 w-10 text-primary mx-auto" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">

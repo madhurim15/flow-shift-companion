@@ -27,9 +27,9 @@ export const HowItWorksSection = () => {
 
   return (
     <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[hsl(200,60%,92%)] via-[hsl(220,55%,90%)] to-[hsl(250,60%,92%)]">
-      {/* Decorative blobs */}
-      <div className="absolute top-20 right-10 w-72 h-72 bg-[hsl(210,65%,75%)]/25 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-20 left-10 w-64 h-64 bg-[hsl(270,60%,75%)]/25 rounded-full blur-3xl"></div>
+      {/* Decorative blobs - Hidden on mobile */}
+      <div className="hidden md:block absolute top-20 right-10 w-72 h-72 bg-[hsl(210,65%,75%)]/25 rounded-full blur-3xl"></div>
+      <div className="hidden md:block absolute bottom-20 left-10 w-64 h-64 bg-[hsl(270,60%,75%)]/25 rounded-full blur-3xl"></div>
       
       <div className="max-w-6xl mx-auto">
         <ScrollReveal>
@@ -53,8 +53,8 @@ export const HowItWorksSection = () => {
               ];
               
               return (
-                <ScrollReveal key={index} delay={index * 150}>
-                  <div className={`relative flex flex-col items-center text-center group ${stepColors[index].bg} p-8 rounded-3xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 shadow-lg hover:shadow-2xl`}>
+                <ScrollReveal key={index} delay={0}>
+                  <div className={`relative flex flex-col items-center text-center group ${stepColors[index].bg} p-8 rounded-3xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 shadow-lg md:hover:shadow-2xl`}>
                     {/* Step number and icon */}
                     <div className="relative mb-6">
                       <div className={`w-24 h-24 rounded-full ${stepColors[index].icon} flex items-center justify-center text-3xl font-bold text-white group-hover:scale-110 transition-all duration-300 shadow-lg`}>

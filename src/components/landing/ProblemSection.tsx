@@ -19,9 +19,9 @@ export const ProblemSection = () => {
 
   return (
     <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[hsl(20,70%,92%)] to-[hsl(10,60%,90%)]">
-      {/* Decorative blobs */}
-      <div className="absolute top-20 right-10 w-72 h-72 bg-[hsl(340,65%,80%)]/20 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-20 left-10 w-64 h-64 bg-[hsl(30,70%,75%)]/20 rounded-full blur-3xl"></div>
+      {/* Decorative blobs - Hidden on mobile */}
+      <div className="hidden md:block absolute top-20 right-10 w-72 h-72 bg-[hsl(340,65%,80%)]/20 rounded-full blur-3xl"></div>
+      <div className="hidden md:block absolute bottom-20 left-10 w-64 h-64 bg-[hsl(30,70%,75%)]/20 rounded-full blur-3xl"></div>
       
       <div className="relative max-w-5xl mx-auto text-center">
         <ScrollReveal>
@@ -44,8 +44,8 @@ export const ProblemSection = () => {
             ];
             
             return (
-              <ScrollReveal key={index} delay={index * 100}>
-                <div className={`${cardColors[index]} p-10 rounded-3xl text-center group hover:scale-105 hover:-translate-y-2 transition-all duration-300 shadow-lg hover:shadow-2xl`}>
+              <ScrollReveal key={index} delay={0}>
+                <div className={`${cardColors[index]} p-10 rounded-3xl text-center group hover:scale-105 hover:-translate-y-2 transition-all duration-300 shadow-lg md:hover:shadow-2xl`}>
                   <div className={`w-20 h-20 mx-auto mb-6 rounded-2xl ${iconBgColors[index]} flex items-center justify-center group-hover:scale-110 transition-transform shadow-md`}>
                     <problem.icon className="w-10 h-10 text-white" />
                   </div>
