@@ -15,7 +15,11 @@ import app.lovable.a35e05c71a3c040e8bd0b8d3342281688.SystemMonitoringPlugin;
 
 public class MainActivity extends BridgeActivity {
     // Build stamp to verify correct APK is running
-    private static final long BUILD_STAMP = 1731960000000L; // 2024-11-18 22:00 UTC
+    public static final long BUILD_STAMP = 1731960000000L; // 2024-11-18 22:00 UTC
+    
+    public static long getBuildStamp() {
+        return BUILD_STAMP;
+    }
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {

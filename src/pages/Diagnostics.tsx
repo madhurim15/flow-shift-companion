@@ -37,6 +37,7 @@ const Diagnostics = () => {
   const [bootstrapStatus, setBootstrapStatus] = useState<any>(null);
   const [pluginTestResult, setPluginTestResult] = useState<string>('');
   const [buildInstructionsOpen, setBuildInstructionsOpen] = useState(false);
+  const [nativeBuildStamp, setNativeBuildStamp] = useState<number | null>(null);
   
   const isNativeAndroid = Capacitor.getPlatform() === 'android' && Capacitor.isNativePlatform();
 
@@ -111,6 +112,20 @@ const Diagnostics = () => {
     const interval = setInterval(gatherDiagnostics, 2000);
     return () => clearInterval(interval);
   }, [localNotifications, isNativeAndroid]);
+
+  // Fetch native BUILD_STAMP on native platforms
+  useEffect(() => {
+    if (isNativeAndroid) {
+      SystemMonitoring.getBuildStamp()
+        .then(result => {
+          console.log('Native BUILD_STAMP:', result.buildStamp);
+          setNativeBuildStamp(result.buildStamp);
+        })
+        .catch(err => {
+          console.error('Failed to get native BUILD_STAMP:', err);
+        });
+    }
+  }, [isNativeAndroid]);
 
   const handleRequestPermissions = async () => {
     try {
@@ -459,9 +474,31 @@ const Diagnostics = () => {
                     {diagnosticsData.pluginDetected ? 'Yes' : 'No'}
                   </Badge>
                 </div>
-                <div className="flex justify-between">
-                  <span>BUILD_STAMP:</span>
-                  <span className="font-mono text-xs">{BUILD_STAMP}</span>
+                <div className="flex flex-col gap-2">
+                  <div className="flex justify-between">
+                    <span>Web BUILD_STAMP:</span>
+                    <span className="font-mono text-xs">{BUILD_STAMP}</span>
+                  </div>
+                  {isNativeAndroid && (
+                    <>
+                      <div className="flex justify-between">
+                        <span>Native BUILD_STAMP:</span>
+                        <span className="font-mono text-xs">
+                          {nativeBuildStamp || 'Loading...'}
+                        </span>
+                      </div>
+                      {nativeBuildStamp && nativeBuildStamp !== BUILD_STAMP && (
+                        <div className="text-destructive font-medium text-sm mt-1">
+                          ⚠️ BUILD_STAMP MISMATCH! Run: npx cap sync
+                        </div>
+                      )}
+                      {nativeBuildStamp && nativeBuildStamp === BUILD_STAMP && (
+                        <div className="text-green-600 dark:text-green-400 font-medium text-sm mt-1">
+                          ✅ Web and Native builds are synchronized!
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
               

@@ -288,4 +288,13 @@ public class SystemMonitoringPlugin extends Plugin {
     call.resolve();
   }
 
+  @PluginMethod
+  public void getBuildStamp(PluginCall call) {
+    long buildStamp = MainActivity.getBuildStamp();
+    android.util.Log.i("FlowLight", "Plugin.getBuildStamp -> " + buildStamp);
+    JSObject ret = new JSObject();
+    ret.put("buildStamp", buildStamp);
+    call.resolve(ret);
+  }
+
 }
