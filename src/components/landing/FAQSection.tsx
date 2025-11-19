@@ -33,10 +33,6 @@ export const FAQSection = () => {
 
   return (
     <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[hsl(160,50%,92%)] to-[hsl(140,45%,90%)]">
-      {/* Decorative blobs - Hidden on mobile */}
-      <div className="hidden md:block absolute top-20 right-10 w-72 h-72 bg-[hsl(160,50%,75%)]/25 rounded-full blur-3xl"></div>
-      <div className="hidden md:block absolute bottom-20 left-10 w-64 h-64 bg-[hsl(140,45%,75%)]/25 rounded-full blur-3xl"></div>
-      
       <div className="max-w-4xl mx-auto">
         <ScrollReveal>
           <div className="text-center mb-16">
@@ -55,7 +51,7 @@ export const FAQSection = () => {
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="bg-white/80 backdrop-blur-sm border-0 px-8 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300"
+                className="bg-white/95 border-0 px-8 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300"
               >
                 <AccordionTrigger className="text-xl font-bold text-gray-900 hover:text-[hsl(270,60%,65%)] transition-colors text-left">
                   {faq.question}

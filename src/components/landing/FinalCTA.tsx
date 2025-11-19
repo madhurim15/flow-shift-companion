@@ -8,11 +8,6 @@ export const FinalCTA = () => {
 
   return (
     <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-r from-[hsl(270,60%,75%)] via-[hsl(240,65%,75%)] to-[hsl(180,55%,70%)]">
-      {/* Floating decorative elements - Hidden on mobile */}
-      <div className="hidden md:block absolute top-20 left-10 w-64 h-64 bg-white/20 rounded-full blur-3xl animate-gentle-float"></div>
-      <div className="hidden md:block absolute bottom-20 right-10 w-80 h-80 bg-white/15 rounded-full blur-3xl animate-gentle-float" style={{ animationDelay: "1.5s" }}></div>
-      <div className="hidden lg:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-white/10 rounded-full blur-2xl animate-soft-pulse"></div>
-      
       <div className="relative max-w-4xl mx-auto text-center">
         <ScrollReveal>
           <h2 className="text-5xl md:text-7xl font-heading font-bold mb-8 text-white drop-shadow-lg">

@@ -27,10 +27,6 @@ export const WhyDifferentSection = () => {
 
   return (
     <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-[hsl(160,50%,92%)] to-[hsl(180,45%,90%)]">
-      {/* Decorative blobs - Hidden on mobile */}
-      <div className="hidden md:block absolute top-20 left-10 w-80 h-80 bg-[hsl(180,55%,70%)]/25 rounded-full blur-3xl"></div>
-      <div className="hidden md:block absolute bottom-20 right-10 w-72 h-72 bg-[hsl(160,50%,75%)]/25 rounded-full blur-3xl"></div>
-      
       <div className="relative max-w-6xl mx-auto">
         <ScrollReveal>
           <div className="text-center mb-16">
@@ -73,7 +69,7 @@ export const WhyDifferentSection = () => {
         </div>
 
         <ScrollReveal delay={400}>
-          <div className="bg-white/90 backdrop-blur-lg p-10 md:p-12 rounded-3xl text-center border-2 border-[hsl(270,60%,75%)] shadow-xl">
+          <div className="bg-white/95 p-10 md:p-12 rounded-3xl text-center border-2 border-[hsl(270,60%,75%)] shadow-xl">
             <p className="text-xl md:text-2xl font-semibold leading-relaxed text-gray-800">
               <span className="font-bold text-[hsl(0,70%,55%)]">Other apps:</span> "You failed again. Try harder."<br />
               <span className="font-bold text-[hsl(270,60%,65%)]">FlowLight:</span> "What's really going on? Let's fix the root cause."

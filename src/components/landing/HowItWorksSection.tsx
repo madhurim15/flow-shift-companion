@@ -27,10 +27,6 @@ export const HowItWorksSection = () => {
 
   return (
     <section className="relative py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[hsl(200,60%,92%)] via-[hsl(220,55%,90%)] to-[hsl(250,60%,92%)]">
-      {/* Decorative blobs - Hidden on mobile */}
-      <div className="hidden md:block absolute top-20 right-10 w-72 h-72 bg-[hsl(210,65%,75%)]/25 rounded-full blur-3xl"></div>
-      <div className="hidden md:block absolute bottom-20 left-10 w-64 h-64 bg-[hsl(270,60%,75%)]/25 rounded-full blur-3xl"></div>
-      
       <div className="max-w-6xl mx-auto">
         <ScrollReveal>
           <h2 className="text-5xl md:text-6xl font-heading font-bold text-center mb-20 text-gray-900">
