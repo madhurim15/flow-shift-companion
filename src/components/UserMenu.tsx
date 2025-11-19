@@ -7,7 +7,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, Settings, Bug, Smartphone, Zap, BarChart3 } from 'lucide-react';
+import { User, LogOut, Settings, Bug, Smartphone, Zap, BarChart3, Palette } from 'lucide-react';
+import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -146,6 +147,14 @@ const UserMenu = () => {
         <DropdownMenuItem onClick={() => navigate('/account')}>
           <Settings className="mr-2 h-4 w-4" />
           Account Settings
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem onClick={(e) => e.preventDefault()} className="p-0">
+          <div className="flex items-center w-full px-2 py-1.5">
+            <Palette className="mr-2 h-4 w-4" />
+            <span className="mr-auto">Theme</span>
+            <ThemeSwitcher />
+          </div>
         </DropdownMenuItem>
         
         <DropdownMenuItem onClick={() => navigate('/diagnostics')}>
