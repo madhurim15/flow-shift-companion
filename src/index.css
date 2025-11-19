@@ -283,6 +283,174 @@
     @apply bg-card/80 backdrop-blur-xl border border-border/50;
   }
 
+  /* Performant floating shapes animations */
+  @keyframes float-gentle {
+    0%, 100% {
+      transform: translate3d(0, 0, 0);
+    }
+    25% {
+      transform: translate3d(10px, -15px, 0);
+    }
+    50% {
+      transform: translate3d(-5px, -25px, 0);
+    }
+    75% {
+      transform: translate3d(-10px, -15px, 0);
+    }
+  }
+
+  @keyframes float-slow {
+    0%, 100% {
+      transform: translate3d(0, 0, 0) rotate(0deg);
+    }
+    50% {
+      transform: translate3d(20px, -30px, 0) rotate(5deg);
+    }
+  }
+
+  @keyframes float-drift {
+    0%, 100% {
+      transform: translate3d(0, 0, 0);
+    }
+    33% {
+      transform: translate3d(-15px, -20px, 0);
+    }
+    66% {
+      transform: translate3d(15px, -10px, 0);
+    }
+  }
+
+  /* Pulsing glow for buttons */
+  @keyframes glow-button {
+    0%, 100% {
+      box-shadow: 0 8px 30px hsl(270 60% 65% / 0.4);
+    }
+    50% {
+      box-shadow: 0 12px 50px hsl(270 60% 65% / 0.6), 
+                  0 0 30px hsl(270 60% 65% / 0.4);
+    }
+  }
+
+  /* Scale pulse */
+  @keyframes scale-pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+
+  /* Checkmark draw-in */
+  @keyframes check-draw {
+    0% {
+      transform: scale(0) rotate(-45deg);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+    }
+  }
+
+  /* Fade slide up (lighter than ScrollReveal) */
+  @keyframes fade-slide-up-light {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Gradient border animation */
+  @keyframes border-flow {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  /* Particle float */
+  @keyframes particle-float {
+    0% {
+      transform: translate3d(0, 0, 0);
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 0.6;
+    }
+    100% {
+      transform: translate3d(var(--tx), var(--ty), 0);
+      opacity: 0;
+    }
+  }
+
+  /* Input focus glow */
+  @keyframes input-glow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 hsl(270 60% 65% / 0);
+    }
+    50% {
+      box-shadow: 0 0 0 4px hsl(270 60% 65% / 0.2);
+    }
+  }
+
+  /* Utility classes for animations */
+  .floating-shape {
+    position: absolute;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    opacity: 0.3;
+    will-change: transform;
+  }
+
+  .animate-float-gentle {
+    animation: float-gentle 8s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: float-slow 12s ease-in-out infinite;
+  }
+
+  .animate-float-drift {
+    animation: float-drift 10s ease-in-out infinite;
+  }
+
+  .animate-glow-button {
+    animation: glow-button 3s ease-in-out infinite;
+  }
+
+  .animate-scale-pulse {
+    animation: scale-pulse 2s ease-in-out infinite;
+  }
+
+  .animate-check-draw {
+    animation: check-draw 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  .animate-fade-slide-up-light {
+    animation: fade-slide-up-light 0.6s ease-out forwards;
+  }
+
+  .animate-border-flow {
+    animation: border-flow 3s ease infinite;
+  }
+
+  .animate-particle-float {
+    animation: particle-float 8s ease-in-out infinite;
+  }
+
+  .animate-input-glow {
+    animation: input-glow 2s ease-in-out infinite;
+  }
+
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     *,

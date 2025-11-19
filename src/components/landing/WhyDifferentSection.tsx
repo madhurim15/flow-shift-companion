@@ -58,7 +58,7 @@ export const WhyDifferentSection = () => {
               <ScrollReveal key={index} delay={0}>
                 <div className={`${cardColors[index]} p-10 rounded-3xl group hover:scale-105 hover:-translate-y-2 transition-all duration-300 shadow-lg md:hover:shadow-2xl`}>
                   <div className={`w-20 h-20 mb-6 rounded-2xl ${iconBgColors[index]} flex items-center justify-center group-hover:scale-110 transition-transform shadow-md`}>
-                    <item.icon className="w-10 h-10 text-white" />
+                    <item.icon className="w-10 h-10 text-white animate-gentle-float" style={{ animationDelay: `${index * 0.3}s` }} />
                   </div>
                   <h3 className="text-2xl font-heading font-bold mb-4 text-gray-900">{item.title}</h3>
                   <p className="text-xl text-gray-800 leading-relaxed">{item.description}</p>

@@ -64,7 +64,7 @@ export const FeaturesGrid = () => {
               <ScrollReveal key={index} delay={0}>
                 <div className={`${featureColors[index].bg} p-10 rounded-3xl group hover:scale-105 hover:-translate-y-2 transition-all duration-300 shadow-lg md:hover:shadow-2xl`}>
                   <div className={`w-20 h-20 mb-6 rounded-2xl ${featureColors[index].icon} flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-md`}>
-                    <feature.icon className="w-10 h-10 text-white" />
+                    <feature.icon className="w-10 h-10 text-white animate-gentle-float" />
                   </div>
                   <h3 className="text-2xl font-heading font-bold mb-4 text-gray-900">{feature.title}</h3>
                   <p className="text-xl text-gray-800 leading-relaxed">{feature.description}</p>
