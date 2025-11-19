@@ -72,8 +72,13 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[hsl(250,60%,95%)] to-[hsl(280,55%,93%)] flex items-center justify-center p-4">
-      <Card className="max-w-md mx-auto p-8 shadow-lg border border-border/50 bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-[hsl(250,60%,95%)] to-[hsl(280,55%,93%)] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Floating Geometric Shapes */}
+      <div className="floating-shape w-48 h-48 bg-gradient-to-br from-[hsl(270,60%,75%)] to-[hsl(270,60%,85%)] top-20 left-10 animate-float-gentle" style={{ animationDelay: '0s' }} />
+      <div className="floating-shape w-40 h-40 bg-gradient-to-br from-[hsl(210,65%,75%)] to-[hsl(210,65%,85%)] bottom-32 right-20 animate-float-slow" style={{ animationDelay: '1.5s' }} />
+      <div className="floating-shape w-36 h-36 bg-gradient-to-br from-[hsl(180,55%,75%)] to-[hsl(180,55%,85%)] top-1/2 right-10 animate-float-drift" style={{ animationDelay: '3s' }} />
+      
+      <Card className="max-w-md mx-auto p-8 shadow-xl border border-border/50 bg-background relative z-10 animate-scale-in">
         <div className="text-center space-y-6">
           <div className="space-y-2">
             <div>
@@ -102,7 +107,7 @@ const Auth = () => {
                   placeholder="What should we call you?"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="gentle-hover"
+                  className="transition-all duration-300 focus:scale-[1.02] focus:shadow-lg focus:shadow-primary/20"
                 />
               </div>
             )}
@@ -118,7 +123,7 @@ const Auth = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="gentle-hover"
+                className="transition-all duration-300 focus:scale-[1.02] focus:shadow-lg focus:shadow-primary/20"
               />
             </div>
 
@@ -133,13 +138,13 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="gentle-hover"
+                className="transition-all duration-300 focus:scale-[1.02] focus:shadow-lg focus:shadow-primary/20"
               />
             </div>
 
             <Button 
               type="submit" 
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground gentle-hover"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
               disabled={loading}
               size="lg"
             >
@@ -151,7 +156,7 @@ const Auth = () => {
               ) : (
                 <>
                   {isSignUp ? 'Create my account' : 'Sign in'} 
-                  <Heart className="ml-2 h-4 w-4" />
+                  <Heart className="ml-2 h-4 w-4 animate-soft-pulse" />
                 </>
               )}
             </Button>

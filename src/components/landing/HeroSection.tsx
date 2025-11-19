@@ -7,10 +7,16 @@ export const HeroSection = () => {
   
   return (
     <section className="relative overflow-hidden min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[hsl(250,60%,92%)] via-[hsl(280,55%,90%)] to-[hsl(340,50%,92%)]">
-      <div className="relative max-w-6xl mx-auto text-center w-full py-20">
+      {/* Floating Geometric Shapes */}
+      <div className="floating-shape w-64 h-64 bg-gradient-to-br from-[hsl(270,60%,75%)] to-[hsl(270,60%,85%)] top-20 left-10 animate-float-gentle" style={{ animationDelay: '0s' }} />
+      <div className="floating-shape w-48 h-48 bg-gradient-to-br from-[hsl(210,65%,75%)] to-[hsl(210,65%,85%)] top-40 right-20 animate-float-slow" style={{ animationDelay: '1s' }} />
+      <div className="floating-shape w-56 h-56 bg-gradient-to-br from-[hsl(180,55%,75%)] to-[hsl(180,55%,85%)] bottom-32 left-1/4 animate-float-drift" style={{ animationDelay: '2s' }} />
+      <div className="floating-shape w-40 h-40 bg-gradient-to-br from-[hsl(340,65%,75%)] to-[hsl(340,65%,85%)] bottom-20 right-1/3 animate-float-gentle" style={{ animationDelay: '3s' }} />
+      
+      <div className="relative max-w-6xl mx-auto text-center w-full py-20 z-10">
         {/* Badge - Enhanced */}
-        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/95 border-2 border-[hsl(270,60%,75%)] mb-8 animate-fade-in-up shadow-lg">
-          <Sparkles className="w-5 h-5 text-primary" />
+        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/95 border-2 border-[hsl(270,60%,75%)] mb-8 animate-fade-in-up shadow-lg hover:scale-105 transition-transform duration-300">
+          <Sparkles className="w-5 h-5 text-primary animate-gentle-float" />
           <span className="text-base font-semibold text-gray-800">Gentle Accountability Digital Guardian</span>
         </div>
         
@@ -30,7 +36,7 @@ export const HeroSection = () => {
           <Button 
             size="lg" 
             onClick={() => navigate('/auth')}
-            className="h-16 px-12 text-xl font-bold bg-[hsl(270,60%,65%)] hover:bg-[hsl(270,60%,55%)] text-white shadow-[0_8px_30px_hsl(270,60%,65%,0.4)] hover:shadow-[0_12px_40px_hsl(270,60%,65%,0.5)] transition-all duration-300 hover:scale-105"
+            className="h-16 px-12 text-xl font-bold bg-[hsl(270,60%,65%)] hover:bg-[hsl(270,60%,55%)] text-white animate-glow-button transition-all duration-300 hover:scale-105"
           >
             Start 14‑Day Free Trial
             <ArrowRight className="w-6 h-6 ml-2" />

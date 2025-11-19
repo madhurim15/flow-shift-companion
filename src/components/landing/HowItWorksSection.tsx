@@ -53,7 +53,7 @@ export const HowItWorksSection = () => {
                   <div className={`relative flex flex-col items-center text-center group ${stepColors[index].bg} p-8 rounded-3xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 shadow-lg md:hover:shadow-2xl`}>
                     {/* Step number and icon */}
                     <div className="relative mb-6">
-                      <div className={`w-24 h-24 rounded-full ${stepColors[index].icon} flex items-center justify-center text-3xl font-bold text-white group-hover:scale-110 transition-all duration-300 shadow-lg`}>
+                      <div className={`w-24 h-24 rounded-full ${stepColors[index].icon} flex items-center justify-center text-3xl font-bold text-white group-hover:scale-110 transition-all duration-300 shadow-lg animate-gentle-float`} style={{ animationDelay: `${index * 0.5}s` }}>
                         {index + 1}
                       </div>
                       <div className={`absolute -bottom-2 -right-2 w-16 h-16 rounded-xl bg-white flex items-center justify-center group-hover:scale-110 transition-transform shadow-md`}>

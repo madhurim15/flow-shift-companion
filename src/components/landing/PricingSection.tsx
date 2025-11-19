@@ -35,8 +35,8 @@ export const PricingSection = () => {
             
             <div className="relative z-10">
               {/* Badge */}
-              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[hsl(270,60%,88%)] border-2 border-[hsl(270,60%,75%)] mb-6">
-                <Sparkles className="w-5 h-5 text-[hsl(270,60%,55%)]" />
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[hsl(270,60%,88%)] border-2 border-[hsl(270,60%,75%)] mb-6 animate-scale-pulse">
+                <Sparkles className="w-5 h-5 text-[hsl(270,60%,55%)] animate-gentle-float" />
                 <span className="text-base font-bold text-[hsl(270,60%,55%)]">14-Day Free Trial</span>
               </div>
 
@@ -56,8 +56,8 @@ export const PricingSection = () => {
               {/* Features */}
               <ul className="space-y-5 mb-10">
                 {features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-4">
-                    <div className="w-8 h-8 rounded-full bg-[hsl(140,50%,75%)] flex items-center justify-center flex-shrink-0">
+                  <li key={index} className="flex items-start gap-4 group">
+                    <div className="w-8 h-8 rounded-full bg-[hsl(140,50%,75%)] flex items-center justify-center flex-shrink-0 animate-check-draw group-hover:scale-110 transition-transform duration-300" style={{ animationDelay: `${index * 100}ms` }}>
                       <Check className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-xl text-gray-800 font-medium">{feature}</span>
@@ -69,7 +69,7 @@ export const PricingSection = () => {
               <Button
                 size="lg"
                 onClick={() => navigate('/auth')}
-                className="w-full h-16 text-xl font-bold bg-[hsl(270,60%,65%)] hover:bg-[hsl(270,60%,55%)] text-white shadow-[0_8px_30px_hsl(270,60%,65%,0.4)] hover:shadow-[0_12px_40px_hsl(270,60%,65%,0.5)] transition-all duration-300 hover:scale-105"
+                className="w-full h-16 text-xl font-bold bg-[hsl(270,60%,65%)] hover:bg-[hsl(270,60%,55%)] text-white animate-glow-button transition-all duration-300 hover:scale-105"
               >
                 Start Your Free Trial
                 <ArrowRight className="ml-2 w-6 h-6" />
