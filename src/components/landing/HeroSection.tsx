@@ -7,15 +7,9 @@ export const HeroSection = () => {
   
   return (
     <section className="relative overflow-hidden min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[hsl(250,60%,92%)] via-[hsl(280,55%,90%)] to-[hsl(340,50%,92%)]">
-      {/* Floating Decorative Elements - Optimized for mobile */}
-      <div className="hidden md:block absolute top-20 left-10 w-64 h-64 bg-[hsl(270,60%,75%)]/30 rounded-full blur-3xl animate-gentle-float"></div>
-      <div className="hidden md:block absolute bottom-32 right-20 w-80 h-80 bg-[hsl(180,55%,70%)]/30 rounded-full blur-3xl animate-gentle-float" style={{ animationDelay: "1s" }}></div>
-      <div className="hidden lg:block absolute top-1/2 left-1/4 w-48 h-48 bg-[hsl(210,65%,75%)]/30 rounded-full blur-2xl animate-soft-pulse"></div>
-      <div className="hidden lg:block absolute top-1/3 right-1/3 w-56 h-56 bg-[hsl(340,65%,80%)]/25 rounded-full blur-3xl animate-gentle-float" style={{ animationDelay: "2s" }}></div>
-      
       <div className="relative max-w-6xl mx-auto text-center w-full py-20">
         {/* Badge - Enhanced */}
-        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/90 backdrop-blur-lg border-2 border-[hsl(270,60%,75%)] mb-8 animate-fade-in-up shadow-lg">
+        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/95 border-2 border-[hsl(270,60%,75%)] mb-8 animate-fade-in-up shadow-lg">
           <Sparkles className="w-5 h-5 text-primary" />
           <span className="text-base font-semibold text-gray-800">Gentle Accountability Digital Guardian</span>
         </div>

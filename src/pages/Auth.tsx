@@ -21,6 +21,17 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check network connectivity
+    if (!navigator.onLine) {
+      toast({
+        title: "No internet connection",
+        description: "Please check your network and try again.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -61,8 +72,8 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center p-4">
-      <Card className="max-w-md mx-auto p-8 shadow-lg border border-border/50 bg-background/95">
+    <div className="min-h-screen bg-gradient-to-br from-[hsl(250,60%,95%)] to-[hsl(280,55%,93%)] flex items-center justify-center p-4">
+      <Card className="max-w-md mx-auto p-8 shadow-lg border border-border/50 bg-background">
         <div className="text-center space-y-6">
           <div className="space-y-2">
             <div>

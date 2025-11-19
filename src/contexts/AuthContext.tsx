@@ -90,11 +90,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-    return { error };
+    try {
+      console.log('Attempting sign in...', { 
+        email, 
+        online: navigator.onLine,
+        timestamp: new Date().toISOString()
+      });
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        console.error('Supabase auth error:', {
+          message: error.message,
+          status: error.status,
+          name: error.name,
+          stack: error.stack
+        });
+      } else {
+        console.log('Sign in successful:', { 
+          userId: data.user?.id,
+          sessionExists: !!data.session 
+        });
+      }
+      
+      return { error };
+    } catch (err: any) {
+      console.error('Unexpected error during sign in:', {
+        message: err?.message,
+        name: err?.name,
+        stack: err?.stack,
+        online: navigator.onLine
+      });
+      return { error: err };
+    }
   };
 
   const signOut = async () => {

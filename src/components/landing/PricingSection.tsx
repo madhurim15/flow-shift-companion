@@ -16,10 +16,6 @@ export const PricingSection = () => {
 
   return (
     <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-b from-[hsl(250,60%,92%)] to-[hsl(270,55%,90%)]">
-      {/* Decorative blobs - Hidden on mobile */}
-      <div className="hidden md:block absolute top-20 left-10 w-80 h-80 bg-[hsl(270,60%,75%)]/25 rounded-full blur-3xl"></div>
-      <div className="hidden md:block absolute bottom-20 right-10 w-72 h-72 bg-[hsl(250,60%,75%)]/25 rounded-full blur-3xl"></div>
-      
       <div className="relative max-w-5xl mx-auto">
         <ScrollReveal>
           <div className="text-center mb-16">

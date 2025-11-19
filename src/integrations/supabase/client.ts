@@ -9,3 +9,10 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+// Verify client initialization
+console.log('Supabase client initialized:', {
+  url: SUPABASE_URL,
+  hasKey: !!SUPABASE_PUBLISHABLE_KEY,
+  keyPrefix: SUPABASE_PUBLISHABLE_KEY?.substring(0, 20) + '...'
+});

@@ -13,10 +13,6 @@ export const ValueDemoSection = () => {
 
   return (
     <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-[hsl(50,80%,90%)] to-[hsl(30,70%,88%)]">
-      {/* Decorative blobs - Hidden on mobile */}
-      <div className="hidden md:block absolute top-20 right-10 w-72 h-72 bg-[hsl(50,80%,75%)]/30 rounded-full blur-3xl"></div>
-      <div className="hidden md:block absolute bottom-20 left-10 w-64 h-64 bg-[hsl(30,70%,75%)]/30 rounded-full blur-3xl"></div>
-      
       <div className="relative max-w-7xl mx-auto">
         <ScrollReveal>
           <div className="text-center mb-16">
@@ -61,7 +57,7 @@ export const ValueDemoSection = () => {
         <ScrollReveal delay={400}>
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {outcomes.map((outcome, index) => (
-              <div key={index} className="flex items-start gap-4 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300">
+              <div key={index} className="flex items-start gap-4 bg-white/95 p-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300">
                 <div className="w-10 h-10 rounded-full bg-[hsl(140,50%,75%)] flex items-center justify-center flex-shrink-0 mt-1">
                   <CheckCircle2 className="w-6 h-6 text-white" />
                 </div>
