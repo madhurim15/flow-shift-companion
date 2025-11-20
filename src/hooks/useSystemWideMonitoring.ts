@@ -155,7 +155,7 @@ export const useSystemWideMonitoring = () => {
     }
   }, []);
 
-  // Integrate with native SystemMonitoring plugin on Android
+  // Listen to SystemMonitoring events (MonitoringBootstrap handles initialization)
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
@@ -164,20 +164,12 @@ export const useSystemWideMonitoring = () => {
 
     (async () => {
       try {
-        // Request permissions with better error handling
-        const permissionResult = await SystemMonitoring.requestPermissions();
-        if (!permissionResult.granted) {
-          console.warn('Usage access permission not granted');
-          setState(prev => ({ ...prev, isMonitoring: false }));
-          return;
-        }
+        // Wait for MonitoringBootstrap to initialize SystemMonitoring first
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        console.log('[useSystemWideMonitoring] Adding event listeners (MonitoringBootstrap handles initialization)');
 
-        await SystemMonitoring.startMonitoring();
-        setState(prev => ({ ...prev, isMonitoring: true }));
-
-        console.log(`[SystemWideMonitoring] Started monitoring ${isDebugMode ? '(Debug Mode)' : ''}`);
-
-        // Listen for app changes
+        // Only add listeners - DON'T call requestPermissions or startMonitoring
         appChangeListener = await SystemMonitoring.addListener('appChanged', async ({ package: pkg, appName }) => {
           try {
             console.log(`[SystemWideMonitoring] App changed to: ${appName} (${pkg})`);
@@ -224,18 +216,20 @@ export const useSystemWideMonitoring = () => {
           }
         });
 
+        setState(prev => ({ ...prev, isMonitoring: true }));
+
       } catch (e) {
-        console.error('SystemMonitoring init failed', e);
+        console.error('SystemMonitoring listener setup failed', e);
         setState(prev => ({ ...prev, isMonitoring: false }));
       }
     })();
 
     return () => {
-      try { appChangeListener && appChangeListener.remove(); } catch {}
-      try { durationListener && durationListener.remove(); } catch {}
-      try { SystemMonitoring.stopMonitoring(); } catch {}
+      try { appChangeListener?.remove(); } catch {}
+      try { durationListener?.remove(); } catch {}
+      // Don't call stopMonitoring() here - let MonitoringBootstrap control it
     };
-  }, [startSession, updateSessionDuration, endSession, isDebugMode]);
+  }, []); // Empty dependencies - run once only
 
   return {
     ...state,
