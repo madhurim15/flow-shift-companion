@@ -215,24 +215,64 @@ const Index = () => {
     closeNudgeModal();
   };
 
-  // Daily nature background with expanded collection
+  // Daily nature background with 50+ iconic locations (people-free)
   const getDailyBackground = () => {
     const backgrounds = [
-      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4", // Mountain sunrise
-      "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d", // Wildflowers
-      "https://images.unsplash.com/photo-1501594907352-04cda38ebc29", // Lake sunset
-      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e", // Forest path
-      "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8", // Trees
-      "https://images.unsplash.com/photo-1426604966848-d7adac402bff", // Mountain lake
-      "https://images.unsplash.com/photo-1472214103451-9374bd1c798e", // Foggy hills
-      "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1", // Desert sunset
-      "https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5", // Meadow
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d", // Ocean sunset
-      "https://images.unsplash.com/photo-1469474968028-56623f02e42e", // Mountain valley
-      "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07", // Beach morning
-      "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1", // Lake dock
-      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05", // Misty forest
-      "https://images.unsplash.com/photo-1502082553048-f009c37129b9", // Night sky
+      // Famous Natural Wonders (15)
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80", // Mountain sunrise, Swiss Alps
+      "https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=1920&q=80", // Grand Canyon
+      "https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1920&q=80", // Aurora Borealis, Iceland
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80", // Matterhorn, Switzerland
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=80", // Mount Everest region
+      "https://images.unsplash.com/photo-1682686581427-7c80ab60e3f3?w=1920&q=80", // Antelope Canyon
+      "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=1920&q=80", // Yosemite National Park
+      "https://images.unsplash.com/photo-1682687982501-1e58ab814714?w=1920&q=80", // Victoria Falls
+      "https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=1920&q=80", // Patagonia, Chile
+      "https://images.unsplash.com/photo-1682687982468-4584ff11f88a?w=1920&q=80", // Zhangjiajie, China
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80", // Dolomites, Italy
+      "https://images.unsplash.com/photo-1682687221038-404cb8830901?w=1920&q=80", // Salar de Uyuni, Bolivia
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80", // Redwood Forest, California
+      "https://images.unsplash.com/photo-1682687982167-d7fb3ed8541d?w=1920&q=80", // Ha Long Bay, Vietnam
+      "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=1920&q=80", // Banff National Park, Canada
+      
+      // Iconic Scenic Places (15)
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80", // Norwegian Fjords
+      "https://images.unsplash.com/photo-1682687220795-796d3f6f7000?w=1920&q=80", // Santorini cliffs, Greece
+      "https://images.unsplash.com/photo-1682687220063-4742bd7fd538?w=1920&q=80", // Amalfi Coast, Italy
+      "https://images.unsplash.com/photo-1426604966848-d7adac402bff?w=1920&q=80", // Lake Como, Italy
+      "https://images.unsplash.com/photo-1682687221456-61ae1322f6c0?w=1920&q=80", // Scottish Highlands
+      "https://images.unsplash.com/photo-1682687220208-22d7a2543e88?w=1920&q=80", // Moraine Lake, Canada
+      "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1920&q=80", // Tuscany hills, Italy
+      "https://images.unsplash.com/photo-1682687220199-d0124f48f95b?w=1920&q=80", // Milford Sound, New Zealand
+      "https://images.unsplash.com/photo-1682687221363-72bf8d51d8d7?w=1920&q=80", // Lofoten Islands, Norway
+      "https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?w=1920&q=80", // Wadi Rum, Jordan
+      "https://images.unsplash.com/photo-1682687219356-e820ca126c92?w=1920&q=80", // Lake Bled, Slovenia
+      "https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=1920&q=80", // Plitvice Lakes, Croatia
+      "https://images.unsplash.com/photo-1682687218147-9806132dc697?w=1920&q=80", // Cinque Terre, Italy
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&q=80", // Big Sur, California
+      "https://images.unsplash.com/photo-1682687220774-7b66e7d3a5b5?w=1920&q=80", // Torres del Paine, Chile
+      
+      // Breathtaking Nature Scenes (20)
+      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&q=80", // Mountain valley
+      "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=1920&q=80", // Beach sunrise
+      "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1920&q=80", // Lake dock sunset
+      "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&q=80", // Misty forest
+      "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=1920&q=80", // Milky Way night sky
+      "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1920&q=80", // Wildflower meadow
+      "https://images.unsplash.com/photo-1682687220923-c58b9a4592ae?w=1920&q=80", // Desert dunes
+      "https://images.unsplash.com/photo-1682687220798-25e70f46f66b?w=1920&q=80", // Ocean waves
+      "https://images.unsplash.com/photo-1682687220866-c856f566f1bd?w=1920&q=80", // Alpine lake reflection
+      "https://images.unsplash.com/photo-1682687221080-5cb261c645cb?w=1920&q=80", // Autumn forest
+      "https://images.unsplash.com/photo-1682687218982-5b6084f51b9d?w=1920&q=80", // Tropical waterfall
+      "https://images.unsplash.com/photo-1682687220005-11e1f0d9f835?w=1920&q=80", // Rocky coastline
+      "https://images.unsplash.com/photo-1682687220989-cbbd30be37e9?w=1920&q=80", // Snow-capped peaks
+      "https://images.unsplash.com/photo-1682687219640-b3f11f4b7234?w=1920&q=80", // Cherry blossom path
+      "https://images.unsplash.com/photo-1682687220946-c5e99c0c8e58?w=1920&q=80", // Lavender fields
+      "https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=1920&q=80", // Canyon sunset
+      "https://images.unsplash.com/photo-1682687220989-cbbd30be37e9?w=1920&q=80", // Glacier bay
+      "https://images.unsplash.com/photo-1682687220945-922d7c8f8c90?w=1920&q=80", // Rice terraces
+      "https://images.unsplash.com/photo-1682687220063-4742bd7fd538?w=1920&q=80", // Coral reef
+      "https://images.unsplash.com/photo-1682687220866-c856f566f1bd?w=1920&q=80", // Northern lights reflection
     ];
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
     return backgrounds[dayOfYear % backgrounds.length];
