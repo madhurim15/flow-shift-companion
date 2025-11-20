@@ -29,6 +29,20 @@ export const MonitoringBootstrap = () => {
   const monitoringCheckTimeoutRef = useRef<NodeJS.Timeout>();
   const notificationRequestCountRef = useRef(0);
   const notificationRequestTimesRef = useRef<number[]>([]);
+  
+  // Refs to track state without triggering re-renders (prevents infinite loop)
+  const hasUsageAccessRef = useRef(false);
+  const isBootstrappedRef = useRef(false);
+  const toastIdsRef = useRef<string[]>([]);
+
+  // Sync refs with state
+  useEffect(() => {
+    hasUsageAccessRef.current = hasUsageAccess;
+  }, [hasUsageAccess]);
+
+  useEffect(() => {
+    isBootstrappedRef.current = isBootstrapped;
+  }, [isBootstrapped]);
 
   // Expose bootstrap status to window for diagnostics
   useEffect(() => {
@@ -61,7 +75,8 @@ export const MonitoringBootstrap = () => {
       duration
     });
     
-    setToastIds(prev => [...prev, toastResult.id]);
+    // Store in ref instead of state to prevent re-renders
+    toastIdsRef.current = [...toastIdsRef.current, toastResult.id];
     
     // Remove type from active set after toast duration
     setTimeout(() => {
@@ -397,7 +412,8 @@ export const MonitoringBootstrap = () => {
         const permissionStatus = await checkPermissionsWithDebounce();
         if (!permissionStatus) return;
         
-        if (permissionStatus.usageAccess && !isBootstrapped && !bootstrapInProgressRef.current) {
+        // Use refs to prevent unnecessary effect re-runs
+        if (permissionStatus.usageAccess && !isBootstrappedRef.current && !bootstrapInProgressRef.current) {
           // User granted permission - restart monitoring
           bootstrapInProgressRef.current = true;
           
@@ -505,8 +521,8 @@ export const MonitoringBootstrap = () => {
       resumeListener.then(handle => handle.remove());
       clearTimeout(resumeTimeout);
       
-      // Cleanup any active toasts on unmount
-      toastIds.forEach(id => dismiss(id));
+      // Cleanup any active toasts on unmount using ref
+      toastIdsRef.current.forEach(id => dismiss(id));
       activeToastTypesRef.current.clear();
       
       // Clear monitoring check timeout
@@ -514,7 +530,7 @@ export const MonitoringBootstrap = () => {
         clearTimeout(monitoringCheckTimeoutRef.current);
       }
     };
-  }, [hasUsageAccess, isBootstrapped, showToast, checkPermissionsWithDebounce, toastIds, dismiss, isDebugMode, requestNotificationPermissions, monitoringActive]);
+  }, [showToast, checkPermissionsWithDebounce, isDebugMode, requestNotificationPermissions, dismiss]);
 
   // This component renders nothing - it's just for side effects
   return null;
