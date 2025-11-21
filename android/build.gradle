@@ -2,7 +2,7 @@
 
 buildscript {
     ext {
-        gradlePluginVersion = '8.12.3'
+        gradlePluginVersion = '8.7.3'
     }
 
     // ADD REPOSITORIES FOR BUILDSCRIPT DEPENDENCIES
@@ -27,20 +27,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-    }
-    
-    // Force Java 17 for ALL subprojects including capacitor-android
-    subprojects {
-        afterEvaluate { project ->
-            if (project.hasProperty('android')) {
-                project.android {
-                    compileOptions {
-                        sourceCompatibility JavaVersion.VERSION_17
-                        targetCompatibility JavaVersion.VERSION_17
-                    }
-                }
-            }
-        }
     }
 }
 
