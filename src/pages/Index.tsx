@@ -249,13 +249,13 @@ const Index = () => {
       "https://images.unsplash.com/photo-1682687219356-e820ca126c92?w=1920&q=80", // Lake Bled, Slovenia
       "https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=1920&q=80", // Plitvice Lakes, Croatia
       "https://images.unsplash.com/photo-1682687218147-9806132dc697?w=1920&q=80", // Cinque Terre, Italy
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1920&q=80", // Big Sur, California
+      "https://images.unsplash.com/photo-1682687220866-c856f566f1bd?w=1920&q=80", // Pure coastal cliffs - NO PEOPLE
       "https://images.unsplash.com/photo-1682687220774-7b66e7d3a5b5?w=1920&q=80", // Torres del Paine, Chile
       
       // Breathtaking Nature Scenes (20)
       "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1920&q=80", // Mountain valley
       "https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=1920&q=80", // Beach sunrise
-      "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1920&q=80", // Lake dock sunset
+      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80", // Pristine mountain lake - NO PEOPLE
       "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&q=80", // Misty forest
       "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=1920&q=80", // Milky Way night sky
       "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=1920&q=80", // Wildflower meadow
