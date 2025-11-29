@@ -55,13 +55,13 @@ public class SystemMonitoringPlugin extends Plugin {
     filter.addAction("FLOWLIGHT_APP_CHANGED");
     filter.addAction("FLOWLIGHT_DURATION_UPDATE");
     
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-      getContext().registerReceiver(appChangeReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
-      android.util.Log.i("FlowLight", "Registered appChangeReceiver with RECEIVER_NOT_EXPORTED (API 33+)");
-    } else {
-      getContext().registerReceiver(appChangeReceiver, filter);
-      android.util.Log.i("FlowLight", "Registered appChangeReceiver (API < 33)");
-    }
+    ContextCompat.registerReceiver(
+      getContext(),
+      appChangeReceiver,
+      filter,
+      ContextCompat.RECEIVER_NOT_EXPORTED
+    );
+    android.util.Log.i("FlowLight", "Registered appChangeReceiver with ContextCompat");
   }
 
   @Override
