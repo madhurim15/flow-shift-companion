@@ -157,13 +157,27 @@ public class SystemMonitoringService extends Service {
     IntentFilter screenFilter = new IntentFilter();
     screenFilter.addAction(Intent.ACTION_SCREEN_ON);
     screenFilter.addAction(Intent.ACTION_SCREEN_OFF);
-    registerReceiver(screenStateReceiver, screenFilter);
+    
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      registerReceiver(screenStateReceiver, screenFilter, Context.RECEIVER_NOT_EXPORTED);
+      Log.i("FlowLight", "Registered screenStateReceiver with RECEIVER_NOT_EXPORTED (API 33+)");
+    } else {
+      registerReceiver(screenStateReceiver, screenFilter);
+      Log.i("FlowLight", "Registered screenStateReceiver (API < 33)");
+    }
     
     // Register receiver for nudge actions
     IntentFilter actionFilter = new IntentFilter();
     actionFilter.addAction("FLOWLIGHT_NUDGE_SNOOZED");
     actionFilter.addAction("FLOWLIGHT_NUDGE_DISMISSED");
-    registerReceiver(nudgeActionReceiver, actionFilter);
+    
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      registerReceiver(nudgeActionReceiver, actionFilter, Context.RECEIVER_NOT_EXPORTED);
+      Log.i("FlowLight", "Registered nudgeActionReceiver with RECEIVER_NOT_EXPORTED (API 33+)");
+    } else {
+      registerReceiver(nudgeActionReceiver, actionFilter);
+      Log.i("FlowLight", "Registered nudgeActionReceiver (API < 33)");
+    }
     
     Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
       .setContentTitle("FlowLight monitoring active")
