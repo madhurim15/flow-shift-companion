@@ -28,6 +28,7 @@ import java.util.Set;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 // Daily usage tracking class
 class DailyAppUsage {
