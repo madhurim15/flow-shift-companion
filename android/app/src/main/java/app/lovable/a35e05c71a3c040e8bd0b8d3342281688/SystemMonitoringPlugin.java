@@ -24,7 +24,7 @@ public class SystemMonitoringPlugin extends Plugin {
   @Override
   public void load() {
     super.load();
-    android.util.Log.i("FlowLight", "SystemMonitoringPlugin loaded");
+    android.util.Log.i("FlowLight", "SystemMonitoringPlugin.load() starting on API " + Build.VERSION.SDK_INT);
     // Register receiver for app change events
     appChangeReceiver = new BroadcastReceiver() {
       @Override
@@ -54,7 +54,14 @@ public class SystemMonitoringPlugin extends Plugin {
     IntentFilter filter = new IntentFilter();
     filter.addAction("FLOWLIGHT_APP_CHANGED");
     filter.addAction("FLOWLIGHT_DURATION_UPDATE");
-    getContext().registerReceiver(appChangeReceiver, filter);
+    
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      getContext().registerReceiver(appChangeReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+      android.util.Log.i("FlowLight", "Registered appChangeReceiver with RECEIVER_NOT_EXPORTED (API 33+)");
+    } else {
+      getContext().registerReceiver(appChangeReceiver, filter);
+      android.util.Log.i("FlowLight", "Registered appChangeReceiver (API < 33)");
+    }
   }
 
   @Override
