@@ -530,7 +530,7 @@ export const MonitoringBootstrap = () => {
         clearTimeout(monitoringCheckTimeoutRef.current);
       }
     };
-  }, [showToast, checkPermissionsWithDebounce, isDebugMode, requestNotificationPermissions, dismiss]);
+  }, [showToast, checkPermissionsWithDebounce, isDebugMode, requestNotificationPermissions]);
 
   // This component renders nothing - it's just for side effects
   return null;
