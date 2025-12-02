@@ -14,9 +14,7 @@ import { logNudgeResponse } from '@/utils/nudgeResponseUtils';
 import type { NudgeResponseType } from '@/data/nudgeResponses';
 import { useLocalNotifications } from '@/hooks/useLocalNotifications';
 import { 
-  scheduleDailyNotifications, 
-  shouldRescheduleToday, 
-  setLastScheduledDate,
+  scheduleDailyNotifications,
   type DailySchedule 
 } from '@/utils/dailyNotificationScheduler';
 import { Capacitor } from '@capacitor/core';
@@ -77,16 +75,6 @@ export const useReminderSystem = () => {
         dbEnabled: settings.notifications_enabled,
         isNative: Capacitor.isNativePlatform()
       });
-      
-      // Enable midnight rescheduler if notifications are enabled
-      if (settings.notifications_enabled && Capacitor.isNativePlatform()) {
-        try {
-          await SystemMonitoring.scheduleMidnightReschedule();
-          console.log('Midnight rescheduler activated on app init');
-        } catch (error) {
-          console.error('Failed to activate midnight rescheduler:', error);
-        }
-      }
     } catch (error) {
       console.error('Error initializing notification system:', error);
       setNotificationsEnabled(true);
@@ -97,12 +85,6 @@ export const useReminderSystem = () => {
 
   const scheduleTodaysNotifications = useCallback(async () => {
     if (!notificationsEnabled || !reminderSettings) return;
-    
-    // Only schedule if we haven't already scheduled today
-    if (!shouldRescheduleToday()) {
-      console.log('Already scheduled notifications for today');
-      return;
-    }
 
     const schedule: DailySchedule = {
       morning: reminderSettings.morning_time?.slice(0, 5) || '09:00',
@@ -111,12 +93,11 @@ export const useReminderSystem = () => {
       night: reminderSettings.night_time?.slice(0, 5) || '21:00'
     };
 
-    console.log('Scheduling daily notifications:', schedule);
+    console.log('Scheduling repeating daily notifications:', schedule);
 
     try {
       await scheduleDailyNotifications(schedule);
-      console.log('✅ Notifications scheduled for today');
-      setLastScheduledDate(new Date().toDateString());
+      console.log('✅ Repeating daily notifications scheduled');
     } catch (error) {
       console.error('Failed to schedule notifications:', error);
       // Fallback to showing permission request on web
@@ -124,7 +105,7 @@ export const useReminderSystem = () => {
         setBrowserPermissionWarning(true);
       }
     }
-  }, [notificationsEnabled, reminderSettings, localNotifications]);
+  }, [notificationsEnabled, reminderSettings]);
 
   const requestBrowserPermission = async () => {
     if (Capacitor.isNativePlatform()) {
@@ -147,23 +128,6 @@ export const useReminderSystem = () => {
       if (newState) {
         await requestBrowserPermission();
         await scheduleTodaysNotifications();
-        if (Capacitor.isNativePlatform()) {
-          try {
-            await SystemMonitoring.scheduleMidnightReschedule();
-            console.log('Midnight notification rescheduler enabled');
-          } catch (err) {
-            console.error('Failed to schedule midnight rescheduler:', err);
-          }
-        }
-      } else {
-        if (Capacitor.isNativePlatform()) {
-          try {
-            await SystemMonitoring.cancelMidnightReschedule();
-            console.log('Midnight notification rescheduler cancelled');
-          } catch (err) {
-            console.error('Failed to cancel midnight rescheduler:', err);
-          }
-        }
       }
 
       toast({
@@ -215,37 +179,6 @@ export const useReminderSystem = () => {
   };
 
   const closeNudgeModal = () => setShowNudgeModal(false);
-
-  // Listen for midnight reschedule events on native platforms
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return;
-    
-    let isSubscribed = true;
-    let handlePromise: Promise<any> | null = null;
-    
-    const setup = async () => {
-      try {
-        const h = await SystemMonitoring.addListener('midnightReschedule', () => {
-          if (isSubscribed) {
-            console.log('Received midnight reschedule event');
-            scheduleTodaysNotifications();
-          }
-        });
-        handlePromise = Promise.resolve(h);
-      } catch (e) {
-        console.error('Failed to setup midnight reschedule listener:', e);
-      }
-    };
-    
-    setup();
-    
-    return () => {
-      isSubscribed = false;
-      if (handlePromise) {
-        handlePromise.then(h => h?.remove()).catch(err => console.error('Error removing listener:', err));
-      }
-    };
-  }, [scheduleTodaysNotifications]);
 
   return {
     notificationsEnabled,
