@@ -26,47 +26,45 @@ export const scheduleDailyNotifications = async (schedule: DailySchedule): Promi
     // Clear any existing notifications
     await clearTodaysNotifications();
 
-    const today = new Date();
     const notifications: any[] = [];
 
-    // Schedule each reminder type for today if the time hasn't passed
+    // Schedule each reminder type as a repeating daily notification
     Object.entries(schedule).forEach(([type, timeString]) => {
       const reminderType = type as ReminderType;
       const [hours, minutes] = timeString.split(':').map(Number);
-      
-      const scheduledTime = new Date(today);
-      scheduledTime.setHours(hours, minutes, 0, 0);
 
-      // Only schedule if the time is in the future
-      if (scheduledTime > new Date()) {
-        const notification: any = {
-          id: NOTIFICATION_IDS[reminderType],
-          title: 'FlowLight ✨',
-          body: reminderMessages[reminderType],
-          schedule: { at: scheduledTime },
-          extra: {
-            type: 'daily_reminder',
-            reminderType,
-            timestamp: Date.now()
+      const notification: any = {
+        id: NOTIFICATION_IDS[reminderType],
+        title: 'FlowLight ✨',
+        body: reminderMessages[reminderType],
+        schedule: {
+          repeats: true,
+          every: 'day',
+          on: {
+            hour: hours,
+            minute: minutes
           }
-        };
-
-        // Use high priority channel for Android
-        if (Capacitor.getPlatform() === 'android') {
-          notification.channelId = 'flowlight_high';
+        },
+        extra: {
+          type: 'daily_reminder',
+          reminderType,
+          timestamp: Date.now()
         }
+      };
 
-        notifications.push(notification);
-        console.log(`Scheduled ${reminderType} reminder for ${scheduledTime.toLocaleTimeString()}`);
+      // Use high priority channel for Android
+      if (Capacitor.getPlatform() === 'android') {
+        notification.channelId = 'flowlight_high';
       }
+
+      notifications.push(notification);
+      console.log(`Scheduled ${reminderType} daily repeating reminder at ${timeString}`);
     });
 
-    if (notifications.length > 0) {
-      await LocalNotifications.schedule({
-        notifications
-      });
-      console.log(`Successfully scheduled ${notifications.length} notifications for today`);
-    }
+    await LocalNotifications.schedule({
+      notifications
+    });
+    console.log(`Successfully scheduled ${notifications.length} repeating daily notifications`);
 
     return true;
   } catch (error) {
