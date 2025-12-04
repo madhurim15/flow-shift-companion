@@ -23,45 +23,51 @@ public class SystemMonitoringPlugin extends Plugin {
 
   @Override
   public void load() {
-    super.load();
-    android.util.Log.i("FlowLight", "SystemMonitoringPlugin.load() starting on API " + Build.VERSION.SDK_INT);
-    // Register receiver for app change events
-    appChangeReceiver = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        String pkg = intent.getStringExtra("package");
-        String appName = intent.getStringExtra("appName");
-        
-        if (pkg != null) {
-          JSObject data = new JSObject();
-          data.put("package", pkg);
-          if (appName != null) {
-            data.put("appName", appName);
-          }
+    android.util.Log.w("FlowLight", ">>> SystemMonitoringPlugin.load() CALLED <<<");
+    try {
+      super.load();
+      android.util.Log.w("FlowLight", ">>> SystemMonitoringPlugin.load() - super.load() completed on API " + Build.VERSION.SDK_INT + " <<<");
+      
+      // Register receiver for app change events
+      appChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+          String action = intent.getAction();
+          String pkg = intent.getStringExtra("package");
+          String appName = intent.getStringExtra("appName");
           
-          if ("FLOWLIGHT_APP_CHANGED".equals(action)) {
-            notifyListeners("appChanged", data);
-          } else if ("FLOWLIGHT_DURATION_UPDATE".equals(action)) {
-            int durationSeconds = intent.getIntExtra("durationSeconds", 0);
-            data.put("durationSeconds", durationSeconds);
-            notifyListeners("durationUpdate", data);
+          if (pkg != null) {
+            JSObject data = new JSObject();
+            data.put("package", pkg);
+            if (appName != null) {
+              data.put("appName", appName);
+            }
+            
+            if ("FLOWLIGHT_APP_CHANGED".equals(action)) {
+              notifyListeners("appChanged", data);
+            } else if ("FLOWLIGHT_DURATION_UPDATE".equals(action)) {
+              int durationSeconds = intent.getIntExtra("durationSeconds", 0);
+              data.put("durationSeconds", durationSeconds);
+              notifyListeners("durationUpdate", data);
+            }
           }
         }
-      }
-    };
-    
-    IntentFilter filter = new IntentFilter();
-    filter.addAction("FLOWLIGHT_APP_CHANGED");
-    filter.addAction("FLOWLIGHT_DURATION_UPDATE");
-    
-    ContextCompat.registerReceiver(
-      getContext(),
-      appChangeReceiver,
-      filter,
-      ContextCompat.RECEIVER_NOT_EXPORTED
-    );
-    android.util.Log.i("FlowLight", "Registered appChangeReceiver with ContextCompat");
+      };
+      
+      IntentFilter filter = new IntentFilter();
+      filter.addAction("FLOWLIGHT_APP_CHANGED");
+      filter.addAction("FLOWLIGHT_DURATION_UPDATE");
+      
+      ContextCompat.registerReceiver(
+        getContext(),
+        appChangeReceiver,
+        filter,
+        ContextCompat.RECEIVER_NOT_EXPORTED
+      );
+      android.util.Log.w("FlowLight", ">>> SystemMonitoringPlugin.load() COMPLETED SUCCESSFULLY <<<");
+    } catch (Exception e) {
+      android.util.Log.e("FlowLight", ">>> SystemMonitoringPlugin.load() FAILED <<<", e);
+    }
   }
 
   @Override
