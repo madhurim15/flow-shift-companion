@@ -31,6 +31,8 @@ import PhotoCapture from "./pages/PhotoCapture";
 import WinLog from "./pages/WinLog";
 import IntentionReset from "./pages/IntentionReset";
 import Account from "./pages/Account";
+import TrialEnded from "./pages/TrialEnded";
+import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
 
 // Protected route wrapper
@@ -159,6 +161,14 @@ const router = createHashRouter([
   {
     path: "/account",
     element: <ProtectedRoute><Account /></ProtectedRoute>
+  },
+  {
+    path: "/trial-ended",
+    element: <ProtectedRoute><TrialEnded /></ProtectedRoute>
+  },
+  {
+    path: "/feedback",
+    element: <ProtectedRoute><Feedback /></ProtectedRoute>
   },
   {
     path: "*",
@@ -357,6 +367,24 @@ const App = () => {
         <>
           <AppContent />
           <ProtectedRoute><Account /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/trial-ended",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><TrialEnded /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/feedback",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><Feedback /></ProtectedRoute>
         </>
       )
     },

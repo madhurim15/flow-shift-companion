@@ -157,12 +157,15 @@ const UserMenu = () => {
           </div>
         </DropdownMenuItem>
         
-        <DropdownMenuItem onClick={() => navigate('/diagnostics')}>
-          <BarChart3 className="mr-2 h-4 w-4" />
-          Diagnostics
-        </DropdownMenuItem>
+        {/* Diagnostics - Only show in debug mode */}
+        {isDebugEnabled && (
+          <DropdownMenuItem onClick={() => navigate('/diagnostics')}>
+            <BarChart3 className="mr-2 h-4 w-4" />
+            Diagnostics
+          </DropdownMenuItem>
+        )}
         
-        {/* Developer Tools - Only show if debug mode is enabled */}
+        {/* Developer Tools - Only show if debug mode is enabled on native Android */}
         {isNativeAndroid && isDebugEnabled && (
           <>
             <DropdownMenuSeparator />
