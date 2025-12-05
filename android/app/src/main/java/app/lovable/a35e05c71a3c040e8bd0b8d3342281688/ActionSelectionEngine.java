@@ -43,12 +43,12 @@ public class ActionSelectionEngine {
         List<ActionButton> allActions = getAllActions();
         List<ActionButton> selectedActions = new ArrayList<>();
         
-        // Always include mood check option
-        ActionButton moodCheck = new ActionButton("How am I feeling?", "mood", false);
+        // Always include mood check option (shortened label)
+        ActionButton moodCheck = new ActionButton("😊 Mood", "mood", false);
         
         // Determine physical/digital ratio based on duration and level
         int physicalWeight = getPhysicalWeight(durationMinutes, level);
-        int numActions = level == 1 ? 2 : 3; // Level 1: 2 actions, Level 2-3: 3 actions
+        int numActions = 2; // Always use 2 actions for better notification visibility
         
         // For Level 3, require physical actions (no dismiss, must act)
         if (level >= 3) {
@@ -227,25 +227,25 @@ public class ActionSelectionEngine {
     }
     
     /**
-     * Get all available actions
+     * Get all available actions with short labels for notification buttons
      */
     private static List<ActionButton> getAllActions() {
         List<ActionButton> actions = new ArrayList<>();
         
-        // Physical actions
-        actions.add(new ActionButton("💧 Sip water", "hydration", true));
-        actions.add(new ActionButton("👀 Eye rest (20s)", "eye-rest", true));
-        actions.add(new ActionButton("🧘 3 deep breaths", "breathing", true));
-        actions.add(new ActionButton("🙆 Quick stretch", "stretch", true));
-        actions.add(new ActionButton("🚶 5-min walk", "walk", true));
-        actions.add(new ActionButton("🧍 Stand & shake", "standing", true));
+        // Physical actions (shortened labels for notification buttons)
+        actions.add(new ActionButton("💧 Water", "hydration", true));
+        actions.add(new ActionButton("👀 Eye rest", "eye-rest", true));
+        actions.add(new ActionButton("🧘 Breathe", "breathing", true));
+        actions.add(new ActionButton("🙆 Stretch", "stretch", true));
+        actions.add(new ActionButton("🚶 Walk", "walk", true));
+        actions.add(new ActionButton("🧍 Stand up", "standing", true));
         
-        // Intentional digital actions
-        actions.add(new ActionButton("📝 Quick journal", "journal", false));
-        actions.add(new ActionButton("🎙️ Voice note", "voice", false));
-        actions.add(new ActionButton("📸 Photo moment", "photo", false));
-        actions.add(new ActionButton("🏆 Log today's win", "win", false));
-        actions.add(new ActionButton("🎯 Set intention", "intention", false));
+        // Intentional digital actions (shortened labels)
+        actions.add(new ActionButton("📝 Journal", "journal", false));
+        actions.add(new ActionButton("🎙️ Voice", "voice", false));
+        actions.add(new ActionButton("📸 Photo", "photo", false));
+        actions.add(new ActionButton("🏆 Win", "win", false));
+        actions.add(new ActionButton("🎯 Intention", "intention", false));
         actions.add(new ActionButton("✨ Gratitude", "gratitude", false));
         
         return actions;

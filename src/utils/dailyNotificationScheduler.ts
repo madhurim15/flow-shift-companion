@@ -23,10 +23,14 @@ export const scheduleDailyNotifications = async (schedule: DailySchedule): Promi
   }
 
   try {
+    console.log('📅 [DailyNotifications] Starting schedule with:', JSON.stringify(schedule));
+    
     // Clear any existing notifications
     await clearTodaysNotifications();
 
     const notifications: any[] = [];
+    const now = new Date();
+    console.log(`📅 [DailyNotifications] Current time: ${now.toLocaleTimeString()}`);
 
     // Schedule each reminder type as a repeating daily notification
     Object.entries(schedule).forEach(([type, timeString]) => {
@@ -58,17 +62,21 @@ export const scheduleDailyNotifications = async (schedule: DailySchedule): Promi
       }
 
       notifications.push(notification);
-      console.log(`Scheduled ${reminderType} daily repeating reminder at ${timeString}`);
+      console.log(`📅 [DailyNotifications] Scheduling ${reminderType} at ${hours}:${String(minutes).padStart(2, '0')} (ID: ${NOTIFICATION_IDS[reminderType]})`);
     });
 
     await LocalNotifications.schedule({
       notifications
     });
-    console.log(`Successfully scheduled ${notifications.length} repeating daily notifications`);
+    console.log(`📅 [DailyNotifications] Successfully scheduled ${notifications.length} repeating daily notifications`);
+    
+    // Log pending notifications for verification
+    const pending = await LocalNotifications.getPending();
+    console.log(`📅 [DailyNotifications] Pending notifications:`, JSON.stringify(pending.notifications.map(n => ({ id: n.id, title: n.title }))));
 
     return true;
   } catch (error) {
-    console.error('Failed to schedule daily notifications:', error);
+    console.error('📅 [DailyNotifications] Failed to schedule:', error);
     return false;
   }
 };
