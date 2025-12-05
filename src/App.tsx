@@ -298,6 +298,60 @@ const App = () => {
       )
     },
     {
+      path: "/hydration",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><Hydration /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/eye-rest",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><EyeRest /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/standing",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><StandingBreak /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/photo",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><PhotoCapture /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/win",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><WinLog /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/intention",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><IntentionReset /></ProtectedRoute>
+        </>
+      )
+    },
+    {
       path: "/account",
       element: (
         <>

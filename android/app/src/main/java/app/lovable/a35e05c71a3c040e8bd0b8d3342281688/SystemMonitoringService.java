@@ -361,6 +361,14 @@ public class SystemMonitoringService extends Service {
       channel.enableLights(true);
       channel.setLightColor(0xFF488AFF);
       channel.setShowBadge(true);
+      // Enable sound for nudge notifications
+      channel.setSound(
+        android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION),
+        new android.media.AudioAttributes.Builder()
+          .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+          .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+          .build()
+      );
       NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
       nm.createNotificationChannel(channel);
     }
@@ -556,6 +564,9 @@ public class SystemMonitoringService extends Service {
       .replace("{duration}", durationStr);
     
     // Build notification with action buttons
+    // Add sound to notification
+    android.net.Uri soundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION);
+    
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NUDGE_CHANNEL_ID)
       .setContentTitle(title)
       .setContentText(personalizedMessage)
@@ -565,10 +576,11 @@ public class SystemMonitoringService extends Service {
       .setCategory(NotificationCompat.CATEGORY_REMINDER)
       .setAutoCancel(true)
       .setOngoing(false)
-      .setTimeoutAfter(60000);
+      .setSound(soundUri);
+      // Removed setTimeoutAfter to keep notification in tray until user dismisses
     
-    // Add action buttons (up to 3)
-    int actionCount = Math.min(3, actions.size());
+    // Add action buttons (limit to 2 for better visibility)
+    int actionCount = Math.min(2, actions.size());
     for (int i = 0; i < actionCount; i++) {
       ActionSelectionEngine.ActionButton action = actions.get(i);
       
@@ -612,16 +624,8 @@ public class SystemMonitoringService extends Service {
       builder.addAction(0, action.label, actionPendingIntent);
     }
     
-    // Add dismiss button for Level 1 & 2 only
-    if (level <= 2) {
-      Intent dismissIntent = new Intent(this, NudgeActions.class);
-      dismissIntent.setAction(NudgeActions.ACTION_DISMISS);
-      PendingIntent dismissPendingIntent = PendingIntent.getBroadcast(
-        this, 200, dismissIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-      );
-      builder.addAction(0, "Not right now", dismissPendingIntent);
-    }
+    // Note: Dismiss button removed to keep notification action count minimal
+    // Users can swipe to dismiss the notification instead
     
     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(NUDGE_NOTIF_ID, builder.build());
@@ -678,6 +682,8 @@ public class SystemMonitoringService extends Service {
     
     // Build meta-nudge notification
     String detailMessage = message + "\n\nTotal today: " + hours + "h " + minutes + "m";
+    android.net.Uri soundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION);
+    
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NUDGE_CHANNEL_ID)
       .setContentTitle("Daily Screen Time Alert 📱")
       .setContentText(message)
@@ -686,7 +692,7 @@ public class SystemMonitoringService extends Service {
       .setPriority(NotificationCompat.PRIORITY_MAX)
       .setCategory(NotificationCompat.CATEGORY_REMINDER)
       .setAutoCancel(true)
-      .setTimeoutAfter(60000)
+      .setSound(soundUri)
       .setContentIntent(pendingIntent);
     
     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
