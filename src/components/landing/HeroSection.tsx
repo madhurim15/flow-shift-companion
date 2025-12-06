@@ -28,7 +28,7 @@ export const HeroSection = () => {
         
         {/* Subheadline */}
         <p className="text-xl sm:text-2xl text-gray-800 mb-12 max-w-3xl mx-auto leading-relaxed font-medium animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-          FlowLight detects doomscrolling patterns on your phone and nudges you towards productive micro‑efforts—right when you need them.
+          FlowFocus detects doomscrolling patterns on your phone and nudges you towards productive micro‑efforts—right when you need them.
         </p>
         
         {/* CTA Buttons - Larger and More Vibrant */}

@@ -36,7 +36,7 @@ const InAppNotificationCenter = ({
 
   useEffect(() => {
     // Load persisted notifications from localStorage
-    const stored = localStorage.getItem('flowlight-inapp-notifications');
+    const stored = localStorage.getItem('flowfocus-inapp-notifications');
     if (stored) {
       try {
         const parsed = JSON.parse(stored).map((n: any) => ({
@@ -61,7 +61,7 @@ const InAppNotificationCenter = ({
 
     setNotifications(prev => {
       const updated = [newNotification, ...prev].slice(0, 10); // Keep only latest 10
-      localStorage.setItem('flowlight-inapp-notifications', JSON.stringify(updated));
+      localStorage.setItem('flowfocus-inapp-notifications', JSON.stringify(updated));
       return updated;
     });
   };
@@ -69,7 +69,7 @@ const InAppNotificationCenter = ({
   const markAsRead = (id: string) => {
     setNotifications(prev => {
       const updated = prev.map(n => n.id === id ? { ...n, read: true } : n);
-      localStorage.setItem('flowlight-inapp-notifications', JSON.stringify(updated));
+      localStorage.setItem('flowfocus-inapp-notifications', JSON.stringify(updated));
       return updated;
     });
   };
@@ -77,7 +77,7 @@ const InAppNotificationCenter = ({
   const removeNotification = (id: string) => {
     setNotifications(prev => {
       const updated = prev.filter(n => n.id !== id);
-      localStorage.setItem('flowlight-inapp-notifications', JSON.stringify(updated));
+      localStorage.setItem('flowfocus-inapp-notifications', JSON.stringify(updated));
       return updated;
     });
   };
@@ -106,9 +106,9 @@ const InAppNotificationCenter = ({
 
   // Expose addNotification globally for the reminder system to use
   useEffect(() => {
-    (window as any).flowlightAddInAppNotification = addNotification;
+    (window as any).flowfocusAddInAppNotification = addNotification;
     return () => {
-      delete (window as any).flowlightAddInAppNotification;
+      delete (window as any).flowfocusAddInAppNotification;
     };
   }, []);
 

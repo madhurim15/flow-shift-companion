@@ -274,7 +274,7 @@ export const MonitoringBootstrap = () => {
                   // Check for notification permission on API 33+
                   if (!status.notificationsEnabled) {
                     showToast('warning', 'Enable Notifications', 
-                      'Please enable notifications for FlowLight in App Settings', 8000);
+                      'Please enable notifications for FlowFocus in App Settings', 8000);
                   }
                 } catch (statusError) {
                   console.error('[MonitoringBootstrap] Status check error:', statusError);
@@ -373,7 +373,7 @@ export const MonitoringBootstrap = () => {
           setTimeout(() => {
             showToast(
               'monitoring-active',
-              "✅ FlowLight Active",
+              "✅ FlowFocus Active",
               "Monitoring started. Check for persistent notification.",
               4000
             );
@@ -478,7 +478,7 @@ export const MonitoringBootstrap = () => {
             setTimeout(() => {
               showToast(
                 'monitoring-resumed',
-                "✅ FlowLight Active",
+                "✅ FlowFocus Active",
                 "Monitoring started successfully",
                 3000
               );

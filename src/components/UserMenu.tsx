@@ -82,7 +82,7 @@ const UserMenu = () => {
       await SystemMonitoring.startMonitoring({ debug: true });
       toast({
         title: "Monitoring Started",
-        description: "FlowLight monitoring is now active with debug thresholds",
+        description: "FlowFocus monitoring is now active with debug thresholds",
         duration: 4000
       });
       checkUsageAccess();
@@ -100,7 +100,7 @@ const UserMenu = () => {
       await SystemMonitoring.stopMonitoring();
       toast({
         title: "Monitoring Stopped",
-        description: "FlowLight monitoring has been paused",
+        description: "FlowFocus monitoring has been paused",
         duration: 3000
       });
     } catch (error) {
@@ -117,7 +117,7 @@ const UserMenu = () => {
       await SystemMonitoring.requestPermissions();
       toast({
         title: "Opening Settings",
-        description: "Please enable Usage Access for FlowLight",
+        description: "Please enable Usage Access for FlowFocus",
         duration: 5000
       });
     } catch (error) {

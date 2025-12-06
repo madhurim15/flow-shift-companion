@@ -11,11 +11,11 @@ export const FAQSection = () => {
   const faqs = [
     {
       question: "Is this a blocker app?",
-      answer: "No. FlowLight uses a psychology-first approach. Instead of blocking apps, we help you notice patterns and offer productive alternatives right when you're tempted to scroll."
+      answer: "No. FlowFocus uses a psychology-first approach. Instead of blocking apps, we help you notice patterns and offer productive alternatives right when you're tempted to scroll."
     },
     {
       question: "Does it work across all apps?",
-      answer: "Yes. FlowLight monitors system-wide activity on Android, including social media platforms, video streaming services, shopping apps, and more."
+      answer: "Yes. FlowFocus monitors system-wide activity on Android, including social media platforms, video streaming services, shopping apps, and more."
     },
     {
       question: "Will it shame me for using apps?",
@@ -40,7 +40,7 @@ export const FAQSection = () => {
               Common Questions
             </h2>
             <p className="text-xl text-gray-800 font-medium">
-              Everything you need to know about FlowLight
+              Everything you need to know about FlowFocus
             </p>
           </div>
         </ScrollReveal>

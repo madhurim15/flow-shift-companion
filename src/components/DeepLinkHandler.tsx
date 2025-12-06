@@ -15,9 +15,12 @@ export const DeepLinkHandler = () => {
       console.log('Deep link opened:', url);
       
       try {
-        // Parse: flowlight://action/breathing
-        if (url.includes('flowlight://action/')) {
-          const action = url.split('flowlight://action/')[1];
+        // Parse: flowfocus://action/breathing (new) or flowlight://action/breathing (legacy)
+        const actionPattern = /(?:flowfocus|flowlight):\/\/action\/(.+)/;
+        const match = url.match(actionPattern);
+        
+        if (match) {
+          const action = match[1];
           
           // Navigate to appropriate route
           const routeMap: Record<string, string> = {
