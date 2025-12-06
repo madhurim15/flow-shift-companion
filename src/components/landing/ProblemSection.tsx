@@ -56,7 +56,7 @@ export const ProblemSection = () => {
         
         <ScrollReveal delay={300}>
           <p className="text-xl text-center text-gray-800 max-w-3xl mx-auto leading-relaxed font-medium">
-            FlowLight breaks this loop—not by forcing you to stop, but by helping you understand why you reach for your phone in the first place.
+            FlowFocus breaks this loop—not by forcing you to stop, but by helping you understand why you reach for your phone in the first place.
           </p>
         </ScrollReveal>
       </div>

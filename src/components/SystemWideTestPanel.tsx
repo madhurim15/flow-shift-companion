@@ -89,7 +89,7 @@ export const SystemWideTestPanel: React.FC = () => {
       setIsNativeMonitoringActive(true);
       toast({
         title: "Monitoring Started",
-        description: "FlowLight monitoring active with debug thresholds (25s for Instagram)",
+        description: "FlowFocus monitoring active with debug thresholds (25s for Instagram)",
         duration: 5000
       });
       
@@ -110,7 +110,7 @@ export const SystemWideTestPanel: React.FC = () => {
       setIsNativeMonitoringActive(false);
       toast({
         title: "Monitoring Stopped",
-        description: "FlowLight monitoring has been paused",
+        description: "FlowFocus monitoring has been paused",
         duration: 3000
       });
     } catch (error) {
@@ -127,7 +127,7 @@ export const SystemWideTestPanel: React.FC = () => {
       await SystemMonitoring.requestPermissions();
       toast({
         title: "Opening Settings",
-        description: "Please enable Usage Access for FlowLight and return to the app",
+        description: "Please enable Usage Access for FlowFocus and return to the app",
         duration: 8000
       });
     } catch (error) {
@@ -200,7 +200,7 @@ export const SystemWideTestPanel: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm">Persistent Notification:</span>
                   <Badge variant="outline" className="text-xs">
-                    Check for "FlowLight monitoring active"
+                    Check for "FlowFocus monitoring active"
                   </Badge>
                 </div>
               </div>
@@ -338,7 +338,7 @@ export const SystemWideTestPanel: React.FC = () => {
             <h4 className="font-medium">Psychology-First Intervention Testing</h4>
             <div className="p-4 border rounded-lg space-y-3">
               <div className="text-sm text-muted-foreground">
-                Test how FlowLight would gently intervene based on the selected psychological state
+                Test how FlowFocus would gently intervene based on the selected psychological state
               </div>
               
               <Button 

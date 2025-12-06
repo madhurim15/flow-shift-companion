@@ -41,7 +41,7 @@ export const FeaturesGrid = () => {
         <ScrollReveal>
           <div className="text-center mb-16">
             <h2 className="text-5xl md:text-6xl font-heading font-bold mb-6 text-gray-900">
-              Why FlowLight Works
+              Why FlowFocus Works
             </h2>
             <p className="text-xl text-gray-800 max-w-3xl mx-auto font-medium">
               Built on procrastination research, not willpower myths

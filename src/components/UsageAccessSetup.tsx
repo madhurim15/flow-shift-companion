@@ -168,7 +168,7 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
       console.error('Error requesting usage access:', error);
       toast({
         title: "Could not open settings",
-        description: "Open Settings → Apps → Special access → Usage data access and enable FlowLight.",
+        description: "Open Settings → Apps → Special access → Usage data access and enable FlowFocus.",
       });
     }
   };
@@ -178,12 +178,12 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
       await SystemMonitoring.openAppSettings();
       toast({
         title: "Opening App Settings",
-        description: "Navigate to Special access → Usage data access → enable FlowLight.",
+        description: "Navigate to Special access → Usage data access → enable FlowFocus.",
       });
     } catch (error) {
       toast({
         title: "Manual navigation needed",
-        description: "Settings → Apps → FlowLight → Special access → Usage data access → enable.",
+        description: "Settings → Apps → FlowFocus → Special access → Usage data access → enable.",
       });
     }
   };
@@ -195,12 +195,12 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
       await SystemMonitoring.openBatteryOptimizationSettings();
       toast({
         title: "Opening Battery Settings",
-        description: "Disable battery optimization for FlowLight to ensure monitoring works.",
+        description: "Disable battery optimization for FlowFocus to ensure monitoring works.",
       });
     } catch (error) {
       toast({
         title: "Manual navigation needed",
-        description: "Settings → Battery → Battery optimization → FlowLight → Don't optimize.",
+        description: "Settings → Battery → Battery optimization → FlowFocus → Don't optimize.",
       });
     }
   };
@@ -232,7 +232,7 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
       } else {
         toast({
           title: "Permission not found",
-          description: "Please enable Usage data access for FlowLight in Settings.",
+          description: "Please enable Usage data access for FlowFocus in Settings.",
         });
       }
     } catch (error) {
@@ -260,7 +260,7 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
                 Ready to Go!
               </h2>
               <p className="text-muted-foreground">
-                FlowLight is ready to help you stay mindful of your digital habits.
+                FlowFocus is ready to help you stay mindful of your digital habits.
               </p>
             </div>
 
@@ -290,7 +290,7 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
                 Permission Granted!
               </h2>
               <p className="text-muted-foreground">
-                FlowLight can now monitor your app usage and send gentle nudges.
+                FlowFocus can now monitor your app usage and send gentle nudges.
               </p>
             </div>
 
@@ -327,7 +327,7 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
               App Monitoring Permission
             </h2>
             <p className="text-muted-foreground">
-              To send mindful nudges, FlowLight needs to monitor app usage
+              To send mindful nudges, FlowFocus needs to monitor app usage
             </p>
             
             {/* Samsung-specific hint */}
@@ -423,7 +423,7 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Samsung: Settings → Apps → FlowLight → Special access → Usage data access → enable.
+            Samsung: Settings → Apps → FlowFocus → Special access → Usage data access → enable.
           </p>
         </div>
       </Card>

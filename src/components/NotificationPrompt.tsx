@@ -28,7 +28,7 @@ const NotificationPrompt = ({ onPermissionGranted, onDismiss }: NotificationProm
           // Send a welcome notification if service worker is available
           if ('serviceWorker' in navigator) {
             const registration = await navigator.serviceWorker.ready;
-            registration.showNotification('Flowlight Notifications Enabled! 🎉', {
+            registration.showNotification('FlowFocus Notifications Enabled! 🎉', {
               body: 'You\'ll now receive gentle reminders to check in with yourself.',
               icon: '/favicon.ico',
               badge: '/favicon.ico',

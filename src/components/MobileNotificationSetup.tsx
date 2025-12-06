@@ -136,7 +136,7 @@ const MobileNotificationSetup = ({ onPermissionGranted }: MobileNotificationSetu
         // For native platforms, send a test local notification
         const success = await localNotifications.scheduleHighPriorityReminder(
           "Test Notification",
-          "FlowLight notifications are working! 🎉",
+          "FlowFocus notifications are working! 🎉",
           1 // 1 second delay
         );
         if (success) {

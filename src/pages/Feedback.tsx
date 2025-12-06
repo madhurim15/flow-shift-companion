@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, ExternalLink, MessageSquare, Star, Heart } from 'lucide-react';
+import { ArrowLeft, ExternalLink, MessageSquare, Star, Heart, Bug, Clock, CheckCircle } from 'lucide-react';
+import BetaTesterBadge from '@/components/BetaTesterBadge';
 
-const FEEDBACK_FORM_URL = 'https://forms.gle/YOUR_FORM_ID'; // Replace with actual Google Form URL
+const FEEDBACK_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdId9R5dugT1pETsTxADCTS2tPjkJyPFa24o-0pG3VLGw9ydQ/viewform?usp=dialog';
 
 const Feedback = () => {
   const { user } = useAuth();
@@ -41,7 +42,7 @@ const Feedback = () => {
             <ArrowLeft className="h-4 w-4" />
             <span className="font-medium">Back</span>
           </button>
-          <span className="text-sm text-muted-foreground">Feedback</span>
+          <BetaTesterBadge />
         </div>
       </div>
 
@@ -59,8 +60,36 @@ const Feedback = () => {
               We'd love your feedback!
             </h1>
             <p className="text-sm text-muted-foreground">
-              Your thoughts help us build a better FlowLight for everyone.
+              Your thoughts help us build a better FlowFocus for everyone.
             </p>
+          </div>
+          
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <Clock className="h-3 w-3" />
+            <span>Takes about 3 minutes</span>
+          </div>
+        </Card>
+
+        {/* What the form covers */}
+        <Card className="p-4 bg-muted/30">
+          <h3 className="text-sm font-medium text-foreground mb-3">What we'll ask about:</h3>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <CheckCircle className="h-3 w-3 text-primary" />
+              <span>Overall experience</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <CheckCircle className="h-3 w-3 text-primary" />
+              <span>Feature usage</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <CheckCircle className="h-3 w-3 text-primary" />
+              <span>Nudge frequency</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <CheckCircle className="h-3 w-3 text-primary" />
+              <span>Feature requests</span>
+            </div>
           </div>
         </Card>
 
@@ -72,7 +101,7 @@ const Feedback = () => {
               </div>
               <div className="flex-1">
                 <h3 className="font-medium text-foreground">Rate Your Experience</h3>
-                <p className="text-xs text-muted-foreground">Quick 2-minute survey</p>
+                <p className="text-xs text-muted-foreground">Tell us what's working well</p>
               </div>
               <ExternalLink className="h-4 w-4 text-muted-foreground" />
             </div>
@@ -80,8 +109,8 @@ const Feedback = () => {
 
           <Card className="p-4 hover:bg-muted/50 transition-colors cursor-pointer" onClick={openFeedbackForm}>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <MessageSquare className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
+                <Bug className="h-5 w-5 text-red-600" />
               </div>
               <div className="flex-1">
                 <h3 className="font-medium text-foreground">Report a Bug</h3>
@@ -98,7 +127,7 @@ const Feedback = () => {
               </div>
               <div className="flex-1">
                 <h3 className="font-medium text-foreground">Feature Request</h3>
-                <p className="text-xs text-muted-foreground">What would make FlowLight better?</p>
+                <p className="text-xs text-muted-foreground">What would make FlowFocus better?</p>
               </div>
               <ExternalLink className="h-4 w-4 text-muted-foreground" />
             </div>
@@ -117,7 +146,7 @@ const Feedback = () => {
         </div>
 
         <p className="text-xs text-muted-foreground text-center pt-2">
-          Your feedback is anonymous and helps shape the future of FlowLight.
+          Your feedback is anonymous and helps shape the future of FlowFocus.
         </p>
       </div>
     </div>

@@ -5,6 +5,9 @@ import { useTrialContext } from '@/contexts/TrialContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Heart, MessageSquare, Sparkles } from 'lucide-react';
+import BetaTesterBadge from '@/components/BetaTesterBadge';
+
+const FEEDBACK_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdId9R5dugT1pETsTxADCTS2tPjkJyPFa24o-0pG3VLGw9ydQ/viewform?usp=dialog';
 
 const TrialEnded = () => {
   const { user } = useAuth();
@@ -39,12 +42,13 @@ const TrialEnded = () => {
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
+          <BetaTesterBadge size="md" />
           <h1 className="text-2xl font-bold text-foreground">
             Thanks for being a beta tester! 🙏
           </h1>
           <p className="text-muted-foreground">
-            You've been using FlowLight for {daysSinceStart} days.
+            You've been using FlowFocus for {daysSinceStart} days.
           </p>
         </div>
 
@@ -54,14 +58,14 @@ const TrialEnded = () => {
             <span>Your journey so far</span>
           </div>
           <p className="text-sm text-foreground">
-            We're still building FlowLight and your feedback is invaluable. 
+            We're still building FlowFocus and your feedback is invaluable. 
             As a thank you, you have continued access during our beta period.
           </p>
         </div>
 
         <div className="space-y-3 pt-4">
           <Button 
-            onClick={() => window.open('https://forms.gle/YOUR_FORM_ID', '_blank')}
+            onClick={() => window.open(FEEDBACK_FORM_URL, '_blank')}
             className="w-full"
             variant="default"
           >
@@ -74,7 +78,7 @@ const TrialEnded = () => {
             variant="outline"
             className="w-full"
           >
-            Continue Using FlowLight
+            Continue Using FlowFocus
           </Button>
         </div>
 

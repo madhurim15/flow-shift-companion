@@ -183,7 +183,7 @@ export const EnhancedStreakDisplay = ({ onClose }: EnhancedStreakDisplayProps) =
                 ) : (
                   <div className="text-center py-2">
                     <p className="text-sm text-muted-foreground">
-                      Keep using FlowLight to track your screen time. We'll show your progress here! 📊
+                      Keep using FlowFocus to track your screen time. We'll show your progress here! 📊
                     </p>
                   </div>
                 )}

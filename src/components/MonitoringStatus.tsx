@@ -32,7 +32,7 @@ export const MonitoringStatus = () => {
       await SystemMonitoring.requestPermissions();
       toast({
         title: "Settings Opened",
-        description: "Enable FlowLight in Usage Access, then return to the app.",
+        description: "Enable FlowFocus in Usage Access, then return to the app.",
         duration: 5000
       });
       
@@ -111,7 +111,7 @@ export const MonitoringStatus = () => {
         {!hasUsageAccess && (
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              FlowLight needs Usage Access permission to provide mindful nudges while you use other apps.
+              FlowFocus needs Usage Access permission to provide mindful nudges while you use other apps.
             </p>
             <Button onClick={openUsageAccessSettings} variant="outline" size="sm">
               Open Usage Access Settings
@@ -122,7 +122,7 @@ export const MonitoringStatus = () => {
         {hasUsageAccess && (
           <div className="space-y-2">
             <p className="text-sm text-green-600">
-              ✅ FlowLight is monitoring your app usage and ready to provide mindful nudges.
+              ✅ FlowFocus is monitoring your app usage and ready to provide mindful nudges.
             </p>
             <p className="text-xs text-muted-foreground">
               Add ?debug=1 to the URL for testing with shorter thresholds (30s instead of 15min).

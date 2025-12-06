@@ -66,7 +66,7 @@ const LandingRoute = () => {
 };
 
 // Early startup logging for debugging
-console.log('🚀 FlowLight App Starting');
+console.log('🚀 FlowFocus App Starting');
 console.log('📱 Platform:', Capacitor.getPlatform());
 console.log('🏠 Native:', Capacitor.isNativePlatform());
 console.log('🌐 URL:', window.location.href);
