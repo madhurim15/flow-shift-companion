@@ -472,6 +472,9 @@ const Index = () => {
 
       {/* Dice Rolls Remaining Display */}
       <DiceRollsRemaining show={appState === "completion-celebration"} />
+      
+      {/* First Week Tips for new users */}
+      {appState === "mood-selection" && <FirstWeekTips />}
     </div>
   );
 };
