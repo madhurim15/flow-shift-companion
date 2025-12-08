@@ -119,7 +119,7 @@ public class AppThresholds {
     }
     
     public static String[] getNudgeMessage(android.content.Context context, int level) {
-        android.content.SharedPreferences prefs = context.getSharedPreferences("FlowLightNudges", android.content.Context.MODE_PRIVATE);
+        android.content.SharedPreferences prefs = context.getSharedPreferences("FlowFocusNudges", android.content.Context.MODE_PRIVATE);
         String key = "nudge_message_index_level_" + level;
         
         // Get current index for this level

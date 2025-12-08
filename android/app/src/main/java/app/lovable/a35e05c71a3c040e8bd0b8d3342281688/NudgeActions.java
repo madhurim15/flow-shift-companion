@@ -38,54 +38,54 @@ public class NudgeActions extends BroadcastReceiver {
         String deepLink = null;
         switch (action) {
             case ACTION_DISMISS:
-                Intent dismissIntent = new Intent("FLOWLIGHT_NUDGE_DISMISSED");
+                Intent dismissIntent = new Intent("FLOWFOCUS_NUDGE_DISMISSED");
                 context.sendBroadcast(dismissIntent);
                 break;
             case ACTION_MOOD:
-                deepLink = "flowlight://action/mood";
+                deepLink = "flowfocus://action/mood";
                 break;
             case ACTION_HYDRATION:
-                deepLink = "flowlight://action/hydration";
+                deepLink = "flowfocus://action/hydration";
                 break;
             case ACTION_EYE_REST:
-                deepLink = "flowlight://action/eye-rest";
+                deepLink = "flowfocus://action/eye-rest";
                 break;
             case ACTION_BREATHING:
-                deepLink = "flowlight://action/breathing";
+                deepLink = "flowfocus://action/breathing";
                 break;
             case ACTION_STRETCH:
-                deepLink = "flowlight://action/stretch";
+                deepLink = "flowfocus://action/stretch";
                 break;
             case ACTION_WALK:
-                deepLink = "flowlight://action/walk";
+                deepLink = "flowfocus://action/walk";
                 break;
             case ACTION_STANDING:
-                deepLink = "flowlight://action/standing";
+                deepLink = "flowfocus://action/standing";
                 break;
             case ACTION_JOURNAL:
-                deepLink = "flowlight://action/journal";
+                deepLink = "flowfocus://action/journal";
                 break;
             case ACTION_VOICE:
-                deepLink = "flowlight://action/voice";
+                deepLink = "flowfocus://action/voice";
                 break;
             case ACTION_PHOTO:
-                deepLink = "flowlight://action/photo";
+                deepLink = "flowfocus://action/photo";
                 break;
             case ACTION_WIN:
-                deepLink = "flowlight://action/win";
+                deepLink = "flowfocus://action/win";
                 break;
             case ACTION_INTENTION:
-                deepLink = "flowlight://action/intention";
+                deepLink = "flowfocus://action/intention";
                 break;
             case ACTION_GRATITUDE:
-                deepLink = "flowlight://action/gratitude";
+                deepLink = "flowfocus://action/gratitude";
                 break;
             case ACTION_OPEN_APP:
-                deepLink = "flowlight://app";
+                deepLink = "flowfocus://app";
                 break;
         }
         
-        // Open FlowLight with deep link
+        // Open FlowFocus with deep link
         if (deepLink != null) {
             Intent openIntent = new Intent(Intent.ACTION_VIEW);
             openIntent.setData(android.net.Uri.parse(deepLink));

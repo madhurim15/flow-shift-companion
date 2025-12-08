@@ -57,8 +57,8 @@ public class SystemMonitoringService extends Service {
     add("com.android.launcher");
     add("com.android.launcher3");
   }};
-  private static final String CHANNEL_ID = "flowlight_monitor";
-  private static final String NUDGE_CHANNEL_ID = "flowlight_nudge";
+  private static final String CHANNEL_ID = "flowfocus_monitor";
+  private static final String NUDGE_CHANNEL_ID = "flowfocus_nudge";
   private static final int NOTIF_ID = 98765;
   private static final int NUDGE_NOTIF_ID = 98766;
   private static final int META_NUDGE_NOTIF_ID = 98767;
@@ -108,10 +108,10 @@ public class SystemMonitoringService extends Service {
     @Override
     public void onReceive(Context context, Intent intent) {
       String action = intent.getAction();
-      if ("FLOWLIGHT_NUDGE_SNOOZED".equals(action)) {
+      if ("FLOWFOCUS_NUDGE_SNOOZED".equals(action)) {
         // Snooze for 5 minutes
         nextAllowedNudgeTime = System.currentTimeMillis() + (5 * 60 * 1000);
-      } else if ("FLOWLIGHT_NUDGE_DISMISSED".equals(action)) {
+      } else if ("FLOWFOCUS_NUDGE_DISMISSED".equals(action)) {
         // Increase dismissal count and reduce future cooldowns
         dismissalCount++;
       }
@@ -129,17 +129,17 @@ public class SystemMonitoringService extends Service {
         if (lastPackage != null && sessionStartTime > 0) {
           long sessionDuration = (System.currentTimeMillis() - sessionStartTime) / 1000;
           saveDailyUsage(lastPackage, (int) sessionDuration, lastNudgeLevel);
-          Log.d("FlowLight", "Screen OFF - saved session: " + sessionDuration + "s");
+          Log.d("FlowFocus", "Screen OFF - saved session: " + sessionDuration + "s");
         }
         
         // Terminate active session when screen goes off
         lastPackage = null;
         sessionStartTime = 0;
         currentAppName = null;
-        Log.d("FlowLight", "Screen OFF - session terminated");
+        Log.d("FlowFocus", "Screen OFF - session terminated");
       } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
         isScreenOn = true;
-        Log.d("FlowLight", "Screen ON - resuming tracking");
+        Log.d("FlowFocus", "Screen ON - resuming tracking");
       }
     }
   };
@@ -148,7 +148,7 @@ public class SystemMonitoringService extends Service {
   public void onCreate() {
     super.onCreate();
     isRunning = true;
-    Log.i("FlowLight", "SystemMonitoringService.onCreate called (isRunning=true)");
+    Log.i("FlowFocus", "SystemMonitoringService.onCreate called (isRunning=true)");
     createNotificationChannel();
     createNudgeNotificationChannel();
     
@@ -165,12 +165,12 @@ public class SystemMonitoringService extends Service {
       screenFilter,
       ContextCompat.RECEIVER_NOT_EXPORTED
     );
-    Log.i("FlowLight", "Registered screenStateReceiver with ContextCompat");
+    Log.i("FlowFocus", "Registered screenStateReceiver with ContextCompat");
     
     // Register receiver for nudge actions
     IntentFilter actionFilter = new IntentFilter();
-    actionFilter.addAction("FLOWLIGHT_NUDGE_SNOOZED");
-    actionFilter.addAction("FLOWLIGHT_NUDGE_DISMISSED");
+    actionFilter.addAction("FLOWFOCUS_NUDGE_SNOOZED");
+    actionFilter.addAction("FLOWFOCUS_NUDGE_DISMISSED");
     
     ContextCompat.registerReceiver(
       this,
@@ -178,10 +178,10 @@ public class SystemMonitoringService extends Service {
       actionFilter,
       ContextCompat.RECEIVER_NOT_EXPORTED
     );
-    Log.i("FlowLight", "Registered nudgeActionReceiver with ContextCompat");
+    Log.i("FlowFocus", "Registered nudgeActionReceiver with ContextCompat");
     
     Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-      .setContentTitle("FlowLight monitoring active")
+      .setContentTitle("FlowFocus monitoring active")
       .setContentText("Keeping you mindful across apps")
       .setSmallIcon(getApplicationInfo().icon)
       .setOngoing(true)
@@ -189,9 +189,9 @@ public class SystemMonitoringService extends Service {
     
     try {
       startForeground(NOTIF_ID, notification);
-      Log.i("FlowLight", "startForeground SUCCESS - notification should be visible");
+      Log.i("FlowFocus", "startForeground SUCCESS - notification should be visible");
     } catch (Exception e) {
-      Log.e("FlowLight", "startForeground FAILED", e);
+      Log.e("FlowFocus", "startForeground FAILED", e);
     }
 
     handler = new Handler();
@@ -204,7 +204,7 @@ public class SystemMonitoringService extends Service {
           // Check if date changed (midnight reset)
           String today = getTodayDate();
           if (!today.equals(currentDate)) {
-            Log.d("FlowLight", "Date changed - clearing daily usage map and resetting meta-nudge tracking");
+            Log.d("FlowFocus", "Date changed - clearing daily usage map and resetting meta-nudge tracking");
             dailyUsageMap.clear();
             totalDailyScreenTimeSeconds = 0;
             lastMetaNudgeLevel = 0;
@@ -227,7 +227,7 @@ public class SystemMonitoringService extends Service {
                   if (lastPackage != null && sessionStartTime > 0) {
                     long sessionDuration = (System.currentTimeMillis() - sessionStartTime) / 1000;
                     saveDailyUsage(lastPackage, (int) sessionDuration, lastNudgeLevel);
-                    Log.d("FlowLight", "Saved " + lastPackage + " session: " + sessionDuration + "s, level: " + lastNudgeLevel);
+                    Log.d("FlowFocus", "Saved " + lastPackage + " session: " + sessionDuration + "s, level: " + lastNudgeLevel);
                   }
                   
                   lastPackage = detectedPackage;
@@ -239,21 +239,21 @@ public class SystemMonitoringService extends Service {
                   DailyAppUsage usage = dailyUsageMap.get(detectedPackage);
                   if (usage != null) {
                     lastNudgeLevel = usage.lastNudgeLevel;
-                    Log.d("FlowLight", "Restored nudge level " + lastNudgeLevel + " for " + detectedPackage + " (total: " + usage.totalSeconds + "s)");
+                    Log.d("FlowFocus", "Restored nudge level " + lastNudgeLevel + " for " + detectedPackage + " (total: " + usage.totalSeconds + "s)");
                   } else {
                     lastNudgeLevel = 0;
                   }
                   nextAllowedNudgeTime = 0;
                   dismissalCount = 0;
                   
-                  Log.d("FlowLight", "App changed to (verified): " + detectedPackage + " -> " + appName);
+                  Log.d("FlowFocus", "App changed to (verified): " + detectedPackage + " -> " + appName);
                   
-                  Intent i = new Intent("FLOWLIGHT_APP_CHANGED");
+                  Intent i = new Intent("FLOWFOCUS_APP_CHANGED");
                   i.putExtra("package", detectedPackage);
                   i.putExtra("appName", appName);
                   sendBroadcast(i);
                 } else {
-                  Log.d("FlowLight", "App change from " + detectedPackage + " to " + recheck + " - unstable, ignoring");
+                  Log.d("FlowFocus", "App change from " + detectedPackage + " to " + recheck + " - unstable, ignoring");
                 }
               }
             }, 750);
@@ -272,7 +272,7 @@ public class SystemMonitoringService extends Service {
             long currentTime = System.currentTimeMillis();
             int durationSeconds = (int) ((currentTime - sessionStartTime) / 1000);
             
-            Intent i = new Intent("FLOWLIGHT_DURATION_UPDATE");
+            Intent i = new Intent("FLOWFOCUS_DURATION_UPDATE");
             i.putExtra("package", lastPackage);
             i.putExtra("appName", currentAppName);
             i.putExtra("durationSeconds", durationSeconds);
@@ -304,7 +304,7 @@ public class SystemMonitoringService extends Service {
       if (userName == null || userName.isEmpty()) {
         userName = "friend";
       }
-      Log.d("FlowLight", "Service started with userName: " + userName + ", debug: " + debugMode);
+      Log.d("FlowFocus", "Service started with userName: " + userName + ", debug: " + debugMode);
     }
     return START_STICKY;
   }
@@ -313,7 +313,7 @@ public class SystemMonitoringService extends Service {
   public void onDestroy() {
     super.onDestroy();
     isRunning = false;
-    Log.i("FlowLight", "SystemMonitoringService.onDestroy called (isRunning=false)");
+    Log.i("FlowFocus", "SystemMonitoringService.onDestroy called (isRunning=false)");
     if (handler != null) {
       if (pollTask != null) {
         handler.removeCallbacks(pollTask);
@@ -340,7 +340,7 @@ public class SystemMonitoringService extends Service {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       NotificationChannel channel = new NotificationChannel(
         CHANNEL_ID,
-        "FlowLight Monitoring",
+        "FlowFocus Monitoring",
         NotificationManager.IMPORTANCE_MIN
       );
       channel.setDescription("Background monitoring for mindful nudges");
@@ -353,7 +353,7 @@ public class SystemMonitoringService extends Service {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       NotificationChannel channel = new NotificationChannel(
         NUDGE_CHANNEL_ID,
-        "FlowLight Nudges",
+        "FlowFocus Nudges",
         NotificationManager.IMPORTANCE_HIGH
       );
       channel.setDescription("Mindful nudges that appear as heads-up notifications");
@@ -399,7 +399,7 @@ public class SystemMonitoringService extends Service {
       if (EXCLUDED_PACKAGES.contains(lastPkg) || 
           lastPkg.toLowerCase().contains("launcher") ||
           lastPkg.equals(getPackageName())) {
-        Log.d("FlowLight", "Excluding package from tracking: " + lastPkg);
+        Log.d("FlowFocus", "Excluding package from tracking: " + lastPkg);
         return null;
       }
     }
@@ -419,7 +419,7 @@ public class SystemMonitoringService extends Service {
   }
 
   private String getAppName(String pkg) {
-    Log.d("FlowLight", "Getting app name for package: " + pkg);
+    Log.d("FlowFocus", "Getting app name for package: " + pkg);
     
     // 1. Check hardcoded map first for common apps
     java.util.Map<String, String> knownApps = new java.util.HashMap<>();
@@ -448,7 +448,7 @@ public class SystemMonitoringService extends Service {
     
     if (knownApps.containsKey(pkg)) {
       String name = knownApps.get(pkg);
-      Log.d("FlowLight", "Got app name from map: " + name + " for package: " + pkg);
+      Log.d("FlowFocus", "Got app name from map: " + name + " for package: " + pkg);
       return name;
     }
     
@@ -459,11 +459,11 @@ public class SystemMonitoringService extends Service {
       CharSequence label = pm.getApplicationLabel(ai);
       String name = label != null ? label.toString() : null;
       if (name != null && !name.isEmpty()) {
-        Log.d("FlowLight", "Got app name from PM: " + name + " for package: " + pkg);
+        Log.d("FlowFocus", "Got app name from PM: " + name + " for package: " + pkg);
         return name;
       }
     } catch (Exception e) {
-      Log.e("FlowLight", "Failed to get app name from PM for: " + pkg, e);
+      Log.e("FlowFocus", "Failed to get app name from PM for: " + pkg, e);
     }
     
     // 3. Smart fallback: search for keywords in package name
@@ -504,7 +504,7 @@ public class SystemMonitoringService extends Service {
   private void checkForNudge(String packageName, String appName, int durationSeconds) {
     // Only check nudges when screen is on
     if (!isScreenOn) {
-      Log.d("FlowLight", "Skipping nudge check - screen is off");
+      Log.d("FlowFocus", "Skipping nudge check - screen is off");
       return;
     }
     
@@ -518,7 +518,7 @@ public class SystemMonitoringService extends Service {
       cumulativeDuration = usage.totalSeconds + durationSeconds;
     }
     
-    Log.d("FlowLight", "Nudge check for " + appName + " - session: " + durationSeconds + "s, cumulative: " + cumulativeDuration + "s, lastLevel: " + lastNudgeLevel);
+    Log.d("FlowFocus", "Nudge check for " + appName + " - session: " + durationSeconds + "s, cumulative: " + cumulativeDuration + "s, lastLevel: " + lastNudgeLevel);
     
     // Find current level based on CUMULATIVE duration
     int newLevel = 0;
@@ -531,7 +531,7 @@ public class SystemMonitoringService extends Service {
     long now = System.currentTimeMillis();
     
     if (newLevel > lastNudgeLevel && now >= nextAllowedNudgeTime) {
-      Log.d("FlowLight", "Showing level " + newLevel + " nudge (cumulative: " + cumulativeDuration + "s)");
+      Log.d("FlowFocus", "Showing level " + newLevel + " nudge (cumulative: " + cumulativeDuration + "s)");
       showNudgeNotification(packageName, appName, newLevel, cumulativeDuration, config.psychState);
       lastNudgeLevel = newLevel;
       
@@ -630,7 +630,7 @@ public class SystemMonitoringService extends Service {
     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(NUDGE_NOTIF_ID, builder.build());
     
-    Log.d("FlowLight", "Showed Level " + level + " nudge with " + actions.size() + " actions: " + title + " | User: " + userName);
+    Log.d("FlowFocus", "Showed Level " + level + " nudge with " + actions.size() + " actions: " + title + " | User: " + userName);
   }
   
   private void checkForMetaNudge() {
@@ -672,7 +672,7 @@ public class SystemMonitoringService extends Service {
     Intent openIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
     if (openIntent != null) {
       openIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-      openIntent.setData(Uri.parse("flowlight://action/journal"));
+      openIntent.setData(Uri.parse("flowfocus://action/journal"));
     }
     
     PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -698,6 +698,6 @@ public class SystemMonitoringService extends Service {
     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(META_NUDGE_NOTIF_ID, builder.build());
     
-    Log.d("FlowLight", "Showed meta-nudge level " + level + " - Total screen time: " + hours + "h " + minutes + "m");
+    Log.d("FlowFocus", "Showed meta-nudge level " + level + " - Total screen time: " + hours + "h " + minutes + "m");
   }
 }
