@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">flowlight-app</string>
-    <string name="title_activity_main">flowlight-app</string>
+    <string name="app_name">FlowFocus</string>
+    <string name="title_activity_main">FlowFocus</string>
     <string name="package_name">app.lovable.a35e05c71a3c040e8bd0b8d3342281688</string>
     <string name="custom_url_scheme">app.lovable.a35e05c71a3c040e8bd0b8d3342281688</string>
 </resources>

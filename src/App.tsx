@@ -11,6 +11,7 @@ import { EnhancedInterventionModal } from "@/components/EnhancedInterventionModa
 import { MonitoringBootstrap } from "@/components/MonitoringBootstrap";
 import { DeepLinkHandler } from "@/components/DeepLinkHandler";
 import { Capacitor } from "@capacitor/core";
+import { runLocalStorageMigration } from "@/utils/localStorageMigration";
 import Landing from "./pages/Landing";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -34,6 +35,9 @@ import Account from "./pages/Account";
 import TrialEnded from "./pages/TrialEnded";
 import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
+
+// Run localStorage migration on app startup
+runLocalStorageMigration();
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
