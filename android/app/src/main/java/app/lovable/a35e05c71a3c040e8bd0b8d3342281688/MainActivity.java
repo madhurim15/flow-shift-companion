@@ -15,7 +15,7 @@ import app.lovable.a35e05c71a3c040e8bd0b8d3342281688.SystemMonitoringPlugin;
 
 public class MainActivity extends BridgeActivity {
     // Build stamp to verify correct APK is running
-    public static final long BUILD_STAMP = 1733312400000L; // 2024-12-04 update
+    public static final long BUILD_STAMP = 1733644800000L; // 2024-12-08 update
     
     public static long getBuildStamp() {
         return BUILD_STAMP;
@@ -24,35 +24,35 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Build stamp verification
-        android.util.Log.w("FlowLight", ">>> MainActivity.onCreate() STARTING <<<");
-        android.util.Log.w("FlowLight", "=== BUILD_STAMP: " + BUILD_STAMP + " ===");
+        android.util.Log.w("FlowFocus", ">>> MainActivity.onCreate() STARTING <<<");
+        android.util.Log.w("FlowFocus", "=== BUILD_STAMP: " + BUILD_STAMP + " ===");
         
         // REGISTER PLUGIN BEFORE super.onCreate() - Some devices require this order
-        android.util.Log.w("FlowLight", ">>> Registering SystemMonitoringPlugin BEFORE super.onCreate() <<<");
+        android.util.Log.w("FlowFocus", ">>> Registering SystemMonitoringPlugin BEFORE super.onCreate() <<<");
         registerPlugin(SystemMonitoringPlugin.class);
-        android.util.Log.w("FlowLight", ">>> SystemMonitoringPlugin registered <<<");
+        android.util.Log.w("FlowFocus", ">>> SystemMonitoringPlugin registered <<<");
         
         // Now call super to initialize Capacitor bridge
         super.onCreate(savedInstanceState);
-        android.util.Log.w("FlowLight", ">>> super.onCreate() completed <<<");
+        android.util.Log.w("FlowFocus", ">>> super.onCreate() completed <<<");
         
         // Configure window for proper display cutout handling and heads-up notifications
         configureWindow();
         
         // DO NOT auto-start here - let onboarding flow handle it with proper Samsung delay
-        android.util.Log.i("FlowLight", "MainActivity ready - service will be started by onboarding");
+        android.util.Log.i("FlowFocus", "MainActivity ready - service will be started by onboarding");
     }
     
     @Override
     public void onStart() {
         super.onStart();
-        android.util.Log.w("FlowLight", "=== onStart() BUILD_STAMP: " + BUILD_STAMP + " ===");
+        android.util.Log.w("FlowFocus", "=== onStart() BUILD_STAMP: " + BUILD_STAMP + " ===");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        android.util.Log.w("FlowLight", "=== onResume() BUILD_STAMP: " + BUILD_STAMP + " ===");
+        android.util.Log.w("FlowFocus", "=== onResume() BUILD_STAMP: " + BUILD_STAMP + " ===");
     }
     
     @Override
@@ -60,7 +60,7 @@ public class MainActivity extends BridgeActivity {
         super.onNewIntent(intent);
         
         if (intent.getBooleanExtra("trigger_notification_reschedule", false)) {
-            android.util.Log.i("FlowLight", "MainActivity: Received midnight reschedule trigger");
+            android.util.Log.i("FlowFocus", "MainActivity: Received midnight reschedule trigger");
             
             // Send event to JavaScript
             com.getcapacitor.JSObject ret = new com.getcapacitor.JSObject();

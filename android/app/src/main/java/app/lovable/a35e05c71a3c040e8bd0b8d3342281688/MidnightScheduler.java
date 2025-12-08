@@ -13,8 +13,8 @@ import java.util.Calendar;
  */
 public class MidnightScheduler extends BroadcastReceiver {
     
-    private static final String TAG = "FlowLight";
-    private static final String ACTION_MIDNIGHT_RESCHEDULE = "app.lovable.flowlight.MIDNIGHT_RESCHEDULE";
+    private static final String TAG = "FlowFocus";
+    private static final String ACTION_MIDNIGHT_RESCHEDULE = "app.lovable.flowfocus.MIDNIGHT_RESCHEDULE";
     
     @Override
     public void onReceive(Context context, Intent intent) {

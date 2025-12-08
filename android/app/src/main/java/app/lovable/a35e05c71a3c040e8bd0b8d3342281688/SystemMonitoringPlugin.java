@@ -23,10 +23,10 @@ public class SystemMonitoringPlugin extends Plugin {
 
   @Override
   public void load() {
-    android.util.Log.w("FlowLight", ">>> SystemMonitoringPlugin.load() CALLED <<<");
+    android.util.Log.w("FlowFocus", ">>> SystemMonitoringPlugin.load() CALLED <<<");
     try {
       super.load();
-      android.util.Log.w("FlowLight", ">>> SystemMonitoringPlugin.load() - super.load() completed on API " + Build.VERSION.SDK_INT + " <<<");
+      android.util.Log.w("FlowFocus", ">>> SystemMonitoringPlugin.load() - super.load() completed on API " + Build.VERSION.SDK_INT + " <<<");
       
       // Register receiver for app change events
       appChangeReceiver = new BroadcastReceiver() {
@@ -43,9 +43,9 @@ public class SystemMonitoringPlugin extends Plugin {
               data.put("appName", appName);
             }
             
-            if ("FLOWLIGHT_APP_CHANGED".equals(action)) {
+            if ("FLOWFOCUS_APP_CHANGED".equals(action)) {
               notifyListeners("appChanged", data);
-            } else if ("FLOWLIGHT_DURATION_UPDATE".equals(action)) {
+            } else if ("FLOWFOCUS_DURATION_UPDATE".equals(action)) {
               int durationSeconds = intent.getIntExtra("durationSeconds", 0);
               data.put("durationSeconds", durationSeconds);
               notifyListeners("durationUpdate", data);
@@ -55,8 +55,8 @@ public class SystemMonitoringPlugin extends Plugin {
       };
       
       IntentFilter filter = new IntentFilter();
-      filter.addAction("FLOWLIGHT_APP_CHANGED");
-      filter.addAction("FLOWLIGHT_DURATION_UPDATE");
+      filter.addAction("FLOWFOCUS_APP_CHANGED");
+      filter.addAction("FLOWFOCUS_DURATION_UPDATE");
       
       ContextCompat.registerReceiver(
         getContext(),
@@ -64,9 +64,9 @@ public class SystemMonitoringPlugin extends Plugin {
         filter,
         ContextCompat.RECEIVER_NOT_EXPORTED
       );
-      android.util.Log.w("FlowLight", ">>> SystemMonitoringPlugin.load() COMPLETED SUCCESSFULLY <<<");
+      android.util.Log.w("FlowFocus", ">>> SystemMonitoringPlugin.load() COMPLETED SUCCESSFULLY <<<");
     } catch (Exception e) {
-      android.util.Log.e("FlowLight", ">>> SystemMonitoringPlugin.load() FAILED <<<", e);
+      android.util.Log.e("FlowFocus", ">>> SystemMonitoringPlugin.load() FAILED <<<", e);
     }
   }
 
@@ -97,7 +97,7 @@ public class SystemMonitoringPlugin extends Plugin {
   @PluginMethod
   public void hasUsageStatsPermission(PluginCall call) {
     boolean granted = UsageStatsHelper.hasUsageStatsPermission(getContext());
-    android.util.Log.i("FlowLight", "Plugin.hasUsageStatsPermission -> " + granted);
+    android.util.Log.i("FlowFocus", "Plugin.hasUsageStatsPermission -> " + granted);
     JSObject ret = new JSObject();
     ret.put("granted", granted);
     call.resolve(ret);
@@ -106,7 +106,7 @@ public class SystemMonitoringPlugin extends Plugin {
   @PluginMethod
   public void checkPermissions(PluginCall call) {
     boolean granted = UsageStatsHelper.hasUsageStatsPermission(getContext());
-    android.util.Log.i("FlowLight", "Plugin.checkPermissions -> usageAccess=" + granted);
+    android.util.Log.i("FlowFocus", "Plugin.checkPermissions -> usageAccess=" + granted);
     JSObject ret = new JSObject();
     ret.put("usageAccess", granted);
     call.resolve(ret);
@@ -114,11 +114,11 @@ public class SystemMonitoringPlugin extends Plugin {
 
   @PluginMethod
   public void startMonitoring(PluginCall call) {
-    android.util.Log.i("FlowLight", "Plugin.startMonitoring called");
+    android.util.Log.i("FlowFocus", "Plugin.startMonitoring called");
     
     // Ensure Usage Access is granted before starting service
     if (!UsageStatsHelper.hasUsageStatsPermission(getContext())) {
-      android.util.Log.e("FlowLight", "startMonitoring: usage_access_denied");
+      android.util.Log.e("FlowFocus", "startMonitoring: usage_access_denied");
       call.reject("usage_access_denied");
       return;
     }
@@ -131,7 +131,7 @@ public class SystemMonitoringPlugin extends Plugin {
       ) == android.content.pm.PackageManager.PERMISSION_GRANTED;
       
       if (!notificationsEnabled) {
-        android.util.Log.e("FlowLight", "startMonitoring: notifications_denied");
+        android.util.Log.e("FlowFocus", "startMonitoring: notifications_denied");
         call.reject("notifications_denied");
         return;
       }
@@ -139,7 +139,7 @@ public class SystemMonitoringPlugin extends Plugin {
 
     // Check if service is already running (idempotent start)
     if (SystemMonitoringService.isRunning) {
-      android.util.Log.d("FlowLight", "Service already running, skipping duplicate start");
+      android.util.Log.d("FlowFocus", "Service already running, skipping duplicate start");
       call.resolve();
       return;
     }
@@ -154,10 +154,10 @@ public class SystemMonitoringPlugin extends Plugin {
 
     try {
       ContextCompat.startForegroundService(getContext(), serviceIntent);
-      android.util.Log.d("FlowLight", "Started monitoring with userName: " + userName + ", debug: " + debug);
+      android.util.Log.d("FlowFocus", "Started monitoring with userName: " + userName + ", debug: " + debug);
       call.resolve();
     } catch (Exception e) {
-      android.util.Log.e("FlowLight", "startMonitoring exception", e);
+      android.util.Log.e("FlowFocus", "startMonitoring exception", e);
       call.reject("Failed to start monitoring: " + e.getMessage());
     }
   }
@@ -189,7 +189,7 @@ public class SystemMonitoringPlugin extends Plugin {
       getContext().startActivity(intent);
       call.resolve();
     } catch (Exception e) {
-      android.util.Log.e("FlowLight", "Failed to open battery optimization settings", e);
+      android.util.Log.e("FlowFocus", "Failed to open battery optimization settings", e);
       call.reject("Failed to open battery settings: " + e.getMessage());
     }
   }
@@ -203,14 +203,14 @@ public class SystemMonitoringPlugin extends Plugin {
       getContext().startActivity(intent);
       call.resolve();
     } catch (Exception e) {
-      android.util.Log.e("FlowLight", "Failed to open app settings", e);
+      android.util.Log.e("FlowFocus", "Failed to open app settings", e);
       call.reject("Failed to open app settings: " + e.getMessage());
     }
   }
 
   @PluginMethod
   public void getStatus(PluginCall call) {
-    android.util.Log.i("FlowLight", "Plugin.getStatus called");
+    android.util.Log.i("FlowFocus", "Plugin.getStatus called");
     
     JSObject ret = new JSObject();
     
@@ -227,7 +227,7 @@ public class SystemMonitoringPlugin extends Plugin {
           android.Manifest.permission.POST_NOTIFICATIONS
         ) == android.content.pm.PackageManager.PERMISSION_GRANTED;
       } catch (Exception e) {
-        android.util.Log.e("FlowLight", "Failed to check notification permission", e);
+        android.util.Log.e("FlowFocus", "Failed to check notification permission", e);
       }
     }
     ret.put("notificationsEnabled", notificationsEnabled);
@@ -236,29 +236,29 @@ public class SystemMonitoringPlugin extends Plugin {
     boolean serviceRunning = SystemMonitoringService.isRunning;
     ret.put("serviceRunning", serviceRunning);
     
-    android.util.Log.i("FlowLight", "Plugin.getStatus -> usageAccess=" + usageAccess + 
+    android.util.Log.i("FlowFocus", "Plugin.getStatus -> usageAccess=" + usageAccess + 
                        ", notifications=" + notificationsEnabled + ", serviceRunning=" + serviceRunning);
     call.resolve(ret);
   }
 
   @PluginMethod
   public void restartMonitoring(PluginCall call) {
-    android.util.Log.i("FlowLight", "Plugin.restartMonitoring called");
+    android.util.Log.i("FlowFocus", "Plugin.restartMonitoring called");
     
     // Stop service first
     try {
       Intent stopIntent = new Intent(getContext(), SystemMonitoringService.class);
       getContext().stopService(stopIntent);
-      android.util.Log.d("FlowLight", "Service stop initiated");
+      android.util.Log.d("FlowFocus", "Service stop initiated");
     } catch (Exception e) {
-      android.util.Log.e("FlowLight", "Failed to stop service", e);
+      android.util.Log.e("FlowFocus", "Failed to stop service", e);
     }
     
     // Small delay to ensure clean shutdown
     try {
       Thread.sleep(500);
     } catch (InterruptedException e) {
-      android.util.Log.e("FlowLight", "Sleep interrupted", e);
+      android.util.Log.e("FlowFocus", "Sleep interrupted", e);
     }
     
     // Start service again
@@ -275,28 +275,28 @@ public class SystemMonitoringPlugin extends Plugin {
     
     try {
       ContextCompat.startForegroundService(getContext(), startIntent);
-      android.util.Log.d("FlowLight", "Service restart initiated");
+      android.util.Log.d("FlowFocus", "Service restart initiated");
       
       // Return status after restart
       JSObject ret = new JSObject();
       ret.put("restarted", true);
       call.resolve(ret);
     } catch (Exception e) {
-      android.util.Log.e("FlowLight", "Failed to restart service", e);
+      android.util.Log.e("FlowFocus", "Failed to restart service", e);
       call.reject("Failed to restart monitoring: " + e.getMessage());
     }
   }
 
   @PluginMethod
   public void scheduleMidnightReschedule(PluginCall call) {
-    android.util.Log.i("FlowLight", "scheduleMidnightReschedule called from JS");
+    android.util.Log.i("FlowFocus", "scheduleMidnightReschedule called from JS");
     MidnightScheduler.scheduleMidnightAlarm(getContext());
     call.resolve();
   }
 
   @PluginMethod
   public void cancelMidnightReschedule(PluginCall call) {
-    android.util.Log.i("FlowLight", "cancelMidnightReschedule called from JS");
+    android.util.Log.i("FlowFocus", "cancelMidnightReschedule called from JS");
     MidnightScheduler.cancelMidnightAlarm(getContext());
     call.resolve();
   }
@@ -304,7 +304,7 @@ public class SystemMonitoringPlugin extends Plugin {
   @PluginMethod
   public void getBuildStamp(PluginCall call) {
     long buildStamp = MainActivity.getBuildStamp();
-    android.util.Log.i("FlowLight", "Plugin.getBuildStamp -> " + buildStamp);
+    android.util.Log.i("FlowFocus", "Plugin.getBuildStamp -> " + buildStamp);
     JSObject ret = new JSObject();
     ret.put("buildStamp", buildStamp);
     call.resolve(ret);

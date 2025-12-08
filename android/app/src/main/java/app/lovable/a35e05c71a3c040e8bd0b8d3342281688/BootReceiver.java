@@ -13,7 +13,7 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
-            android.util.Log.i("FlowLight", "BootReceiver: Device boot completed");
+            android.util.Log.i("FlowFocus", "BootReceiver: Device boot completed");
             
             // Check if Usage Access permission is granted
             if (UsageStatsHelper.hasUsageStatsPermission(context)) {
@@ -21,13 +21,13 @@ public class BootReceiver extends BroadcastReceiver {
                 Intent serviceIntent = new Intent(context, SystemMonitoringService.class);
                 serviceIntent.putExtra("debug", false);
                 ContextCompat.startForegroundService(context, serviceIntent);
-                android.util.Log.i("FlowLight", "BootReceiver started SystemMonitoringService after reboot");
+                android.util.Log.i("FlowFocus", "BootReceiver started SystemMonitoringService after reboot");
                 
                 // Reschedule midnight alarm after reboot
                 MidnightScheduler.scheduleMidnightAlarm(context);
-                android.util.Log.i("FlowLight", "BootReceiver: Rescheduled midnight notification alarm");
+                android.util.Log.i("FlowFocus", "BootReceiver: Rescheduled midnight notification alarm");
             } else {
-                android.util.Log.i("FlowLight", "BootReceiver: Usage Access not granted, service not started");
+                android.util.Log.i("FlowFocus", "BootReceiver: Usage Access not granted, service not started");
             }
         }
     }
