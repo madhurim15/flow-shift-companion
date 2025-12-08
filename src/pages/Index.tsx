@@ -18,6 +18,7 @@ import { SystemWideTestPanel } from "@/components/SystemWideTestPanel";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { MainGoalInput } from "@/components/MainGoalInput";
 import { DailyMantra } from "@/components/DailyMantra";
+import { FirstWeekTips } from "@/components/FirstWeekTips";
 import { Button } from "@/components/ui/button";
 import { Timer, Home, Brain, Settings, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,7 +43,9 @@ const Index = () => {
   } = useAuth();
   const [appState, setAppState] = useState<AppState>(() => {
     if (!user) return 'welcome';
-    const hasCompleted = localStorage.getItem(`flowlight-onboarding-completed-${user.id}`);
+    // Check both old and new keys for backwards compatibility
+    const hasCompleted = localStorage.getItem(`flowfocus-onboarding-completed-${user.id}`) || 
+                         localStorage.getItem(`flowlight-onboarding-completed-${user.id}`);
     return hasCompleted === 'true' ? 'mood-selection' : 'welcome';
   });
   
@@ -87,7 +90,8 @@ const Index = () => {
   // Reset onboarding state when user changes
   useEffect(() => {
     if (user) {
-      const hasCompleted = localStorage.getItem(`flowlight-onboarding-completed-${user.id}`);
+      const hasCompleted = localStorage.getItem(`flowfocus-onboarding-completed-${user.id}`) ||
+                           localStorage.getItem(`flowlight-onboarding-completed-${user.id}`);
       if (hasCompleted !== 'true' && appState !== 'welcome') {
         setAppState('welcome');
       }
@@ -99,7 +103,10 @@ const Index = () => {
     if (!Capacitor.isNativePlatform()) return;
 
     const backButtonListener = App.addListener('backButton', ({ canGoBack }) => {
-      const hasCompletedOnboarding = user ? localStorage.getItem(`flowlight-onboarding-completed-${user.id}`) === 'true' : false;
+      const hasCompletedOnboarding = user ? (
+        localStorage.getItem(`flowfocus-onboarding-completed-${user.id}`) === 'true' ||
+        localStorage.getItem(`flowlight-onboarding-completed-${user.id}`) === 'true'
+      ) : false;
       
       if (appState === 'welcome') {
         // On welcome/onboarding screen, exit app
@@ -131,7 +138,7 @@ const Index = () => {
   }, [appState]);
   const handleStart = () => {
     if (user) {
-      localStorage.setItem(`flowlight-onboarding-completed-${user.id}`, 'true');
+      localStorage.setItem(`flowfocus-onboarding-completed-${user.id}`, 'true');
     }
     setAppState("mood-selection");
   };

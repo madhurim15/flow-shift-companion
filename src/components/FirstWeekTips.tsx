@@ -1,0 +1,131 @@
+import { useState, useEffect } from 'react';
+import { X, Sparkles, BarChart3, Dice5, MessageSquare, Flame } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { getFlowFocusItem, setFlowFocusItem } from '@/utils/localStorageMigration';
+
+const TIPS = [
+  {
+    icon: BarChart3,
+    title: "Stats build over time",
+    description: "Your usage patterns become more accurate after 5-7 days of tracking."
+  },
+  {
+    icon: Dice5,
+    title: "Roll the dice!",
+    description: "Feeling stuck? Try the Action Dice for a quick mood-boosting activity."
+  },
+  {
+    icon: Flame,
+    title: "Build your streak",
+    description: "Complete daily actions to build momentum and track your progress."
+  },
+  {
+    icon: MessageSquare,
+    title: "Share feedback",
+    description: "Found a bug or have ideas? Tap Settings → Feedback anytime."
+  }
+];
+
+const MAX_VISITS = 3;
+const VISITS_KEY = 'first_week_tips_visits';
+const DISMISSED_KEY = 'first_week_tips_dismissed';
+
+export const FirstWeekTips = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+
+  useEffect(() => {
+    // Check if permanently dismissed
+    const dismissed = getFlowFocusItem(DISMISSED_KEY);
+    if (dismissed === 'true') {
+      return;
+    }
+
+    // Check visit count
+    const visits = parseInt(getFlowFocusItem(VISITS_KEY) || '0', 10);
+    
+    if (visits < MAX_VISITS) {
+      // Show tips and increment visit count
+      setIsVisible(true);
+      setFlowFocusItem(VISITS_KEY, String(visits + 1));
+      
+      // Rotate through tips based on visit
+      setCurrentTipIndex(visits % TIPS.length);
+    }
+  }, []);
+
+  const handleDismiss = () => {
+    setIsVisible(false);
+  };
+
+  const handleDismissForever = () => {
+    setFlowFocusItem(DISMISSED_KEY, 'true');
+    setIsVisible(false);
+  };
+
+  if (!isVisible) return null;
+
+  const currentTip = TIPS[currentTipIndex];
+  const TipIcon = currentTip.icon;
+
+  return (
+    <div className="fixed bottom-20 left-4 right-4 z-40 animate-in slide-in-from-bottom-4 duration-500">
+      <div className="bg-gradient-to-br from-primary/10 via-background to-accent/10 backdrop-blur-lg border border-primary/20 rounded-2xl p-4 shadow-xl">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-primary/20 rounded-lg">
+              <Sparkles className="w-4 h-4 text-primary" />
+            </div>
+            <span className="text-xs font-medium text-primary">First Week Tip</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 -mr-1 -mt-1"
+            onClick={handleDismiss}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+
+        {/* Tip Content */}
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-primary/10 rounded-xl shrink-0">
+            <TipIcon className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-semibold text-foreground text-sm mb-1">
+              {currentTip.title}
+            </h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {currentTip.description}
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
+          <div className="flex gap-1">
+            {TIPS.map((_, index) => (
+              <div
+                key={index}
+                className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                  index === currentTipIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+                }`}
+              />
+            ))}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs h-7 text-muted-foreground hover:text-foreground"
+            onClick={handleDismissForever}
+          >
+            Don't show again
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
