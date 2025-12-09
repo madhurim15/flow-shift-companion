@@ -622,6 +622,20 @@ public class SystemMonitoringService extends Service {
         actionIntent.setAction(NudgeActions.ACTION_INTENTION);
       } else if (action.deepLink.equals("gratitude")) {
         actionIntent.setAction(NudgeActions.ACTION_GRATITUDE);
+      } else if (action.deepLink.equals("meditation")) {
+        actionIntent.setAction(NudgeActions.ACTION_MEDITATION);
+      } else if (action.deepLink.equals("power-nap")) {
+        actionIntent.setAction(NudgeActions.ACTION_POWER_NAP);
+      } else if (action.deepLink.equals("eye-yoga")) {
+        actionIntent.setAction(NudgeActions.ACTION_EYE_YOGA);
+      } else if (action.deepLink.equals("box-breathing")) {
+        actionIntent.setAction(NudgeActions.ACTION_BOX_BREATHING);
+      } else if (action.deepLink.equals("focus-reset")) {
+        actionIntent.setAction(NudgeActions.ACTION_FOCUS_RESET);
+      } else if (action.deepLink.equals("micro-movement")) {
+        actionIntent.setAction(NudgeActions.ACTION_MICRO_MOVEMENT);
+      } else if (action.deepLink.equals("mindful-sip")) {
+        actionIntent.setAction(NudgeActions.ACTION_MINDFUL_SIP);
       }
       
       PendingIntent actionPendingIntent = PendingIntent.getBroadcast(

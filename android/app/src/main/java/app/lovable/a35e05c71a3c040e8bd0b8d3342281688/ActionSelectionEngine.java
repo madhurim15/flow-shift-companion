@@ -314,6 +314,14 @@ public class ActionSelectionEngine {
         actions.add(new ActionButton("🚶 Walk", "walk", true));
         actions.add(new ActionButton("🧍 Stand up", "standing", true));
         
+        // New physical actions
+        actions.add(new ActionButton("🧘 Meditate", "meditation", true));
+        actions.add(new ActionButton("😴 Power Nap", "power-nap", true));
+        actions.add(new ActionButton("👁️ Eye Yoga", "eye-yoga", true));
+        actions.add(new ActionButton("🌬️ Box Breath", "box-breathing", true));
+        actions.add(new ActionButton("🏋️ Move!", "micro-movement", true));
+        actions.add(new ActionButton("☕ Mindful Sip", "mindful-sip", true));
+        
         // Intentional digital actions (shortened labels)
         actions.add(new ActionButton("📝 Journal", "journal", false));
         actions.add(new ActionButton("🎙️ Voice", "voice", false));
@@ -321,6 +329,7 @@ public class ActionSelectionEngine {
         actions.add(new ActionButton("🏆 Win", "win", false));
         actions.add(new ActionButton("🎯 Intention", "intention", false));
         actions.add(new ActionButton("✨ Gratitude", "gratitude", false));
+        actions.add(new ActionButton("🧠 Focus Reset", "focus-reset", false));
         
         return actions;
     }
