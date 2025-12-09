@@ -10,7 +10,7 @@ public class NudgeActions extends BroadcastReceiver {
     public static final String ACTION_DISMISS = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.DISMISS";
     public static final String ACTION_OPEN_APP = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.OPEN_APP";
     
-    // New action deep links
+    // Existing action deep links
     public static final String ACTION_MOOD = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.MOOD";
     public static final String ACTION_HYDRATION = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.HYDRATION";
     public static final String ACTION_EYE_REST = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.EYE_REST";
@@ -24,6 +24,15 @@ public class NudgeActions extends BroadcastReceiver {
     public static final String ACTION_WIN = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.WIN";
     public static final String ACTION_INTENTION = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.INTENTION";
     public static final String ACTION_GRATITUDE = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.GRATITUDE";
+    
+    // New action deep links
+    public static final String ACTION_MEDITATION = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.MEDITATION";
+    public static final String ACTION_POWER_NAP = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.POWER_NAP";
+    public static final String ACTION_EYE_YOGA = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.EYE_YOGA";
+    public static final String ACTION_BOX_BREATHING = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.BOX_BREATHING";
+    public static final String ACTION_FOCUS_RESET = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.FOCUS_RESET";
+    public static final String ACTION_MICRO_MOVEMENT = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.MICRO_MOVEMENT";
+    public static final String ACTION_MINDFUL_SIP = "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.MINDFUL_SIP";
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -79,6 +88,28 @@ public class NudgeActions extends BroadcastReceiver {
                 break;
             case ACTION_GRATITUDE:
                 deepLink = "flowfocus://action/gratitude";
+                break;
+            // New actions
+            case ACTION_MEDITATION:
+                deepLink = "flowfocus://action/meditation";
+                break;
+            case ACTION_POWER_NAP:
+                deepLink = "flowfocus://action/power-nap";
+                break;
+            case ACTION_EYE_YOGA:
+                deepLink = "flowfocus://action/eye-yoga";
+                break;
+            case ACTION_BOX_BREATHING:
+                deepLink = "flowfocus://action/box-breathing";
+                break;
+            case ACTION_FOCUS_RESET:
+                deepLink = "flowfocus://action/focus-reset";
+                break;
+            case ACTION_MICRO_MOVEMENT:
+                deepLink = "flowfocus://action/micro-movement";
+                break;
+            case ACTION_MINDFUL_SIP:
+                deepLink = "flowfocus://action/mindful-sip";
                 break;
             case ACTION_OPEN_APP:
                 deepLink = "flowfocus://app";

@@ -35,6 +35,14 @@ import Account from "./pages/Account";
 import TrialEnded from "./pages/TrialEnded";
 import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
+// New nudge action pages
+import MeditationTimer from "./pages/MeditationTimer";
+import PowerNap from "./pages/PowerNap";
+import EyeYoga from "./pages/EyeYoga";
+import BoxBreathing from "./pages/BoxBreathing";
+import FocusReset from "./pages/FocusReset";
+import MicroMovement from "./pages/MicroMovement";
+import MindfulSip from "./pages/MindfulSip";
 
 // Run localStorage migration on app startup
 runLocalStorageMigration();
@@ -173,6 +181,35 @@ const router = createHashRouter([
   {
     path: "/feedback",
     element: <ProtectedRoute><Feedback /></ProtectedRoute>
+  },
+  // New nudge action routes
+  {
+    path: "/meditation",
+    element: <ProtectedRoute><MeditationTimer /></ProtectedRoute>
+  },
+  {
+    path: "/power-nap",
+    element: <ProtectedRoute><PowerNap /></ProtectedRoute>
+  },
+  {
+    path: "/eye-yoga",
+    element: <ProtectedRoute><EyeYoga /></ProtectedRoute>
+  },
+  {
+    path: "/box-breathing",
+    element: <ProtectedRoute><BoxBreathing /></ProtectedRoute>
+  },
+  {
+    path: "/focus-reset",
+    element: <ProtectedRoute><FocusReset /></ProtectedRoute>
+  },
+  {
+    path: "/micro-movement",
+    element: <ProtectedRoute><MicroMovement /></ProtectedRoute>
+  },
+  {
+    path: "/mindful-sip",
+    element: <ProtectedRoute><MindfulSip /></ProtectedRoute>
   },
   {
     path: "*",
@@ -389,6 +426,70 @@ const App = () => {
         <>
           <AppContent />
           <ProtectedRoute><Feedback /></ProtectedRoute>
+        </>
+      )
+    },
+    // New nudge action routes with deep link support
+    {
+      path: "/meditation",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><MeditationTimer /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/power-nap",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><PowerNap /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/eye-yoga",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><EyeYoga /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/box-breathing",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><BoxBreathing /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/focus-reset",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><FocusReset /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/micro-movement",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><MicroMovement /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/mindful-sip",
+      element: (
+        <>
+          <AppContent />
+          <ProtectedRoute><MindfulSip /></ProtectedRoute>
         </>
       )
     },

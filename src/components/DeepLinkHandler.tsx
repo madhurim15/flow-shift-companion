@@ -30,16 +30,23 @@ export const DeepLinkHandler = () => {
             'walk': '/walk',
             'stretch': '/stretch',
             'gratitude': '/gratitude',
-            'meditation': '/breathing',
-            'movement': '/walk',
-            // New balanced action routes
+            'meditation': '/meditation',
+            'movement': '/micro-movement',
+            // Balanced action routes
             'mood': '/app',
             'hydration': '/hydration',
             'eye-rest': '/eye-rest',
             'standing': '/standing',
             'photo': '/photo',
             'win': '/win',
-            'intention': '/intention'
+            'intention': '/intention',
+            // New nudge action routes
+            'power-nap': '/power-nap',
+            'eye-yoga': '/eye-yoga',
+            'box-breathing': '/box-breathing',
+            'focus-reset': '/focus-reset',
+            'micro-movement': '/micro-movement',
+            'mindful-sip': '/mindful-sip'
           };
           
           if (routeMap[action]) {
