@@ -69,8 +69,8 @@ export const FirstWeekTips = () => {
   const TipIcon = currentTip.icon;
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-40 animate-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-gradient-to-br from-primary/10 via-background to-accent/10 backdrop-blur-lg border border-primary/20 rounded-2xl p-4 shadow-xl">
+    <div className="fixed bottom-24 left-4 right-4 z-40 animate-in slide-in-from-bottom-4 duration-500 max-h-[calc(100vh-12rem)] overflow-y-auto">
+      <div className="bg-gradient-to-br from-primary/10 via-background to-accent/10 backdrop-blur-lg border border-primary/20 rounded-2xl p-3 shadow-xl">
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
