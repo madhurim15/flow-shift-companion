@@ -74,41 +74,43 @@ public class AppThresholds {
         }
     }
     
+    // Message structure: {Title, Message, SuggestedActions}
+    // SuggestedActions is comma-separated action types that match the message content
     public static String[][] getNudgeMessageVariants(int level) {
         String[][][] allMessages = {
             // Level 1 - Gentle curiosity (5 variants)
             {
-                {"Just Checking In 👋", "Hey {name}, just checking in... You've been on {app} for a bit. How about a quick 2-min walk? 🚶‍♀️✨"},
-                {"Thumb Break Time 😊", "Hey {name}, your thumbs deserve a break! Try 3 deep breaths or jot down what you're feeling? 📝💭"},
-                {"Stretch Time 🙆‍♂️", "Psst {name}... stretch time! {app} will still be here after a 60-second stretch 💪"},
-                {"Better Alternative? 💭", "Hey {name}! Quick question: Would a 5-min journal check-in feel better than scrolling right now? ✍️"},
-                {"Mindful Pause ⏸️", "Hey {name}, pause for a sec 🌟 What if you took 3 deep breaths instead of that next scroll? 🧘‍♀️"}
+                {"Just Checking In 👋", "Hey {name}, just checking in... You've been on {app} for a bit. How about a quick 2-min walk? 🚶‍♀️✨", "walk,stretch"},
+                {"Thumb Break Time 😊", "Hey {name}, your thumbs deserve a break! Try 3 deep breaths or jot down what you're feeling? 📝💭", "breathing,journal"},
+                {"Stretch Time 🙆‍♂️", "Psst {name}... stretch time! {app} will still be here after a 60-second stretch 💪", "stretch,standing"},
+                {"Better Alternative? 💭", "Hey {name}! Quick question: Would a 5-min journal check-in feel better than scrolling right now? ✍️", "journal,voice"},
+                {"Mindful Pause ⏸️", "Hey {name}, pause for a sec 🌟 What if you took 3 deep breaths instead of that next scroll? 🧘‍♀️", "breathing,hydration"}
             },
-            // Level 2 - Concern check-in (7 variants - added masked productivity messages)
+            // Level 2 - Concern check-in (7 variants)
             {
-                {"Real Talk Time 🤔", "Hey {name}, real talk - you've been on {app} for {duration}. How about capturing your thoughts in a voice note? 🎙️💜"},
-                {"Movement Break 🌳", "Hey {name} 💜 Still scrolling? Maybe your body needs movement more than your eyes need content. Take a walk? 🚶‍♀️"},
-                {"Pattern Alert 🧘‍♀️", "Hey {name}, I'm seeing a pattern here... Let's try something different. 3 deep breaths? 🌸"},
-                {"What Are You Looking For? ✍️", "Okay {name}, this is getting long 📱 What if you wrote down what you're actually looking for? 💭"},
-                {"Energy Check ⚡", "Hey {name}, how's your energy? 🔋 Maybe a quick stretch or walk would help more than scrolling? 🌤️"},
-                {"Productivity or Procrastination? 🤔", "Hey {name}, honest check: Is {app} helping your goals or are you avoiding something? 💭"},
-                {"Real Work vs Busy Work 🎯", "{name}, real talk - {duration} on {app}. Is this moving you forward or just keeping you busy? ✍️"}
+                {"Real Talk Time 🤔", "Hey {name}, real talk - you've been on {app} for {duration}. How about capturing your thoughts in a voice note? 🎙️💜", "voice,journal"},
+                {"Movement Break 🌳", "Hey {name} 💜 Still scrolling? Maybe your body needs movement more than your eyes need content. Take a walk? 🚶‍♀️", "walk,stretch"},
+                {"Pattern Alert 🧘‍♀️", "Hey {name}, I'm seeing a pattern here... Let's try something different. 3 deep breaths? 🌸", "breathing,eye-rest"},
+                {"What Are You Looking For? ✍️", "Okay {name}, this is getting long 📱 What if you wrote down what you're actually looking for? 💭", "journal,intention"},
+                {"Energy Check ⚡", "Hey {name}, how's your energy? 🔋 Maybe a quick stretch or walk would help more than scrolling? 🌤️", "stretch,walk"},
+                {"Productivity or Procrastination? 🤔", "Hey {name}, honest check: Is {app} helping your goals or are you avoiding something? 💭", "journal,intention"},
+                {"Real Work vs Busy Work 🎯", "{name}, real talk - {duration} on {app}. Is this moving you forward or just keeping you busy? ✍️", "intention,journal"}
             },
             // Level 3 - Stronger alternative (5 variants)
             {
-                {"Intervention Time! 🚨", "Alright {name}, intervention time! Put the phone down and do 10 jumping jacks. Your brain will thank you 🧠💪"},
-                {"Break The Loop 🔄", "{name}, love the dedication but... this ain't it 😅 How about a 5-min walk outside? Fresh air > stale scrolling 🌤️"},
-                {"Emotion Check 📝", "Real talk {name}: {duration} on {app}? Time to break the loop. Quick journal - what emotion are you avoiding? 💭"},
-                {"Future Self Calling 🙆‍♀️", "{name}, your future self called - they want you to stretch for 2 minutes instead. Can you do that? 💪"},
-                {"Energy Reset ⚡", "{name}, this much {app} drains you more than it fills you 📉 How about a 3-min walk to reset? 🚶‍♀️✨"}
+                {"Intervention Time! 🚨", "Alright {name}, intervention time! Put the phone down and do 10 jumping jacks. Your brain will thank you 🧠💪", "stretch,walk"},
+                {"Break The Loop 🔄", "{name}, love the dedication but... this ain't it 😅 How about a 5-min walk outside? Fresh air > stale scrolling 🌤️", "walk,standing"},
+                {"Emotion Check 📝", "Real talk {name}: {duration} on {app}? Time to break the loop. Quick journal - what emotion are you avoiding? 💭", "journal,voice"},
+                {"Future Self Calling 🙆‍♀️", "{name}, your future self called - they want you to stretch for 2 minutes instead. Can you do that? 💪", "stretch,standing"},
+                {"Energy Reset ⚡", "{name}, this much {app} drains you more than it fills you 📉 How about a 3-min walk to reset? 🚶‍♀️✨", "walk,breathing"}
             },
             // Level 4 - Pattern recognition (5 variants)
             {
-                {"We Need To Talk 🛑", "{name}, we need to talk. This {app} habit is becoming a thing. 20-min walk, now. Your mental health > this content ❤️🚶‍♀️"},
-                {"Tough Love Time 💪", "Listen {name}, tough love time: {duration} on {app}?! Voice record why you're avoiding what you should be doing 🎙️"},
-                {"Stop & Breathe ✋", "{name}!! Stop. Close the app. Take 10 deep breaths. Then write down 3 things you're grateful for 🙏✨"},
-                {"Pattern Not Serving You 😤", "Okay {name}, enough. This pattern isn't serving you. Journal for 5 min about what you're really feeling 📖❤️"},
-                {"Reality Check ⏰", "{name}, real talk: {duration}?! You deserve better than endless scrolling. Take your power back NOW 💪🌟"}
+                {"We Need To Talk 🛑", "{name}, we need to talk. This {app} habit is becoming a thing. 20-min walk, now. Your mental health > this content ❤️🚶‍♀️", "walk,journal"},
+                {"Tough Love Time 💪", "Listen {name}, tough love time: {duration} on {app}?! Voice record why you're avoiding what you should be doing 🎙️", "voice,journal"},
+                {"Stop & Breathe ✋", "{name}!! Stop. Close the app. Take 10 deep breaths. Then write down 3 things you're grateful for 🙏✨", "breathing,gratitude"},
+                {"Pattern Not Serving You 😤", "Okay {name}, enough. This pattern isn't serving you. Journal for 5 min about what you're really feeling 📖❤️", "journal,voice"},
+                {"Reality Check ⏰", "{name}, real talk: {duration}?! You deserve better than endless scrolling. Take your power back NOW 💪🌟", "walk,intention"}
             }
         };
         

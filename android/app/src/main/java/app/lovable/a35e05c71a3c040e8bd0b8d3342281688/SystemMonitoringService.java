@@ -358,14 +358,17 @@ public class SystemMonitoringService extends Service {
       );
       channel.setDescription("Mindful nudges that appear as heads-up notifications");
       channel.enableVibration(true);
+      channel.setVibrationPattern(new long[]{0, 300, 200, 300}); // Custom vibration pattern
       channel.enableLights(true);
       channel.setLightColor(0xFF488AFF);
       channel.setShowBadge(true);
+      channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC); // Show on lock screen
+      channel.setBypassDnd(false); // Respect DND settings
       // Enable sound for nudge notifications
       channel.setSound(
         android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION),
         new android.media.AudioAttributes.Builder()
-          .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+          .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION_EVENT)
           .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
           .build()
       );
@@ -546,15 +549,17 @@ public class SystemMonitoringService extends Service {
     String[] messageData = AppThresholds.getNudgeMessage(this, level);
     String title = messageData[0];
     String messageTemplate = messageData[1];
+    // Get suggested actions from message (3rd element if present)
+    String suggestedActions = messageData.length > 2 ? messageData[2] : "";
     
     // Get contextual actions from ActionSelectionEngine
     Calendar cal = Calendar.getInstance();
     int hour = cal.get(Calendar.HOUR_OF_DAY);
     int minutes = durationSeconds / 60;
     
-    // Get balanced action suggestions based on context
+    // Get action suggestions based on context AND message's suggested actions
     java.util.List<ActionSelectionEngine.ActionButton> actions = 
-        ActionSelectionEngine.getContextualActions(level, psychState, minutes, hour, new String[]{});
+        ActionSelectionEngine.getContextualActions(level, psychState, minutes, hour, new String[]{}, suggestedActions);
     
     // Personalize message with placeholders
     String durationStr = minutes + " minute" + (minutes == 1 ? "" : "s");
@@ -572,11 +577,14 @@ public class SystemMonitoringService extends Service {
       .setContentText(personalizedMessage)
       .setStyle(new NotificationCompat.BigTextStyle().bigText(personalizedMessage))
       .setSmallIcon(getApplicationInfo().icon)
-      .setPriority(NotificationCompat.PRIORITY_HIGH)
-      .setCategory(NotificationCompat.CATEGORY_REMINDER)
+      .setPriority(NotificationCompat.PRIORITY_MAX)  // Maximum priority for heads-up
+      .setCategory(NotificationCompat.CATEGORY_ALARM)  // ALARM category for maximum prominence
       .setAutoCancel(true)
       .setOngoing(false)
-      .setSound(soundUri);
+      .setSound(soundUri)
+      .setVibrate(new long[]{0, 300, 200, 300})  // Vibration pattern: wait, vibrate, pause, vibrate
+      .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)  // Show on lock screen
+      .setDefaults(NotificationCompat.DEFAULT_LIGHTS);  // Enable LED lights
       // Removed setTimeoutAfter to keep notification in tray until user dismisses
     
     // Add action buttons (limit to 2 for better visibility)

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Send, BookOpen, ChevronDown, ChevronUp, MoreHorizontal } from 'lucide-react';
+import { X, Send, BookOpen, ChevronDown, ChevronUp, MoreHorizontal, Pencil, Check, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,6 +35,9 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
   const [currentPrompt] = useState(() => 
     journalPrompts[Math.floor(Math.random() * journalPrompts.length)]
   );
@@ -122,6 +125,52 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
     }
   };
 
+  const startEditing = (journalEntry: JournalEntry) => {
+    setEditingEntryId(journalEntry.id);
+    setEditingText(journalEntry.entry);
+    setExpandedEntry(journalEntry.id);
+  };
+
+  const cancelEditing = () => {
+    setEditingEntryId(null);
+    setEditingText('');
+  };
+
+  const saveEdit = async () => {
+    if (!editingEntryId || !editingText.trim() || savingEdit) return;
+
+    setSavingEdit(true);
+    try {
+      const { error } = await supabase
+        .from('daily_journals')
+        .update({ entry: editingText.trim() })
+        .eq('id', editingEntryId);
+
+      if (error) throw error;
+
+      // Update local state
+      setRecentEntries(prev => 
+        prev.map(e => e.id === editingEntryId ? { ...e, entry: editingText.trim() } : e)
+      );
+
+      toast({
+        title: "Entry updated! ✏️",
+        description: "Your reflection has been saved.",
+      });
+
+      setEditingEntryId(null);
+      setEditingText('');
+    } catch (error) {
+      toast({
+        title: "Couldn't update entry",
+        description: "Please try again in a moment.",
+        variant: "destructive",
+      });
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Header - Fixed */}
@@ -189,8 +238,9 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
               <div className="space-y-3">
                 {recentEntries.map((journalEntry) => {
                   const isExpanded = expandedEntry === journalEntry.id;
+                  const isEditing = editingEntryId === journalEntry.id;
                   const isLongEntry = journalEntry.entry.length > 100;
-                  const shouldTruncate = !isExpanded && isLongEntry;
+                  const shouldTruncate = !isExpanded && isLongEntry && !isEditing;
                   
                   return (
                      <Card 
@@ -204,6 +254,7 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
                         <div 
                           className="p-4 cursor-pointer select-none"
                           onClick={(e) => {
+                            if (isEditing) return;
                             e.preventDefault();
                             e.stopPropagation();
                             setExpandedEntry(isExpanded ? null : journalEntry.id);
@@ -217,7 +268,7 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
                               <Badge variant="outline" className="text-xs">
                                 {journalEntry.entry.length} chars
                               </Badge>
-                              {isLongEntry && (
+                              {isLongEntry && !isEditing && (
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
@@ -239,12 +290,22 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
                           <div className={`bg-muted/30 rounded-lg p-3 transition-all duration-200 ${
                             isExpanded ? 'border border-primary/20' : ''
                           }`}>
-                            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                              {shouldTruncate 
-                                ? `${journalEntry.entry.slice(0, 100)}...` 
-                                : journalEntry.entry
-                              }
-                            </p>
+                            {isEditing ? (
+                              <Textarea
+                                value={editingText}
+                                onChange={(e) => setEditingText(e.target.value.slice(0, maxLength))}
+                                className="resize-none min-h-[80px] text-sm leading-relaxed bg-background"
+                                maxLength={maxLength}
+                                autoFocus
+                              />
+                            ) : (
+                              <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                                {shouldTruncate 
+                                  ? `${journalEntry.entry.slice(0, 100)}...` 
+                                  : journalEntry.entry
+                                }
+                              </p>
+                            )}
                           </div>
                           
                           {/* Footer */}
@@ -258,10 +319,50 @@ export const MicroJournal = ({ onClose }: MicroJournalProps) => {
                                 minute: '2-digit'
                               })}
                             </p>
-                            {isLongEntry && (
-                              <Badge variant={isExpanded ? "default" : "secondary"} className="text-xs">
-                                {isExpanded ? 'Expanded' : 'Click to expand'}
-                              </Badge>
+                            
+                            {isEditing ? (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {editingText.length}/{maxLength}
+                                </Badge>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                  onClick={cancelEditing}
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  className="h-8 gap-1 bg-emerald-600 hover:bg-emerald-700"
+                                  onClick={saveEdit}
+                                  disabled={savingEdit || !editingText.trim()}
+                                >
+                                  <Check className="w-4 h-4" />
+                                  {savingEdit ? 'Saving...' : 'Save'}
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                {isLongEntry && (
+                                  <Badge variant={isExpanded ? "default" : "secondary"} className="text-xs">
+                                    {isExpanded ? 'Expanded' : 'Click to expand'}
+                                  </Badge>
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    startEditing(journalEntry);
+                                  }}
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </Button>
+                              </div>
                             )}
                           </div>
                         </div>

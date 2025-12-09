@@ -27,13 +27,15 @@ public class ActionSelectionEngine {
     
     /**
      * Get contextually appropriate actions based on usage patterns
+     * Now accepts suggestedActions from the nudge message for alignment
      */
     public static List<ActionButton> getContextualActions(
         int level,
         String appCategory,
         int durationMinutes,
         int hourOfDay,
-        String[] existingRecentActions
+        String[] existingRecentActions,
+        String suggestedActions
     ) {
         // Update recent actions tracking
         if (existingRecentActions != null) {
@@ -46,15 +48,21 @@ public class ActionSelectionEngine {
         // Always include mood check option (shortened label)
         ActionButton moodCheck = new ActionButton("😊 Mood", "mood", false);
         
-        // Determine physical/digital ratio based on duration and level
-        int physicalWeight = getPhysicalWeight(durationMinutes, level);
         int numActions = 2; // Always use 2 actions for better notification visibility
         
-        // For Level 3, require physical actions (no dismiss, must act)
-        if (level >= 3) {
-            selectedActions = selectPhysicalActions(allActions, numActions, hourOfDay, appCategory);
+        // If we have suggested actions from the message, prioritize those
+        if (suggestedActions != null && !suggestedActions.isEmpty()) {
+            selectedActions = selectSuggestedActions(allActions, suggestedActions, numActions);
         } else {
-            selectedActions = selectBalancedActions(allActions, numActions, physicalWeight, hourOfDay, appCategory);
+            // Fallback to original logic
+            int physicalWeight = getPhysicalWeight(durationMinutes, level);
+            
+            // For Level 3, require physical actions (no dismiss, must act)
+            if (level >= 3) {
+                selectedActions = selectPhysicalActions(allActions, numActions, hourOfDay, appCategory);
+            } else {
+                selectedActions = selectBalancedActions(allActions, numActions, physicalWeight, hourOfDay, appCategory);
+            }
         }
         
         // Add mood check as first option for Level 1 & 2
@@ -68,6 +76,72 @@ public class ActionSelectionEngine {
         }
         
         return selectedActions;
+    }
+    
+    /**
+     * Backward-compatible overload without suggestedActions
+     */
+    public static List<ActionButton> getContextualActions(
+        int level,
+        String appCategory,
+        int durationMinutes,
+        int hourOfDay,
+        String[] existingRecentActions
+    ) {
+        return getContextualActions(level, appCategory, durationMinutes, hourOfDay, existingRecentActions, null);
+    }
+    
+    /**
+     * Select actions based on suggested actions from the nudge message
+     */
+    private static List<ActionButton> selectSuggestedActions(
+        List<ActionButton> allActions,
+        String suggestedActions,
+        int count
+    ) {
+        List<ActionButton> selected = new ArrayList<>();
+        String[] suggestions = suggestedActions.split(",");
+        
+        // First, find matching actions for suggested deepLinks
+        for (String suggestion : suggestions) {
+            String trimmed = suggestion.trim();
+            for (ActionButton action : allActions) {
+                if (action.deepLink.equals(trimmed) && !containsAction(selected, action.deepLink)) {
+                    selected.add(action);
+                    trackAction(action.deepLink);
+                    if (selected.size() >= count) {
+                        return selected;
+                    }
+                }
+            }
+        }
+        
+        // If we don't have enough, fill with non-recently-used actions
+        if (selected.size() < count) {
+            for (ActionButton action : allActions) {
+                if (!containsAction(selected, action.deepLink) && !wasRecentlyUsed(action.deepLink)) {
+                    selected.add(action);
+                    trackAction(action.deepLink);
+                    if (selected.size() >= count) {
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return selected;
+    }
+    
+    /**
+     * Check if selected list already contains an action with this deepLink
+     */
+    private static boolean containsAction(List<ActionButton> actions, String deepLink) {
+        for (ActionButton action : actions) {
+            if (action.deepLink.equals(deepLink)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
