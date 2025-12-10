@@ -43,6 +43,7 @@ import BoxBreathing from "./pages/BoxBreathing";
 import FocusReset from "./pages/FocusReset";
 import MicroMovement from "./pages/MicroMovement";
 import MindfulSip from "./pages/MindfulSip";
+import BetaDownload from "./pages/BetaDownload";
 
 // Run localStorage migration on app startup
 runLocalStorageMigration();
@@ -490,6 +491,15 @@ const App = () => {
         <>
           <AppContent />
           <ProtectedRoute><MindfulSip /></ProtectedRoute>
+        </>
+      )
+    },
+    {
+      path: "/beta",
+      element: (
+        <>
+          <AppContent />
+          <BetaDownload />
         </>
       )
     },
