@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createHashRouter, RouterProvider, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { TrialProvider } from "@/contexts/TrialContext";
+import { TrialProvider, useTrialContext } from "@/contexts/TrialContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { EnhancedInterventionModal } from "@/components/EnhancedInterventionModal";
@@ -48,9 +48,13 @@ import BetaDownload from "./pages/BetaDownload";
 // Run localStorage migration on app startup
 runLocalStorageMigration();
 
-// Protected route wrapper
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+// Protected route wrapper with trial enforcement
+const ProtectedRoute = ({ children, allowAfterTrial = false }: { 
+  children: React.ReactNode;
+  allowAfterTrial?: boolean;
+}) => {
   const { user, loading } = useAuth();
+  const { trialEnded } = useTrialContext();
   
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -58,6 +62,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+  
+  // Hard block after trial ends (unless route is allowed)
+  if (trialEnded && !allowAfterTrial) {
+    return <Navigate to="/trial-ended" replace />;
   }
   
   return <>{children}</>;
@@ -177,11 +186,11 @@ const router = createHashRouter([
   },
   {
     path: "/trial-ended",
-    element: <ProtectedRoute><TrialEnded /></ProtectedRoute>
+    element: <ProtectedRoute allowAfterTrial><TrialEnded /></ProtectedRoute>
   },
   {
     path: "/feedback",
-    element: <ProtectedRoute><Feedback /></ProtectedRoute>
+    element: <ProtectedRoute allowAfterTrial><Feedback /></ProtectedRoute>
   },
   // New nudge action routes
   {
@@ -417,7 +426,7 @@ const App = () => {
       element: (
         <>
           <AppContent />
-          <ProtectedRoute><TrialEnded /></ProtectedRoute>
+          <ProtectedRoute allowAfterTrial><TrialEnded /></ProtectedRoute>
         </>
       )
     },
@@ -426,7 +435,7 @@ const App = () => {
       element: (
         <>
           <AppContent />
-          <ProtectedRoute><Feedback /></ProtectedRoute>
+          <ProtectedRoute allowAfterTrial><Feedback /></ProtectedRoute>
         </>
       )
     },
