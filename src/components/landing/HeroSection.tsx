@@ -6,7 +6,7 @@ export const HeroSection = () => {
   const navigate = useNavigate();
   
   return (
-    <section className="relative overflow-hidden min-h-screen flex items-center px-4 sm:px-6 lg:px-8 pt-20 bg-gradient-to-br from-[hsl(250,60%,92%)] via-[hsl(280,55%,90%)] to-[hsl(340,50%,92%)]">
+    <section className="relative overflow-hidden min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[hsl(250,60%,92%)] via-[hsl(280,55%,90%)] to-[hsl(340,50%,92%)]">
       {/* Floating Geometric Shapes */}
       <div className="floating-shape w-64 h-64 bg-gradient-to-br from-[hsl(270,60%,75%)] to-[hsl(270,60%,85%)] top-20 left-10 animate-float-gentle" style={{ animationDelay: '0s' }} />
       <div className="floating-shape w-48 h-48 bg-gradient-to-br from-[hsl(210,65%,75%)] to-[hsl(210,65%,85%)] top-40 right-20 animate-float-slow" style={{ animationDelay: '1s' }} />
@@ -14,8 +14,11 @@ export const HeroSection = () => {
       <div className="floating-shape w-40 h-40 bg-gradient-to-br from-[hsl(340,65%,75%)] to-[hsl(340,65%,85%)] bottom-20 right-1/3 animate-float-gentle" style={{ animationDelay: '3s' }} />
       
       <div className="relative max-w-6xl mx-auto text-center w-full py-20 z-10">
-        {/* Badge - Enhanced */}
-        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/95 border-2 border-[hsl(270,60%,75%)] mb-8 animate-fade-in-up shadow-lg hover:scale-105 transition-transform duration-300">
+        {/* App Name */}
+        <h2 className="text-3xl sm:text-4xl font-bold gradient-text mb-4 animate-fade-in-up">FlowFocus</h2>
+        
+        {/* Badge */}
+        <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/95 border-2 border-[hsl(270,60%,75%)] mb-8 animate-fade-in-up shadow-lg hover:scale-105 transition-transform duration-300" style={{ animationDelay: "50ms" }}>
           <Sparkles className="w-5 h-5 text-primary animate-gentle-float" />
           <span className="text-base font-semibold text-gray-800">Gentle Accountability Digital Guardian</span>
         </div>
