@@ -39,7 +39,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.log('Auth state changed:', event, {
           hasSession: !!session,
           hasUser: !!session?.user,
-          userEmail: session?.user?.email,
           isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
         });
         
@@ -60,7 +59,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('Initial session check:', {
         hasSession: !!session,
         hasUser: !!session?.user,
-        userEmail: session?.user?.email,
         isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
       });
       
@@ -92,7 +90,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       console.log('Attempting sign in...', { 
-        email, 
         online: navigator.onLine,
         timestamp: new Date().toISOString()
       });

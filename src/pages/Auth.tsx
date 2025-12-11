@@ -8,6 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Sparkles, Heart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { z } from 'zod';
+
+const authSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -21,6 +27,18 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate input with zod
+    const validation = authSchema.safeParse({ email, password });
+    if (!validation.success) {
+      const errorMessage = validation.error.errors[0]?.message || 'Invalid input';
+      toast({
+        title: "Please check your input",
+        description: errorMessage,
+        variant: "destructive"
+      });
+      return;
+    }
     
     // Check network connectivity
     if (!navigator.onLine) {
