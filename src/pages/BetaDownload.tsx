@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, Shield, MessageSquare, Smartphone, Settings, CheckCircle2, HelpCircle } from "lucide-react";
 
-const GITHUB_RELEASES_URL = "https://github.com/maddyonline/flowfocus-android/releases/latest";
+const GITHUB_RELEASES_URL = "https://github.com/madhurim15/flow-shift-companion/releases/latest";
 const FEEDBACK_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdId9R5dugT1pETsTxADCTS2tPjkJyPFa24o-0pG3VLGw9ydQ/viewform";
 
 const BetaDownload = () => {
