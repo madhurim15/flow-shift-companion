@@ -15,7 +15,7 @@ export const HeroSection = () => {
       
       <div className="relative max-w-6xl mx-auto text-center w-full py-20 z-10">
         {/* App Name */}
-        <h2 className="text-3xl sm:text-4xl font-bold gradient-text mb-4 animate-fade-in-up">FlowFocus</h2>
+        <h2 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-[hsl(270,70%,45%)] mb-6 animate-fade-in-up drop-shadow-lg">FlowFocus</h2>
         
         {/* Badge */}
         <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/95 border-2 border-[hsl(270,60%,75%)] mb-8 animate-fade-in-up shadow-lg hover:scale-105 transition-transform duration-300" style={{ animationDelay: "50ms" }}>
