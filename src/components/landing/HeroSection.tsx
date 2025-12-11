@@ -6,7 +6,7 @@ export const HeroSection = () => {
   const navigate = useNavigate();
   
   return (
-    <section className="relative overflow-hidden min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[hsl(250,60%,92%)] via-[hsl(280,55%,90%)] to-[hsl(340,50%,92%)]">
+    <section className="relative overflow-hidden min-h-screen flex items-center px-4 sm:px-6 lg:px-8 pt-20 bg-gradient-to-br from-[hsl(250,60%,92%)] via-[hsl(280,55%,90%)] to-[hsl(340,50%,92%)]">
       {/* Floating Geometric Shapes */}
       <div className="floating-shape w-64 h-64 bg-gradient-to-br from-[hsl(270,60%,75%)] to-[hsl(270,60%,85%)] top-20 left-10 animate-float-gentle" style={{ animationDelay: '0s' }} />
       <div className="floating-shape w-48 h-48 bg-gradient-to-br from-[hsl(210,65%,75%)] to-[hsl(210,65%,85%)] top-40 right-20 animate-float-slow" style={{ animationDelay: '1s' }} />

@@ -1,3 +1,4 @@
+import { LandingHeader } from "@/components/landing/LandingHeader";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { ProblemSection } from "@/components/landing/ProblemSection";
 import { WhyDifferentSection } from "@/components/landing/WhyDifferentSection";
@@ -11,6 +12,7 @@ import { FinalCTA } from "@/components/landing/FinalCTA";
 const Landing = () => {
   return (
     <div className="min-h-screen bg-background">
+      <LandingHeader />
       <HeroSection />
       <ProblemSection />
       <WhyDifferentSection />
