@@ -74,11 +74,11 @@ const TrialEnded = () => {
           </Button>
           
           <Button 
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/feedback')}
             variant="outline"
             className="w-full"
           >
-            Continue Using FlowFocus
+            More Feedback Options
           </Button>
         </div>
 
