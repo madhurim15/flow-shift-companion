@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Sparkles, BarChart3, Dice5, MessageSquare, Flame } from 'lucide-react';
+import { X, Sparkles, BarChart3, Dice5, MessageSquare, Flame, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getFlowFocusItem, setFlowFocusItem } from '@/utils/localStorageMigration';
 
@@ -63,6 +63,18 @@ export const FirstWeekTips = () => {
     setIsVisible(false);
   };
 
+  const goToPrevTip = () => {
+    setCurrentTipIndex((prev) => (prev === 0 ? TIPS.length - 1 : prev - 1));
+  };
+
+  const goToNextTip = () => {
+    setCurrentTipIndex((prev) => (prev === TIPS.length - 1 ? 0 : prev + 1));
+  };
+
+  const goToTip = (index: number) => {
+    setCurrentTipIndex(index);
+  };
+
   if (!isVisible) return null;
 
   const currentTip = TIPS[currentTipIndex];
@@ -89,30 +101,54 @@ export const FirstWeekTips = () => {
           </Button>
         </div>
 
-        {/* Tip Content */}
-        <div className="flex items-start gap-3">
-          <div className="p-2 bg-primary/10 rounded-xl shrink-0">
-            <TipIcon className="w-5 h-5 text-primary" />
+        {/* Tip Content with Navigation Arrows */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={goToPrevTip}
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className="p-2 bg-primary/10 rounded-xl shrink-0">
+              <TipIcon className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-semibold text-foreground text-sm mb-1">
+                {currentTip.title}
+              </h4>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {currentTip.description}
+              </p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-foreground text-sm mb-1">
-              {currentTip.title}
-            </h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {currentTip.description}
-            </p>
-          </div>
+          
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={goToNextTip}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
         </div>
 
-        {/* Footer */}
+        {/* Footer with Clickable Dots */}
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
-          <div className="flex gap-1">
+          <div className="flex gap-1.5">
             {TIPS.map((_, index) => (
-              <div
+              <button
                 key={index}
-                className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                  index === currentTipIndex ? 'bg-primary' : 'bg-muted-foreground/30'
+                onClick={() => goToTip(index)}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index === currentTipIndex 
+                    ? 'bg-primary' 
+                    : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
                 }`}
+                aria-label={`Go to tip ${index + 1}`}
               />
             ))}
           </div>
