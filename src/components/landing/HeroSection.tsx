@@ -5,21 +5,6 @@ import { Sparkles, ArrowRight } from "lucide-react";
 export const HeroSection = () => {
   const navigate = useNavigate();
   
-  const handleGetApp = () => {
-    // Try to open native app first using deep link
-    const deepLink = 'flowfocus://app';
-    
-    const timeout = setTimeout(() => {
-      // If we're still here after 1.5s, app isn't installed - go to beta
-      navigate('/beta');
-    }, 1500);
-    
-    // Try to open the app
-    window.location.href = deepLink;
-    
-    // If app opens, clear the timeout (user will leave page)
-    window.addEventListener('blur', () => clearTimeout(timeout), { once: true });
-  };
   
   return (
     <section className="relative overflow-hidden min-h-screen flex items-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[hsl(250,60%,92%)] via-[hsl(280,55%,90%)] to-[hsl(340,50%,92%)]">
@@ -54,7 +39,7 @@ export const HeroSection = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10 animate-fade-in-up" style={{ animationDelay: "300ms" }}>
           <Button 
             size="lg" 
-            onClick={handleGetApp}
+            onClick={() => navigate('/auth')}
             className="h-16 px-12 text-xl font-bold bg-[hsl(270,60%,65%)] hover:bg-[hsl(270,60%,55%)] text-white animate-glow-button transition-all duration-300 hover:scale-105"
           >
             Start 14‑Day Free Trial
