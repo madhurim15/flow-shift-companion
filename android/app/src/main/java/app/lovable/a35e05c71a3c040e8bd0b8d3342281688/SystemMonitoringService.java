@@ -351,6 +351,15 @@ public class SystemMonitoringService extends Service {
 
   private void createNudgeNotificationChannel() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+      
+      // CRITICAL: Delete existing channel to force new settings to take effect
+      // Android caches channel settings, so we must delete and recreate
+      if (nm.getNotificationChannel(NUDGE_CHANNEL_ID) != null) {
+        nm.deleteNotificationChannel(NUDGE_CHANNEL_ID);
+        Log.i("FlowFocus", "Deleted old nudge notification channel to reset settings");
+      }
+      
       NotificationChannel channel = new NotificationChannel(
         NUDGE_CHANNEL_ID,
         "FlowFocus Nudges",
@@ -364,16 +373,16 @@ public class SystemMonitoringService extends Service {
       channel.setShowBadge(true);
       channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC); // Show on lock screen
       channel.setBypassDnd(false); // Respect DND settings
-      // Enable sound for nudge notifications
+      // Enable sound for nudge notifications - use ALARM type for louder sound
       channel.setSound(
-        android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION),
+        android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM),
         new android.media.AudioAttributes.Builder()
-          .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION_EVENT)
+          .setUsage(android.media.AudioAttributes.USAGE_ALARM)
           .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
           .build()
       );
-      NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
       nm.createNotificationChannel(channel);
+      Log.i("FlowFocus", "Created nudge notification channel with IMPORTANCE_HIGH and alarm sound");
     }
   }
 
@@ -545,6 +554,14 @@ public class SystemMonitoringService extends Service {
   }
 
   private void showNudgeNotification(String packageName, String appName, int level, int durationSeconds, String psychState) {
+    // Acquire wake lock to ensure screen turns on and stays on for notification
+    PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+      PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE,
+      "FlowFocus::NudgeWakeLock"
+    );
+    wakeLock.acquire(10000); // Hold for 10 seconds to ensure notification is seen
+    Log.d("FlowFocus", "Acquired wake lock for nudge notification");
+    
     // Get message with rotation (pass context for SharedPreferences)
     String[] messageData = AppThresholds.getNudgeMessage(this, level);
     String title = messageData[0];
@@ -568,9 +585,17 @@ public class SystemMonitoringService extends Service {
       .replace("{app}", appName)
       .replace("{duration}", durationStr);
     
+    // Create full-screen intent for maximum prominence (like alarms/calls)
+    Intent fullScreenIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("flowfocus://action/breathing"));
+    fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(
+      this, 999, fullScreenIntent,
+      PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+    );
+    
     // Build notification with action buttons
-    // Add sound to notification
-    android.net.Uri soundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION);
+    // Add sound to notification - use ALARM type for louder notification
+    android.net.Uri soundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM);
     
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NUDGE_CHANNEL_ID)
       .setContentTitle(title)
@@ -582,9 +607,10 @@ public class SystemMonitoringService extends Service {
       .setAutoCancel(true)
       .setOngoing(false)
       .setSound(soundUri)
-      .setVibrate(new long[]{0, 300, 200, 300})  // Vibration pattern: wait, vibrate, pause, vibrate
+      .setVibrate(new long[]{0, 500, 200, 500, 200, 500})  // Stronger vibration pattern
       .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)  // Show on lock screen
-      .setDefaults(NotificationCompat.DEFAULT_LIGHTS);  // Enable LED lights
+      .setDefaults(NotificationCompat.DEFAULT_LIGHTS)  // Enable LED lights
+      .setFullScreenIntent(fullScreenPendingIntent, true);  // Full-screen intent for alarm-like prominence
       // Removed setTimeoutAfter to keep notification in tray until user dismisses
     
     // Add action buttons (limit to 2 for better visibility)
@@ -652,7 +678,7 @@ public class SystemMonitoringService extends Service {
     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(NUDGE_NOTIF_ID, builder.build());
     
-    Log.d("FlowFocus", "Showed Level " + level + " nudge with " + actions.size() + " actions: " + title + " | User: " + userName);
+    Log.d("FlowFocus", "Showed Level " + level + " nudge with full-screen intent and " + actions.size() + " actions: " + title + " | User: " + userName);
   }
   
   private void checkForMetaNudge() {
@@ -680,6 +706,13 @@ public class SystemMonitoringService extends Service {
   }
   
   private void showMetaNudgeNotification(int level, int totalSeconds) {
+    // Acquire wake lock for meta-nudge too
+    PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+      PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE,
+      "FlowFocus::MetaNudgeWakeLock"
+    );
+    wakeLock.acquire(10000);
+    
     String[] metaMessages = {
       "You've been on your phone for 1 hour today. Time for a real-world check-in? 🌍",
       "2 hours of screen time today, " + userName + ". Your eyes and mind might need a longer break 👀💭",
@@ -702,9 +735,17 @@ public class SystemMonitoringService extends Service {
       PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
     );
     
+    // Create full-screen intent for meta-nudge too
+    Intent fullScreenIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("flowfocus://action/journal"));
+    fullScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    PendingIntent fullScreenPendingIntent = PendingIntent.getActivity(
+      this, 998, fullScreenIntent,
+      PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+    );
+    
     // Build meta-nudge notification
     String detailMessage = message + "\n\nTotal today: " + hours + "h " + minutes + "m";
-    android.net.Uri soundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION);
+    android.net.Uri soundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM);
     
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NUDGE_CHANNEL_ID)
       .setContentTitle("Daily Screen Time Alert 📱")
@@ -712,14 +753,17 @@ public class SystemMonitoringService extends Service {
       .setStyle(new NotificationCompat.BigTextStyle().bigText(detailMessage))
       .setSmallIcon(getApplicationInfo().icon)
       .setPriority(NotificationCompat.PRIORITY_MAX)
-      .setCategory(NotificationCompat.CATEGORY_REMINDER)
+      .setCategory(NotificationCompat.CATEGORY_ALARM)
       .setAutoCancel(true)
       .setSound(soundUri)
+      .setVibrate(new long[]{0, 500, 200, 500, 200, 500})
+      .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+      .setFullScreenIntent(fullScreenPendingIntent, true)
       .setContentIntent(pendingIntent);
     
     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(META_NUDGE_NOTIF_ID, builder.build());
     
-    Log.d("FlowFocus", "Showed meta-nudge level " + level + " - Total screen time: " + hours + "h " + minutes + "m");
+    Log.d("FlowFocus", "Showed meta-nudge level " + level + " with full-screen intent - Total screen time: " + hours + "h " + minutes + "m");
   }
 }
