@@ -39,6 +39,14 @@ public class MainActivity extends BridgeActivity {
         // Configure window for proper display cutout handling and heads-up notifications
         configureWindow();
         
+        // Handle deep link if app was cold-started via it
+        Intent launchIntent = getIntent();
+        if (launchIntent != null && launchIntent.getData() != null) {
+            String url = launchIntent.getData().toString();
+            android.util.Log.w("FlowFocus", "Cold start deep link detected: " + url);
+            // Capacitor bridge will handle this automatically after full initialization
+        }
+        
         // DO NOT auto-start here - let onboarding flow handle it with proper Samsung delay
         android.util.Log.i("FlowFocus", "MainActivity ready - service will be started by onboarding");
     }
@@ -58,8 +66,21 @@ public class MainActivity extends BridgeActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        setIntent(intent); // Important: update the intent for the activity
         
-        if (intent.getBooleanExtra("trigger_notification_reschedule", false)) {
+        // Handle deep links from nudge actions
+        if (intent != null && intent.getData() != null) {
+            String url = intent.getData().toString();
+            android.util.Log.w("FlowFocus", "Deep link received in onNewIntent: " + url);
+            
+            // Forward to Capacitor bridge - this triggers 'appUrlOpen' event in DeepLinkHandler
+            if (getBridge() != null) {
+                getBridge().handleLocalUrl(url);
+            }
+        }
+        
+        // Handle midnight reschedule trigger
+        if (intent != null && intent.getBooleanExtra("trigger_notification_reschedule", false)) {
             android.util.Log.i("FlowFocus", "MainActivity: Received midnight reschedule trigger");
             
             // Send event to JavaScript
