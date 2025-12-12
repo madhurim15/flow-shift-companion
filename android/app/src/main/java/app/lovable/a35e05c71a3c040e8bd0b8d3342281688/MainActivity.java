@@ -68,15 +68,11 @@ public class MainActivity extends BridgeActivity {
         super.onNewIntent(intent);
         setIntent(intent); // Important: update the intent for the activity
         
-        // Handle deep links from nudge actions
+        // Log deep links - Capacitor's App plugin automatically handles ACTION_VIEW intents
+        // and fires 'appUrlOpen' event which DeepLinkHandler.tsx listens for
         if (intent != null && intent.getData() != null) {
             String url = intent.getData().toString();
             android.util.Log.w("FlowFocus", "Deep link received in onNewIntent: " + url);
-            
-            // Forward to Capacitor bridge - this triggers 'appUrlOpen' event in DeepLinkHandler
-            if (getBridge() != null) {
-                getBridge().handleLocalUrl(url);
-            }
         }
         
         // Handle midnight reschedule trigger
