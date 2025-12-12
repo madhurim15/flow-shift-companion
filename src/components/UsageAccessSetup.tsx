@@ -6,10 +6,34 @@ import { useToast } from '@/hooks/use-toast';
 import { Capacitor } from '@capacitor/core';
 import { SystemMonitoring } from '@/plugins/system-monitoring';
 import { useLocalNotifications } from '@/hooks/useLocalNotifications';
+import { supabase } from '@/integrations/supabase/client';
 
 type UsageAccessSetupProps = {
   onPermissionGranted: () => void;
   onSkip: () => void;
+};
+
+// Helper function to fetch user's preferred name
+const fetchUserName = async (): Promise<string> => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('preferred_name, full_name')
+        .eq('id', user.id)
+        .maybeSingle();
+      
+      if (profile?.preferred_name) {
+        return profile.preferred_name;
+      } else if (profile?.full_name) {
+        return profile.full_name.split(' ')[0];
+      }
+    }
+  } catch (e) {
+    console.log('[UsageAccessSetup] Failed to fetch user name:', e);
+  }
+  return 'friend';
 };
 
 const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps) => {
@@ -20,7 +44,6 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
 
   const checkUsageAccess = async () => {
     if (!Capacitor.isNativePlatform()) {
-      // Skip for web - no usage access needed
       onPermissionGranted();
       return;
     }
@@ -33,15 +56,18 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
       if (result.usageAccess) {
         toast({
           title: "Permission Granted!",
-          description: "Starting FlowLight monitoring...",
+          description: "Starting FlowFocus monitoring...",
         });
 
         try {
-          // Request notifications first (Android 13+ requirement)
           await requestNotificationPermissions();
         } catch (e) {
           console.log('[UsageAccessSetup] Notification permission request failed (continuing):', e);
         }
+
+        // Fetch user's preferred name
+        const userName = await fetchUserName();
+        console.log('[UsageAccessSetup] Using userName for nudges:', userName);
 
         // Samsung-specific delay before starting monitoring
         const isSamsung = /samsung/i.test(navigator.userAgent) || /SM-[A-Z]\d+/i.test(navigator.userAgent);
@@ -50,19 +76,20 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
         
         setTimeout(async () => {
           try {
-            await SystemMonitoring.startMonitoring();
+            await SystemMonitoring.startMonitoring({ userName });
             console.log('[UsageAccessSetup] Monitoring started successfully');
             onPermissionGranted();
           } catch (error) {
             console.error('[UsageAccessSetup] Failed to start monitoring:', error);
             // Retry logic
-            setTimeout(() => {
-              SystemMonitoring.startMonitoring()
-                .then(() => {
-                  console.log('[UsageAccessSetup] Monitoring started on retry');
-                  onPermissionGranted();
-                })
-                .catch(err => console.error('[UsageAccessSetup] Retry failed:', err));
+            setTimeout(async () => {
+              try {
+                await SystemMonitoring.startMonitoring({ userName });
+                console.log('[UsageAccessSetup] Monitoring started on retry');
+                onPermissionGranted();
+              } catch (err) {
+                console.error('[UsageAccessSetup] Retry failed:', err);
+              }
             }, 2000);
           }
         }, delayMs);
@@ -75,10 +102,8 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
   };
 
   useEffect(() => {
-    // Check initial state
     checkUsageAccess();
 
-    // Check when app becomes visible (user returns from settings)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         checkUsageAccess();
@@ -92,78 +117,6 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
   const requestUsageAccess = async () => {
     try {
       await SystemMonitoring.requestPermissions();
-  const checkAgainNow = async () => {
-    try {
-      setIsChecking(true);
-      console.log('[UsageAccessSetup] Manual check triggered');
-      
-      const status = await SystemMonitoring.checkPermissions();
-      console.log('[UsageAccessSetup] Manual check result:', status);
-      
-      if (status.usageAccess) {
-        setHasUsageAccess(true);
-        
-        // Samsung-specific delay before starting monitoring
-        const isSamsung = /samsung/i.test(navigator.userAgent) || 
-                          /SM-[A-Z]\d+/i.test(navigator.userAgent);
-        const delayMs = isSamsung ? 1500 : 500;
-        
-        console.log(`[UsageAccessSetup] Starting monitoring with ${delayMs}ms delay (Samsung: ${isSamsung})`);
-        
-        setTimeout(async () => {
-          try {
-            await SystemMonitoring.startMonitoring({ 
-              debug: false 
-            });
-            console.log('[UsageAccessSetup] Monitoring started successfully');
-            toast({
-              title: "Success!",
-              description: "System monitoring activated 🎉",
-            });
-            onPermissionGranted();
-          } catch (error) {
-            console.error('[UsageAccessSetup] Failed to start monitoring:', error);
-            
-            // Single retry after 2 seconds
-            setTimeout(async () => {
-              try {
-                await SystemMonitoring.startMonitoring({ debug: false });
-                console.log('[UsageAccessSetup] Retry successful');
-                toast({
-                  title: "Success!",
-                  description: "Monitoring started!",
-                });
-                onPermissionGranted();
-              } catch (retryError) {
-                console.error('[UsageAccessSetup] Retry failed - entering limited mode:', retryError);
-                toast({
-                  title: "Limited Mode",
-                  description: "Some features may not work. Try restarting the app.",
-                  variant: "destructive",
-                });
-                // Still proceed to let user use the app
-                onPermissionGranted();
-              }
-            }, 2000);
-          }
-        }, delayMs);
-      } else {
-        toast({
-          title: "Permission Needed",
-          description: "Please enable Usage Access in the next screen",
-        });
-      }
-    } catch (error) {
-      console.error('[UsageAccessSetup] Check failed:', error);
-      toast({
-        title: "Error",
-        description: "Could not check permissions",
-        variant: "destructive",
-      });
-    } finally {
-      setTimeout(() => setIsChecking(false), 1000);
-    }
-  };
     } catch (error) {
       console.error('Error requesting usage access:', error);
       toast({
@@ -220,7 +173,12 @@ const UsageAccessSetup = ({ onPermissionGranted, onSkip }: UsageAccessSetupProps
         
         try {
           await requestNotificationPermissions();
-          await SystemMonitoring.startMonitoring();
+          
+          // Fetch user's preferred name
+          const userName = await fetchUserName();
+          console.log('[UsageAccessSetup] Using userName for nudges:', userName);
+          
+          await SystemMonitoring.startMonitoring({ userName });
           onPermissionGranted();
         } catch (e) {
           console.error('[UsageAccessSetup] Failed to start monitoring:', e);
