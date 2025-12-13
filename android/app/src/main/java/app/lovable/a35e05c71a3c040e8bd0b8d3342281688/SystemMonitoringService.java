@@ -367,22 +367,22 @@ public class SystemMonitoringService extends Service {
       );
       channel.setDescription("Mindful nudges that appear as heads-up notifications");
       channel.enableVibration(true);
-      channel.setVibrationPattern(new long[]{0, 300, 200, 300}); // Custom vibration pattern
+      channel.setVibrationPattern(new long[]{0, 500, 200, 500, 200, 500}); // Stronger vibration pattern
       channel.enableLights(true);
       channel.setLightColor(0xFF488AFF);
       channel.setShowBadge(true);
       channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC); // Show on lock screen
       channel.setBypassDnd(false); // Respect DND settings
-      // Enable sound for nudge notifications - use ALARM type for louder sound
+      // Use RINGTONE type instead of ALARM - phone ringtones are typically louder and more attention-grabbing
       channel.setSound(
-        android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM),
+        android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_RINGTONE),
         new android.media.AudioAttributes.Builder()
-          .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+          .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
           .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
           .build()
       );
       nm.createNotificationChannel(channel);
-      Log.i("FlowFocus", "Created nudge notification channel with IMPORTANCE_HIGH and alarm sound");
+      Log.i("FlowFocus", "Created nudge notification channel with IMPORTANCE_HIGH and RINGTONE sound");
     }
   }
 
@@ -594,8 +594,8 @@ public class SystemMonitoringService extends Service {
     );
     
     // Build notification with action buttons
-    // Add sound to notification - use ALARM type for louder notification
-    android.net.Uri soundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM);
+    // Use RINGTONE type for louder, more attention-grabbing sound
+    android.net.Uri soundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_RINGTONE);
     
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NUDGE_CHANNEL_ID)
       .setContentTitle(title)
@@ -614,62 +614,27 @@ public class SystemMonitoringService extends Service {
       // Removed setTimeoutAfter to keep notification in tray until user dismisses
     
     // Add action buttons (limit to 2 for better visibility)
+    // Use PendingIntent.getActivity() DIRECTLY instead of going through BroadcastReceiver
+    // This fixes the issue where deep links don't open the app on Android 10+
     int actionCount = Math.min(2, actions.size());
     for (int i = 0; i < actionCount; i++) {
       ActionSelectionEngine.ActionButton action = actions.get(i);
       
-      // Create deep link intent for this action
-      Intent actionIntent = new Intent(this, NudgeActions.class);
+      // Create direct activity intent with deep link - bypasses BroadcastReceiver entirely
+      Intent directIntent = new Intent(Intent.ACTION_VIEW);
+      directIntent.setData(Uri.parse("flowfocus://action/" + action.deepLink));
+      directIntent.setPackage(getPackageName());
+      directIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+      // Explicitly set the component to MainActivity
+      directIntent.setClassName(this, "app.lovable.a35e05c71a3c040e8bd0b8d3342281688.MainActivity");
       
-      // Map deep link to action constant
-      if (action.deepLink.equals("mood")) {
-        actionIntent.setAction(NudgeActions.ACTION_MOOD);
-      } else if (action.deepLink.equals("hydration")) {
-        actionIntent.setAction(NudgeActions.ACTION_HYDRATION);
-      } else if (action.deepLink.equals("eye-rest")) {
-        actionIntent.setAction(NudgeActions.ACTION_EYE_REST);
-      } else if (action.deepLink.equals("breathing")) {
-        actionIntent.setAction(NudgeActions.ACTION_BREATHING);
-      } else if (action.deepLink.equals("stretch")) {
-        actionIntent.setAction(NudgeActions.ACTION_STRETCH);
-      } else if (action.deepLink.equals("walk")) {
-        actionIntent.setAction(NudgeActions.ACTION_WALK);
-      } else if (action.deepLink.equals("standing")) {
-        actionIntent.setAction(NudgeActions.ACTION_STANDING);
-      } else if (action.deepLink.equals("journal")) {
-        actionIntent.setAction(NudgeActions.ACTION_JOURNAL);
-      } else if (action.deepLink.equals("voice")) {
-        actionIntent.setAction(NudgeActions.ACTION_VOICE);
-      } else if (action.deepLink.equals("photo")) {
-        actionIntent.setAction(NudgeActions.ACTION_PHOTO);
-      } else if (action.deepLink.equals("win")) {
-        actionIntent.setAction(NudgeActions.ACTION_WIN);
-      } else if (action.deepLink.equals("intention")) {
-        actionIntent.setAction(NudgeActions.ACTION_INTENTION);
-      } else if (action.deepLink.equals("gratitude")) {
-        actionIntent.setAction(NudgeActions.ACTION_GRATITUDE);
-      } else if (action.deepLink.equals("meditation")) {
-        actionIntent.setAction(NudgeActions.ACTION_MEDITATION);
-      } else if (action.deepLink.equals("power-nap")) {
-        actionIntent.setAction(NudgeActions.ACTION_POWER_NAP);
-      } else if (action.deepLink.equals("eye-yoga")) {
-        actionIntent.setAction(NudgeActions.ACTION_EYE_YOGA);
-      } else if (action.deepLink.equals("box-breathing")) {
-        actionIntent.setAction(NudgeActions.ACTION_BOX_BREATHING);
-      } else if (action.deepLink.equals("focus-reset")) {
-        actionIntent.setAction(NudgeActions.ACTION_FOCUS_RESET);
-      } else if (action.deepLink.equals("micro-movement")) {
-        actionIntent.setAction(NudgeActions.ACTION_MICRO_MOVEMENT);
-      } else if (action.deepLink.equals("mindful-sip")) {
-        actionIntent.setAction(NudgeActions.ACTION_MINDFUL_SIP);
-      }
-      
-      PendingIntent actionPendingIntent = PendingIntent.getBroadcast(
-        this, 100 + i, actionIntent,
+      PendingIntent actionPendingIntent = PendingIntent.getActivity(
+        this, 100 + i, directIntent,
         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
       );
       
       builder.addAction(0, action.label, actionPendingIntent);
+      Log.d("FlowFocus", "Added action button: " + action.label + " -> flowfocus://action/" + action.deepLink);
     }
     
     // Note: Dismiss button removed to keep notification action count minimal
@@ -678,7 +643,7 @@ public class SystemMonitoringService extends Service {
     NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     nm.notify(NUDGE_NOTIF_ID, builder.build());
     
-    Log.d("FlowFocus", "Showed Level " + level + " nudge with full-screen intent and " + actions.size() + " actions: " + title + " | User: " + userName);
+    Log.d("FlowFocus", "Showed Level " + level + " nudge with DIRECT activity intents for " + actionCount + " actions: " + title + " | User: " + userName);
   }
   
   private void checkForMetaNudge() {
@@ -745,7 +710,8 @@ public class SystemMonitoringService extends Service {
     
     // Build meta-nudge notification
     String detailMessage = message + "\n\nTotal today: " + hours + "h " + minutes + "m";
-    android.net.Uri soundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM);
+    // Use RINGTONE type for louder, more attention-grabbing sound
+    android.net.Uri soundUri = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_RINGTONE);
     
     NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NUDGE_CHANNEL_ID)
       .setContentTitle("Daily Screen Time Alert 📱")
