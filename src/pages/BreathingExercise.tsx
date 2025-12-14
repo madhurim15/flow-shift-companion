@@ -10,7 +10,7 @@ const BreathingExercise = () => {
   const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
-    document.title = "Breathing Exercise - FlowLight";
+    document.title = "Breathing Exercise - FlowFocus";
   }, []);
 
   useEffect(() => {

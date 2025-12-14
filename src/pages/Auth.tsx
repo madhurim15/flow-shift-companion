@@ -70,7 +70,7 @@ const Auth = () => {
       } else {
         if (isSignUp) {
           toast({
-            title: "Welcome to Flowlight! ✨",
+            title: "Welcome to FlowFocus! ✨",
             description: "Check your email to confirm your account, then come back to start flowing."
           });
         } else {
@@ -103,7 +103,7 @@ const Auth = () => {
               <Sparkles className="h-10 w-10 text-primary mx-auto" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">
-              {isSignUp ? 'Join Flowlight' : 'Welcome back'}
+              {isSignUp ? 'Join FlowFocus' : 'Welcome back'}
             </h1>
             <p className="text-muted-foreground text-sm">
               {isSignUp 

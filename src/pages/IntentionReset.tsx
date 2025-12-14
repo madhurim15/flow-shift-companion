@@ -13,7 +13,7 @@ const IntentionReset = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    document.title = "Intention Reset - FlowLight";
+    document.title = "Intention Reset - FlowFocus";
   }, []);
 
   const handleSave = async () => {

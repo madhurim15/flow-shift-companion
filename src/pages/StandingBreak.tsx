@@ -10,7 +10,7 @@ const StandingBreak = () => {
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    document.title = "Standing Break - FlowLight";
+    document.title = "Standing Break - FlowFocus";
   }, []);
 
   useEffect(() => {

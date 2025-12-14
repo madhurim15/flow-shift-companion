@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Flowlight Design System - Gentle, supportive, and calming */
+/* FlowFocus Design System - Gentle, supportive, and calming */
 
 @layer base {
   :root {
@@ -37,7 +37,7 @@
 
     --radius: 1rem;
 
-    /* Flowlight pastel colors */
+    /* FlowFocus pastel colors */
     --flow-calm: 210 65% 88%;
     --flow-gentle: 180 50% 88%;
     --flow-warm: 30 70% 88%;
@@ -82,7 +82,7 @@
     --input: 220 25% 18%;
     --ring: 210 80% 70%;
 
-    /* Flowlight dark custom colors */
+    /* FlowFocus dark custom colors */
     --flow-calm: 210 50% 30%;
     --flow-gentle: 150 30% 25%;
     --flow-warm: 45 40% 25%;

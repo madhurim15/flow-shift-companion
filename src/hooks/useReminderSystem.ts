@@ -149,7 +149,7 @@ export const useReminderSystem = () => {
   const testNotification = async () => {
     if (Capacitor.isNativePlatform()) {
       await localNotifications.scheduleHighPriorityReminder(
-        'FlowLight ✨',
+        'FlowFocus ✨',
         reminderMessages.morning,
         1
       );

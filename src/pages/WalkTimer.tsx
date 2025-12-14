@@ -10,7 +10,7 @@ const WalkTimer = () => {
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    document.title = "Walk Timer - FlowLight";
+    document.title = "Walk Timer - FlowFocus";
   }, []);
 
   useEffect(() => {

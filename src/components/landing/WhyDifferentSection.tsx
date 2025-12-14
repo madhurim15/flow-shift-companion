@@ -72,7 +72,7 @@ export const WhyDifferentSection = () => {
           <div className="bg-white/95 p-10 md:p-12 rounded-3xl text-center border-2 border-[hsl(270,60%,75%)] shadow-xl">
             <p className="text-xl md:text-2xl font-semibold leading-relaxed text-gray-800">
               <span className="font-bold text-[hsl(0,70%,55%)]">Other apps:</span> "You failed again. Try harder."<br />
-              <span className="font-bold text-[hsl(270,60%,65%)]">FlowLight:</span> "What's really going on? Let's fix the root cause."
+              <span className="font-bold text-[hsl(270,60%,65%)]">FlowFocus:</span> "What's really going on? Let's fix the root cause."
             </p>
           </div>
         </ScrollReveal>

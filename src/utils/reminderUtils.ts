@@ -145,11 +145,11 @@ export const showNotification = async (type: ReminderType) => {
   if ('serviceWorker' in navigator) {
     try {
       const registration = await navigator.serviceWorker.ready;
-      await registration.showNotification('FlowLight Gentle Reminder', {
+      await registration.showNotification('FlowFocus Gentle Reminder', {
         body: message,
         icon: '/favicon.ico',
         badge: '/favicon.ico',
-        tag: 'flowlight-reminder',
+        tag: 'flowfocus-reminder',
         requireInteraction: true,
         data: {
           reminderType: type,
@@ -164,10 +164,10 @@ export const showNotification = async (type: ReminderType) => {
   
   // Fallback to basic notification
   if (Notification.permission === 'granted') {
-    new Notification('FlowLight Gentle Reminder', {
+    new Notification('FlowFocus Gentle Reminder', {
       body: message,
       icon: '/favicon.ico',
-      tag: 'flowlight-reminder'
+      tag: 'flowfocus-reminder'
     });
   }
 };

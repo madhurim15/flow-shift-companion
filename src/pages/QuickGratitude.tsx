@@ -13,7 +13,7 @@ const QuickGratitude = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    document.title = "Gratitude - FlowLight";
+    document.title = "Gratitude - FlowFocus";
   }, []);
 
   const updateItem = (index: number, value: string) => {

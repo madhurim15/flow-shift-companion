@@ -9,7 +9,7 @@ const Hydration = () => {
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    document.title = "Hydration Break - FlowLight";
+    document.title = "Hydration Break - FlowFocus";
   }, []);
 
   useEffect(() => {

@@ -13,7 +13,7 @@ const WinLog = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    document.title = "Win Log - FlowLight";
+    document.title = "Win Log - FlowFocus";
   }, []);
 
   const handleSave = async () => {

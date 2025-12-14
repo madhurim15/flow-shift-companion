@@ -15,7 +15,7 @@ const PhotoCapture = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    document.title = "Photo of the Day - FlowLight";
+    document.title = "Photo of the Day - FlowFocus";
   }, []);
 
   const handleSave = async () => {

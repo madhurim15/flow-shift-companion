@@ -35,7 +35,7 @@ const Focus = () => {
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="text-xl">✨</span>
-            <span className="font-medium">Flowlight</span>
+            <span className="font-medium">FlowFocus</span>
           </button>
           
           <div className="flex items-center space-x-4">

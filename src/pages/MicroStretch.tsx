@@ -20,7 +20,7 @@ const MicroStretch = () => {
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    document.title = "Micro Stretch - FlowLight";
+    document.title = "Micro Stretch - FlowFocus";
   }, []);
 
   useEffect(() => {

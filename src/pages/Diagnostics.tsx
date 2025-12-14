@@ -204,7 +204,7 @@ const Diagnostics = () => {
       await SystemMonitoring.startMonitoring({ debug: true });
       toast({
         title: "Monitoring Started",
-        description: "FlowLight monitoring active with debug thresholds",
+        description: "FlowFocus monitoring active with debug thresholds",
         duration: 4000
       });
     } catch (error) {
@@ -221,7 +221,7 @@ const Diagnostics = () => {
       await SystemMonitoring.stopMonitoring();
       toast({
         title: "Monitoring Stopped",
-        description: "FlowLight monitoring has been paused",
+        description: "FlowFocus monitoring has been paused",
         duration: 3000
       });
     } catch (error) {
@@ -238,7 +238,7 @@ const Diagnostics = () => {
       await SystemMonitoring.requestPermissions();
       toast({
         title: "Opening Settings",
-        description: "Please enable Usage Access for FlowLight",
+        description: "Please enable Usage Access for FlowFocus",
         duration: 5000
       });
       setTimeout(() => {
@@ -258,7 +258,7 @@ const Diagnostics = () => {
       await SystemMonitoring.openBatteryOptimizationSettings();
       toast({
         title: "Opening Battery Settings",
-        description: "Disable battery optimization for FlowLight to ensure monitoring works reliably",
+        description: "Disable battery optimization for FlowFocus to ensure monitoring works reliably",
         duration: 5000
       });
     } catch (error) {
@@ -655,7 +655,7 @@ const Diagnostics = () => {
               <div className="flex justify-between items-center">
                 <span>Persistent Notification:</span>
                 <Badge variant="outline" className="text-xs">
-                  Check for "FlowLight monitoring active"
+                  Check for "FlowFocus monitoring active"
                 </Badge>
               </div>
 
@@ -787,7 +787,7 @@ const Diagnostics = () => {
                     <Separator className="my-3" />
                     <div className="font-bold text-sm mb-2">Verify Installation:</div>
                     <div className="bg-background p-2 rounded">
-                      adb logcat -c && adb logcat -s FlowLight Capacitor
+                      adb logcat -c && adb logcat -s FlowFocus Capacitor
                     </div>
                     <div className="mt-2 text-yellow-600 dark:text-yellow-500 font-medium">
                       📋 Look for BUILD_STAMP: {BUILD_STAMP} in logs

@@ -10,7 +10,7 @@ const EyeRest = () => {
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    document.title = "Eye Rest - FlowLight";
+    document.title = "Eye Rest - FlowFocus";
   }, []);
 
   useEffect(() => {

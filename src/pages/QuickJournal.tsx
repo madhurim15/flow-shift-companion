@@ -16,7 +16,7 @@ const QuickJournal = () => {
   const prompt = searchParams.get("prompt") || "What was I avoiding just now?";
 
   useEffect(() => {
-    document.title = "Quick Journal - FlowLight";
+    document.title = "Quick Journal - FlowFocus";
   }, []);
 
   const handleSave = async () => {
