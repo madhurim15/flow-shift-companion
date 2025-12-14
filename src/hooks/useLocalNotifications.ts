@@ -29,10 +29,10 @@ export const useLocalNotifications = () => {
       // Create high-importance notification channel for Android heads-up banners
       if (Capacitor.getPlatform() === 'android') {
         await LocalNotifications.createChannel({
-          id: 'flowlight_high',
-          name: 'FlowLight High Priority',
+          id: 'flowfocus_nudge_channel',
+          name: 'FlowFocus Reminders',
           description: 'High priority notifications that appear as heads-up banners',
-          importance: 4, // IMPORTANCE_HIGH for heads-up display
+          importance: 5, // IMPORTANCE_MAX for heads-up display
           visibility: 1, // VISIBILITY_PUBLIC
           sound: 'default',
           vibration: true,
@@ -81,9 +81,9 @@ export const useLocalNotifications = () => {
         }
       };
 
-      // Use high priority channel for Android heads-up banners
+      // Use FlowFocus nudge channel for Android heads-up banners
       if (Capacitor.getPlatform() === 'android') {
-        notification.channelId = 'flowlight_high';
+        notification.channelId = 'flowfocus_nudge_channel';
       }
 
       await LocalNotifications.schedule({

@@ -156,7 +156,7 @@ export const getReductionMessage = (reductionMinutes: number): string => {
   } else if (reductionMinutes > 0) {
     return "Small steps lead to big changes. Nice work! 🌱";
   } else if (reductionMinutes === 0) {
-    return "Keep using FlowLight to see your progress! 📊";
+    return "Keep using FlowFocus to see your progress! 📊";
   } else {
     return "This week was tough. Tomorrow is a fresh start. 🌅";
   }

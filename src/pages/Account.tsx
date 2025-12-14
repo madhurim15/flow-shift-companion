@@ -102,7 +102,7 @@ const Account = () => {
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="text-xl">✨</span>
-            <span className="font-medium">Flowlight</span>
+            <span className="font-medium">FlowFocus</span>
           </button>
           
           <div className="flex items-center space-x-4">
@@ -195,7 +195,7 @@ const Account = () => {
               </div>
               <Progress value={trialProgress} className="h-2" />
               <p className="text-xs text-muted-foreground">
-                Thanks for being a beta tester! Your feedback shapes FlowLight.
+                Thanks for being a beta tester! Your feedback shapes FlowFocus.
               </p>
             </div>
           ) : (
@@ -221,7 +221,7 @@ const Account = () => {
             </div>
             <div className="flex-1">
               <h3 className="font-semibold">Share Feedback</h3>
-              <p className="text-xs text-muted-foreground">Help us improve FlowLight</p>
+              <p className="text-xs text-muted-foreground">Help us improve FlowFocus</p>
             </div>
             <ArrowLeft className="h-4 w-4 text-muted-foreground rotate-180" />
           </div>

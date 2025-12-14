@@ -5,14 +5,14 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Check, CircleAlert, BellRing, ExternalLink } from 'lucide-react';
 
-const CHANNEL_NAME = 'flowlight-permission';
+const CHANNEL_NAME = 'flowfocus-permission';
 
 const PermissionHelper = () => {
   const [supported, setSupported] = useState<boolean>(false);
   const [permission, setPermission] = useState<NotificationPermission | 'unsupported'>('default');
 
   useEffect(() => {
-    document.title = 'Enable Notifications • FlowLight';
+    document.title = 'Enable Notifications • FlowFocus';
 
     const isSupported = 'Notification' in window;
     setSupported(isSupported);
@@ -34,8 +34,8 @@ const PermissionHelper = () => {
 
     try {
       // localStorage fallback
-      localStorage.setItem('flowlight-permission-result', JSON.stringify({ permission: perm, at: Date.now() }));
-      localStorage.setItem('flowlight-notification-asked', 'true');
+      localStorage.setItem('flowfocus-permission-result', JSON.stringify({ permission: perm, at: Date.now() }));
+      localStorage.setItem('flowfocus-notification-asked', 'true');
     } catch {}
   };
 
@@ -43,7 +43,7 @@ const PermissionHelper = () => {
     if (!supported) return;
     try {
       // Mark that we've asked
-      try { localStorage.setItem('flowlight-notification-asked', 'true'); } catch {}
+      try { localStorage.setItem('flowfocus-notification-asked', 'true'); } catch {}
 
       const perm = await Notification.requestPermission();
       setPermission(perm);
@@ -101,7 +101,7 @@ const PermissionHelper = () => {
           {permission === 'granted' && (
             <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
               <Check className="h-4 w-4" />
-              You can close this tab and return to FlowLight.
+              You can close this tab and return to FlowFocus.
             </div>
           )}
         </CardContent>

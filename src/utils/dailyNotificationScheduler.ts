@@ -39,7 +39,7 @@ export const scheduleDailyNotifications = async (schedule: DailySchedule): Promi
 
       const notification: any = {
         id: NOTIFICATION_IDS[reminderType],
-        title: 'FlowLight ✨',
+        title: 'FlowFocus ✨',
         body: reminderMessages[reminderType],
         schedule: {
           repeats: true,
@@ -53,12 +53,13 @@ export const scheduleDailyNotifications = async (schedule: DailySchedule): Promi
           type: 'daily_reminder',
           reminderType,
           timestamp: Date.now()
-        }
+        },
+        sound: 'default'
       };
 
-      // Use high priority channel for Android
+      // Use the native nudge channel for Android (created by SystemMonitoringService)
       if (Capacitor.getPlatform() === 'android') {
-        notification.channelId = 'flowlight_high';
+        notification.channelId = 'flowfocus_nudge_channel';
       }
 
       notifications.push(notification);
@@ -94,11 +95,11 @@ export const clearTodaysNotifications = async (): Promise<void> => {
 };
 
 export const getLastScheduledDate = (): string | null => {
-  return localStorage.getItem('flowlight_last_scheduled_date');
+  return localStorage.getItem('flowfocus_last_scheduled_date');
 };
 
 export const setLastScheduledDate = (date: string): void => {
-  localStorage.setItem('flowlight_last_scheduled_date', date);
+  localStorage.setItem('flowfocus_last_scheduled_date', date);
 };
 
 export const shouldRescheduleToday = (): boolean => {

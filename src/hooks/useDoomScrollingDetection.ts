@@ -22,7 +22,7 @@ interface DoomScrollingDetectionResult {
   resetPattern: () => void;
 }
 
-const STORAGE_KEY = 'flowlight_doom_scrolling_pattern';
+const STORAGE_KEY = 'flowfocus_doom_scrolling_pattern';
 const INTERVENTION_COOLDOWN = 1 * 60 * 60 * 1000; // 1 hour (reduced from 2)
 const RAPID_RETURN_THRESHOLD = 3 * 60 * 1000; // 3 minutes (reduced from 5)
 const MIN_VISITS_FOR_DETECTION = 4; // Reduced from 8
@@ -101,7 +101,7 @@ export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
 
   // Enhanced doom scrolling detection with time-based and system-wide monitoring
   const isLikelyDoomScrolling = useCallback(() => {
-    // Local pattern detection (within FlowLight app)
+    // Local pattern detection (within FlowFocus app)
     const localDetection = pattern.visitCount >= MIN_VISITS_FOR_DETECTION && 
       (pattern.rapidReturns >= 2 || pattern.visitCount >= 6);
     
@@ -194,13 +194,13 @@ export const useDoomScrollingDetection = (): DoomScrollingDetectionResult => {
 
   // Auto-reset pattern daily
   useEffect(() => {
-    const lastReset = localStorage.getItem('flowlight_last_pattern_reset');
+    const lastReset = localStorage.getItem('flowfocus_last_pattern_reset');
     const now = Date.now();
     const oneDayAgo = now - (24 * 60 * 60 * 1000);
     
     if (!lastReset || parseInt(lastReset) < oneDayAgo) {
       resetPattern();
-      localStorage.setItem('flowlight_last_pattern_reset', now.toString());
+      localStorage.setItem('flowfocus_last_pattern_reset', now.toString());
     }
   }, [resetPattern]);
 

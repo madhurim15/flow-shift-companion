@@ -10,6 +10,11 @@ const KEY_MIGRATIONS: Record<string, string> = {
   'flowlight_theme': 'flowfocus_theme',
   'flowlight_notifications_enabled': 'flowfocus_notifications_enabled',
   'flowlight_usage_access_granted': 'flowfocus_usage_access_granted',
+  'flowlight_doom_scrolling_pattern': 'flowfocus_doom_scrolling_pattern',
+  'flowlight_last_pattern_reset': 'flowfocus_last_pattern_reset',
+  'flowlight_last_scheduled_date': 'flowfocus_last_scheduled_date',
+  'flowlight-notification-asked': 'flowfocus-notification-asked',
+  'flowlight-permission-result': 'flowfocus-permission-result',
 };
 
 const MIGRATION_FLAG = 'flowfocus_migration_v1_complete';

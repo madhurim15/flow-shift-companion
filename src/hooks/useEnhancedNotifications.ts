@@ -42,7 +42,7 @@ export const useEnhancedNotifications = () => {
     if (!('Notification' in window)) return 'blocked-permanently';
     
     const permission = Notification.permission;
-    const hasAskedBefore = localStorage.getItem('flowlight-notification-asked') === 'true';
+    const hasAskedBefore = localStorage.getItem('flowfocus-notification-asked') === 'true';
     
     if (permission === 'granted') return 'granted';
     if (permission === 'default' && !hasAskedBefore) return 'default';
@@ -65,7 +65,7 @@ export const useEnhancedNotifications = () => {
 
   const updateState = async () => {
     const permission = getDetailedPermissionState();
-    const hasAskedBefore = localStorage.getItem('flowlight-notification-asked') === 'true';
+    const hasAskedBefore = localStorage.getItem('flowfocus-notification-asked') === 'true';
     const serviceWorkerReady = await checkServiceWorkerStatus();
     
     setState({
@@ -109,7 +109,7 @@ export const useEnhancedNotifications = () => {
 
     try {
       // Mark that we've asked before
-      localStorage.setItem('flowlight-notification-asked', 'true');
+      localStorage.setItem('flowfocus-notification-asked', 'true');
       
       const permission = await Notification.requestPermission();
       await updateState();
@@ -149,7 +149,7 @@ export const useEnhancedNotifications = () => {
       // Try service worker first
       if (state.serviceWorkerReady) {
         const registration = await navigator.serviceWorker.ready;
-        await registration.showNotification('FlowLight Test', {
+        await registration.showNotification('FlowFocus Test', {
           body: 'Your notifications are working perfectly! ✨',
           icon: '/favicon.ico',
           tag: 'test-notification',
@@ -157,7 +157,7 @@ export const useEnhancedNotifications = () => {
         });
       } else {
         // Fallback to direct notification
-        new Notification('FlowLight Test', {
+        new Notification('FlowFocus Test', {
           body: 'Your notifications are working perfectly! ✨',
           icon: '/favicon.ico',
           tag: 'test-notification'
@@ -181,7 +181,7 @@ export const useEnhancedNotifications = () => {
   };
 
   const resetPermissionTracking = () => {
-    localStorage.removeItem('flowlight-notification-asked');
+    localStorage.removeItem('flowfocus-notification-asked');
     updateState();
   };
 
