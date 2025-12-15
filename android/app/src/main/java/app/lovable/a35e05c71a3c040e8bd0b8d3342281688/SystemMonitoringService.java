@@ -367,22 +367,22 @@ public class SystemMonitoringService extends Service {
       );
       channel.setDescription("Mindful nudges that appear as heads-up notifications");
       channel.enableVibration(true);
-      channel.setVibrationPattern(new long[]{0, 500, 200, 500, 200, 500}); // Stronger vibration pattern
+      channel.setVibrationPattern(new long[]{0, 300, 150, 300}); // Gentle vibration pattern
       channel.enableLights(true);
       channel.setLightColor(0xFF488AFF);
       channel.setShowBadge(true);
       channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC); // Show on lock screen
       channel.setBypassDnd(false); // Respect DND settings
-      // Use RINGTONE type instead of ALARM - phone ringtones are typically louder and more attention-grabbing
+      // Use NOTIFICATION type - normal app notification sound, not phone ringtone
       channel.setSound(
-        android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_RINGTONE),
+        android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_NOTIFICATION),
         new android.media.AudioAttributes.Builder()
-          .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE)
+          .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
           .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
           .build()
       );
       nm.createNotificationChannel(channel);
-      Log.i("FlowFocus", "Created nudge notification channel with IMPORTANCE_HIGH and RINGTONE sound");
+      Log.i("FlowFocus", "Created nudge notification channel with IMPORTANCE_HIGH and NOTIFICATION sound");
     }
   }
 
