@@ -13,10 +13,6 @@ import {
 import { logNudgeResponse } from '@/utils/nudgeResponseUtils';
 import type { NudgeResponseType } from '@/data/nudgeResponses';
 import { useLocalNotifications } from '@/hooks/useLocalNotifications';
-import { 
-  scheduleDailyNotifications,
-  type DailySchedule 
-} from '@/utils/dailyNotificationScheduler';
 import { Capacitor } from '@capacitor/core';
 import { SystemMonitoring } from '@/plugins/system-monitoring';
 
@@ -86,18 +82,33 @@ export const useReminderSystem = () => {
   const scheduleTodaysNotifications = useCallback(async () => {
     if (!notificationsEnabled || !reminderSettings) return;
 
-    const schedule: DailySchedule = {
-      morning: reminderSettings.morning_time?.slice(0, 5) || '09:00',
-      afternoon: reminderSettings.afternoon_time?.slice(0, 5) || '13:00',
-      evening: reminderSettings.evening_time?.slice(0, 5) || '18:00',
-      night: reminderSettings.night_time?.slice(0, 5) || '21:00'
+    // Format times as HH:mm (strip seconds if present)
+    const formatTime = (time: string | null, defaultTime: string) => {
+      if (!time) return defaultTime;
+      return time.slice(0, 5);
     };
 
-    console.log('Scheduling repeating daily notifications:', schedule);
+    const morning = formatTime(reminderSettings.morning_time, '09:00');
+    const afternoon = formatTime(reminderSettings.afternoon_time, '13:00');
+    const evening = formatTime(reminderSettings.evening_time, '18:00');
+    const night = formatTime(reminderSettings.night_time, '21:00');
+
+    console.log('Scheduling daily notifications:', { morning, afternoon, evening, night });
 
     try {
-      await scheduleDailyNotifications(schedule);
-      console.log('✅ Repeating daily notifications scheduled');
+      if (Capacitor.isNativePlatform()) {
+        // Use native AlarmManager-based scheduler for reliable daily reminders
+        await SystemMonitoring.setDailyReminderTimes({
+          morning,
+          afternoon,
+          evening,
+          night
+        });
+        console.log('✅ Native daily reminders scheduled via AlarmManager');
+      } else {
+        // Web fallback - just log
+        console.log('Web platform - daily reminders not supported');
+      }
     } catch (error) {
       console.error('Failed to schedule notifications:', error);
       // Fallback to showing permission request on web

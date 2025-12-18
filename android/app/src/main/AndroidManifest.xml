@@ -87,6 +87,12 @@
             android:enabled="true"
             android:exported="false" />
 
+        <!-- Native daily reminder scheduler using AlarmManager -->
+        <receiver
+            android:name=".DailyReminderScheduler"
+            android:enabled="true"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

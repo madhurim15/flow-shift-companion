@@ -56,4 +56,17 @@ export class SystemMonitoringWeb extends WebPlugin implements SystemMonitoringPl
     console.warn('SystemMonitoring is not supported on web.');
     return { buildStamp: 0 };
   }
+
+  async setDailyReminderTimes(): Promise<{ scheduled: boolean }> {
+    console.warn('SystemMonitoring is not supported on web.');
+    return { scheduled: false };
+  }
+
+  async cancelDailyReminders(): Promise<void> {
+    console.warn('SystemMonitoring is not supported on web.');
+  }
+
+  async scheduleDailyReminders(): Promise<void> {
+    console.warn('SystemMonitoring is not supported on web.');
+  }
 }
