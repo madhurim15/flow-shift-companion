@@ -1,5 +1,9 @@
 package app.lovable.a35e05c71a3c040e8bd0b8d3342281688;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -8,6 +12,9 @@ import java.util.Random;
 import java.util.Set;
 
 public class ActionSelectionEngine {
+    private static final String TAG = "FlowFocus";
+    private static final String PREFS_NAME = "flowfocus_action_engine";
+    private static final String RECENT_ACTIONS_KEY = "recent_actions";
     
     public static class ActionButton {
         public final String label;
@@ -21,15 +28,60 @@ public class ActionSelectionEngine {
         }
     }
     
-    // Track recent actions to prevent repetition
+    // Track recent actions to prevent repetition (persisted to SharedPreferences)
     private static List<String> recentActions = new ArrayList<>();
-    private static final int MAX_RECENT_ACTIONS = 5;
+    private static final int MAX_RECENT_ACTIONS = 10; // Increased from 5 for better variety
+    private static boolean isInitialized = false;
+    
+    /**
+     * Initialize recent actions from SharedPreferences
+     */
+    private static void initializeFromStorage(Context context) {
+        if (isInitialized || context == null) return;
+        
+        try {
+            SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            String stored = prefs.getString(RECENT_ACTIONS_KEY, "");
+            
+            if (!stored.isEmpty()) {
+                String[] actions = stored.split(",");
+                recentActions = new ArrayList<>(Arrays.asList(actions));
+                Log.i(TAG, "Loaded " + recentActions.size() + " recent actions from storage: " + stored);
+            } else {
+                recentActions = new ArrayList<>();
+                Log.i(TAG, "No recent actions in storage, starting fresh");
+            }
+            
+            isInitialized = true;
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to load recent actions from storage", e);
+            recentActions = new ArrayList<>();
+            isInitialized = true;
+        }
+    }
+    
+    /**
+     * Save recent actions to SharedPreferences
+     */
+    private static void saveToStorage(Context context) {
+        if (context == null) return;
+        
+        try {
+            SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            String stored = String.join(",", recentActions);
+            prefs.edit().putString(RECENT_ACTIONS_KEY, stored).apply();
+            Log.d(TAG, "Saved " + recentActions.size() + " recent actions to storage");
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to save recent actions to storage", e);
+        }
+    }
     
     /**
      * Get contextually appropriate actions based on usage patterns
-     * Now accepts suggestedActions from the nudge message for alignment
+     * Now accepts Context for SharedPreferences persistence
      */
     public static List<ActionButton> getContextualActions(
+        Context context,
         int level,
         String appCategory,
         int durationMinutes,
@@ -37,9 +89,21 @@ public class ActionSelectionEngine {
         String[] existingRecentActions,
         String suggestedActions
     ) {
-        // Update recent actions tracking
-        if (existingRecentActions != null) {
-            recentActions = new ArrayList<>(Arrays.asList(existingRecentActions));
+        // Initialize from storage if needed
+        initializeFromStorage(context);
+        
+        // Update recent actions tracking from external source if provided
+        if (existingRecentActions != null && existingRecentActions.length > 0) {
+            for (String action : existingRecentActions) {
+                if (!recentActions.contains(action)) {
+                    recentActions.add(action);
+                }
+            }
+            // Trim to max size
+            while (recentActions.size() > MAX_RECENT_ACTIONS) {
+                recentActions.remove(0);
+            }
+            saveToStorage(context);
         }
         
         List<ActionButton> allActions = getAllActions();
@@ -52,16 +116,16 @@ public class ActionSelectionEngine {
         
         // If we have suggested actions from the message, prioritize those
         if (suggestedActions != null && !suggestedActions.isEmpty()) {
-            selectedActions = selectSuggestedActions(allActions, suggestedActions, numActions);
+            selectedActions = selectSuggestedActions(context, allActions, suggestedActions, numActions);
         } else {
             // Fallback to original logic
             int physicalWeight = getPhysicalWeight(durationMinutes, level);
             
             // For Level 3, require physical actions (no dismiss, must act)
             if (level >= 3) {
-                selectedActions = selectPhysicalActions(allActions, numActions, hourOfDay, appCategory);
+                selectedActions = selectPhysicalActions(context, allActions, numActions, hourOfDay, appCategory);
             } else {
-                selectedActions = selectBalancedActions(allActions, numActions, physicalWeight, hourOfDay, appCategory);
+                selectedActions = selectBalancedActions(context, allActions, numActions, physicalWeight, hourOfDay, appCategory);
             }
         }
         
@@ -79,6 +143,20 @@ public class ActionSelectionEngine {
     }
     
     /**
+     * Backward-compatible overload without Context (for legacy calls)
+     */
+    public static List<ActionButton> getContextualActions(
+        int level,
+        String appCategory,
+        int durationMinutes,
+        int hourOfDay,
+        String[] existingRecentActions,
+        String suggestedActions
+    ) {
+        return getContextualActions(null, level, appCategory, durationMinutes, hourOfDay, existingRecentActions, suggestedActions);
+    }
+    
+    /**
      * Backward-compatible overload without suggestedActions
      */
     public static List<ActionButton> getContextualActions(
@@ -88,13 +166,14 @@ public class ActionSelectionEngine {
         int hourOfDay,
         String[] existingRecentActions
     ) {
-        return getContextualActions(level, appCategory, durationMinutes, hourOfDay, existingRecentActions, null);
+        return getContextualActions(null, level, appCategory, durationMinutes, hourOfDay, existingRecentActions, null);
     }
     
     /**
      * Select actions based on suggested actions from the nudge message
      */
     private static List<ActionButton> selectSuggestedActions(
+        Context context,
         List<ActionButton> allActions,
         String suggestedActions,
         int count
@@ -108,7 +187,7 @@ public class ActionSelectionEngine {
             for (ActionButton action : allActions) {
                 if (action.deepLink.equals(trimmed) && !containsAction(selected, action.deepLink)) {
                     selected.add(action);
-                    trackAction(action.deepLink);
+                    trackAction(context, action.deepLink);
                     if (selected.size() >= count) {
                         return selected;
                     }
@@ -121,7 +200,7 @@ public class ActionSelectionEngine {
             for (ActionButton action : allActions) {
                 if (!containsAction(selected, action.deepLink) && !wasRecentlyUsed(action.deepLink)) {
                     selected.add(action);
-                    trackAction(action.deepLink);
+                    trackAction(context, action.deepLink);
                     if (selected.size() >= count) {
                         break;
                     }
@@ -158,6 +237,7 @@ public class ActionSelectionEngine {
      * Select only physical actions (for Level 3)
      */
     private static List<ActionButton> selectPhysicalActions(
+        Context context,
         List<ActionButton> allActions,
         int count,
         int hourOfDay,
@@ -170,13 +250,23 @@ public class ActionSelectionEngine {
             }
         }
         
+        // If all physical actions were recently used, include them anyway
+        if (physical.isEmpty()) {
+            Log.d(TAG, "All physical actions recently used, resetting for variety");
+            for (ActionButton action : allActions) {
+                if (action.isPhysical) {
+                    physical.add(action);
+                }
+            }
+        }
+        
         // Prioritize by time of day
         physical = prioritizeByTime(physical, hourOfDay, true);
         
         List<ActionButton> selected = new ArrayList<>();
         for (int i = 0; i < Math.min(count, physical.size()); i++) {
             selected.add(physical.get(i));
-            trackAction(physical.get(i).deepLink);
+            trackAction(context, physical.get(i).deepLink);
         }
         
         return selected;
@@ -186,6 +276,7 @@ public class ActionSelectionEngine {
      * Select balanced mix of physical and digital actions
      */
     private static List<ActionButton> selectBalancedActions(
+        Context context,
         List<ActionButton> allActions,
         int count,
         int physicalWeight,
@@ -201,6 +292,26 @@ public class ActionSelectionEngine {
                     physical.add(action);
                 } else {
                     digital.add(action);
+                }
+            }
+        }
+        
+        // If all actions of a type were recently used, include some anyway
+        if (physical.isEmpty()) {
+            Log.d(TAG, "All physical actions recently used, adding some back");
+            for (ActionButton action : allActions) {
+                if (action.isPhysical) {
+                    physical.add(action);
+                    if (physical.size() >= 3) break;
+                }
+            }
+        }
+        if (digital.isEmpty()) {
+            Log.d(TAG, "All digital actions recently used, adding some back");
+            for (ActionButton action : allActions) {
+                if (!action.isPhysical) {
+                    digital.add(action);
+                    if (digital.size() >= 3) break;
                 }
             }
         }
@@ -222,13 +333,13 @@ public class ActionSelectionEngine {
         // Add physical actions
         for (int i = 0; i < Math.min(numPhysical, physical.size()); i++) {
             selected.add(physical.get(i));
-            trackAction(physical.get(i).deepLink);
+            trackAction(context, physical.get(i).deepLink);
         }
         
         // Add digital actions
         for (int i = 0; i < Math.min(numDigital, digital.size()); i++) {
             selected.add(digital.get(i));
-            trackAction(digital.get(i).deepLink);
+            trackAction(context, digital.get(i).deepLink);
         }
         
         return selected;
@@ -291,13 +402,22 @@ public class ActionSelectionEngine {
     }
     
     /**
-     * Track action usage
+     * Track action usage and persist to storage
      */
-    private static void trackAction(String deepLink) {
+    private static void trackAction(Context context, String deepLink) {
+        // Remove if already exists to move to end
+        recentActions.remove(deepLink);
         recentActions.add(deepLink);
-        if (recentActions.size() > MAX_RECENT_ACTIONS) {
+        
+        // Trim to max size
+        while (recentActions.size() > MAX_RECENT_ACTIONS) {
             recentActions.remove(0);
         }
+        
+        // Persist to storage
+        saveToStorage(context);
+        
+        Log.d(TAG, "Tracked action: " + deepLink + ", recent list size: " + recentActions.size());
     }
     
     /**
@@ -339,5 +459,17 @@ public class ActionSelectionEngine {
      */
     public static String[] getRecentActions() {
         return recentActions.toArray(new String[0]);
+    }
+    
+    /**
+     * Clear recent actions (useful for testing or reset)
+     */
+    public static void clearRecentActions(Context context) {
+        recentActions.clear();
+        if (context != null) {
+            SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            prefs.edit().remove(RECENT_ACTIONS_KEY).apply();
+        }
+        Log.i(TAG, "Cleared recent actions");
     }
 }

@@ -310,4 +310,34 @@ public class SystemMonitoringPlugin extends Plugin {
     call.resolve(ret);
   }
 
+  @PluginMethod
+  public void setDailyReminderTimes(PluginCall call) {
+    String morning = call.getString("morning", DailyReminderScheduler.DEFAULT_MORNING);
+    String afternoon = call.getString("afternoon", DailyReminderScheduler.DEFAULT_AFTERNOON);
+    String evening = call.getString("evening", DailyReminderScheduler.DEFAULT_EVENING);
+    String night = call.getString("night", DailyReminderScheduler.DEFAULT_NIGHT);
+    
+    android.util.Log.i("FlowFocus", "setDailyReminderTimes: M=" + morning + " A=" + afternoon + " E=" + evening + " N=" + night);
+    
+    DailyReminderScheduler.saveReminderTimes(getContext(), morning, afternoon, evening, night);
+    
+    JSObject ret = new JSObject();
+    ret.put("scheduled", true);
+    call.resolve(ret);
+  }
+
+  @PluginMethod
+  public void cancelDailyReminders(PluginCall call) {
+    android.util.Log.i("FlowFocus", "cancelDailyReminders called");
+    DailyReminderScheduler.cancelAllReminders(getContext());
+    call.resolve();
+  }
+
+  @PluginMethod
+  public void scheduleDailyReminders(PluginCall call) {
+    android.util.Log.i("FlowFocus", "scheduleDailyReminders called");
+    DailyReminderScheduler.scheduleAllReminders(getContext());
+    call.resolve();
+  }
+
 }

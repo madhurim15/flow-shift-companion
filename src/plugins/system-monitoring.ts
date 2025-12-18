@@ -29,6 +29,17 @@ export interface SystemMonitoringPlugin {
   scheduleMidnightReschedule(): Promise<void>;
   cancelMidnightReschedule(): Promise<void>;
   getBuildStamp(): Promise<{ buildStamp: number }>;
+  
+  // Daily reminder methods (native AlarmManager-based)
+  setDailyReminderTimes(options: {
+    morning?: string;
+    afternoon?: string;
+    evening?: string;
+    night?: string;
+  }): Promise<{ scheduled: boolean }>;
+  cancelDailyReminders(): Promise<void>;
+  scheduleDailyReminders(): Promise<void>;
+  
   addListener(
     eventName: 'appChanged',
     listenerFunc: (event: AppChangedEvent) => void

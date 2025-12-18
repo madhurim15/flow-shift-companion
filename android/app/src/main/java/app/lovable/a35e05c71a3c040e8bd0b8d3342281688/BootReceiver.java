@@ -15,6 +15,10 @@ public class BootReceiver extends BroadcastReceiver {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             android.util.Log.i("FlowFocus", "BootReceiver: Device boot completed");
             
+            // Always reschedule daily reminders after reboot (they use AlarmManager which gets cleared on reboot)
+            DailyReminderScheduler.scheduleAllReminders(context);
+            android.util.Log.i("FlowFocus", "BootReceiver: Rescheduled daily reminders via AlarmManager");
+            
             // Check if Usage Access permission is granted
             if (UsageStatsHelper.hasUsageStatsPermission(context)) {
                 // Start the monitoring service

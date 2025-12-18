@@ -294,6 +294,10 @@ public class SystemMonitoringService extends Service {
     
     handler.post(pollTask);
     handler.post(durationTask);
+    
+    // Schedule native daily reminders using AlarmManager
+    DailyReminderScheduler.scheduleAllReminders(this);
+    Log.i("FlowFocus", "Scheduled native daily reminders via AlarmManager");
   }
 
   @Override
@@ -575,8 +579,9 @@ public class SystemMonitoringService extends Service {
     int minutes = durationSeconds / 60;
     
     // Get action suggestions based on context AND message's suggested actions
+    // Pass Context for SharedPreferences persistence of recent actions
     java.util.List<ActionSelectionEngine.ActionButton> actions = 
-        ActionSelectionEngine.getContextualActions(level, psychState, minutes, hour, new String[]{}, suggestedActions);
+        ActionSelectionEngine.getContextualActions(this, level, psychState, minutes, hour, new String[]{}, suggestedActions);
     
     // Personalize message with placeholders
     String durationStr = minutes + " minute" + (minutes == 1 ? "" : "s");
